@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Hanken_Grotesk } from 'next/font/google'
+import Link from 'next/link'
 import './globals.css'
 
 const hanken = Hanken_Grotesk({
@@ -27,7 +28,30 @@ export default function RootLayout({
           <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-secondary/15 blur-[100px]" />
           <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-tertiary/10 blur-[80px]" />
         </div>
-        {children}
+
+        {/* Header — shared across all pages */}
+        <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+          <div className="mx-auto px-4 sm:px-5 max-w-5xl h-14 flex items-center justify-between">
+            <Link
+              href="/"
+              className="font-bold text-[17px] tracking-tight select-none hover:opacity-75 transition-opacity"
+            >
+              <span className="text-[#1a1b1f]">Medi</span>
+              <span className="text-primary">Compara</span>
+            </Link>
+            <span className="text-[11px] sm:text-[12px] font-semibold tracking-[0.05em] uppercase text-[#717786] hidden sm:block">
+              Farmacias de Colombia
+            </span>
+          </div>
+        </header>
+
+        <main className="flex-1">
+          {children}
+        </main>
+
+        <footer className="border-t border-[#c1c6d7]/30 py-5 sm:py-6 text-center text-[12px] text-[#717786] px-4">
+          Precios consultados directamente de las farmacias. Sujetos a cambios.
+        </footer>
       </body>
     </html>
   )
