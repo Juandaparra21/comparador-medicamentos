@@ -65,7 +65,7 @@ export default function BuscarClient() {
         </div>
       </div>
 
-      <section className="mx-auto px-4 sm:px-5 max-w-5xl pt-6 pb-16 w-full">
+      <section className="mx-auto px-4 sm:px-5 max-w-5xl pt-5 pb-16 w-full">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-28 gap-4 text-[#717786]">
             <div className="w-10 h-10 border-4 border-white/50 border-t-primary rounded-full animate-spin" />
@@ -88,18 +88,15 @@ export default function BuscarClient() {
           </div>
         ) : (
           <>
-            {/* Generic / Brand highlight bar */}
-            <div className="flex flex-wrap items-center gap-3 mb-5 p-4 bg-white/60 backdrop-blur-[20px] border border-white/50 rounded-xl">
-              <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
-                <svg className="w-4 h-4 text-[#717786] shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
-                </svg>
-                <span className="text-[12px] text-[#717786]">
-                  <span className="font-semibold text-secondary">{genericCount} genericos</span>
-                  {' '}&middot;{' '}
-                  <span className="font-semibold text-primary">{brandCount} de marca</span>
-                  {' '}disponibles para &ldquo;{q}&rdquo;
-                </span>
+            {/* Control bar: count + type filters + sort — una sola fila compacta */}
+            <div className="flex flex-wrap items-center gap-2.5 mb-4 p-3 sm:p-3.5 bg-white/60 backdrop-blur-[20px] border border-white/50 rounded-xl">
+              <div className="flex items-center gap-1.5 flex-1 min-w-0 flex-wrap text-[12px]">
+                <span className="font-bold text-[#1a1b1f]">{filtered.length}</span>
+                <span className="text-[#717786]">resultados para &ldquo;{q}&rdquo;</span>
+                <span className="text-[#c1c6d7] hidden sm:inline">&bull;</span>
+                <span className="font-semibold text-secondary hidden sm:inline">{genericCount} genéricos</span>
+                <span className="text-[#c1c6d7] hidden sm:inline">&bull;</span>
+                <span className="font-semibold text-primary hidden sm:inline">{brandCount} de marca</span>
               </div>
 
               {/* Type filter pills */}
@@ -127,42 +124,24 @@ export default function BuscarClient() {
                   </button>
                 ))}
               </div>
+
+              {/* Sort */}
+              <select
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value as SortKey)}
+                className="text-[12px] bg-white/70 border border-[#c1c6d7]/60 rounded-lg px-2.5 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Results header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <p className="text-[14px] text-[#717786]">
-                <span className="font-semibold text-[#1a1b1f]">{filtered.length}</span>{' '}
-                resultado{filtered.length !== 1 ? 's' : ''}
-                {typeFilter !== 'all' && (
-                  <span> &middot; {typeFilter === 'generic' ? 'genericos' : 'de marca'}</span>
-                )}
-              </p>
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="sort"
-                  className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap"
-                >
-                  Ordenar
-                </label>
-                <select
-                  id="sort"
-                  value={sortKey}
-                  onChange={(e) => setSortKey(e.target.value as SortKey)}
-                  className="flex-1 sm:flex-none text-[13px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Stats strip */}
+            {/* Stats pills */}
             {minPrice !== null && maxPrice !== null && (
-              <div className="flex flex-wrap gap-2 mb-5">
+              <div className="flex flex-wrap gap-2 mb-4">
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
                   Min: {formatCOP(minPrice)}
                 </span>
@@ -180,26 +159,9 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Price chart — current prices bar */}
-            <PriceChart results={filtered} minPrice={minPrice} />
-
-            {/* Price history chart — evolution over time */}
-            {history && (
-              <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-[14px] font-bold text-[#1a1b1f]">Historial de precios — ultimos 12 meses</h2>
-                  <span className="text-[11px] text-[#c1c6d7] font-medium hidden sm:block">
-                    Pasa el cursor para ver detalles
-                  </span>
-                </div>
-                <p className="text-[12px] text-[#717786] mb-4">{history.label}</p>
-                <PriceHistoryChart histories={history.histories} unit={history.unit} />
-              </div>
-            )}
-
-            {/* Cards grid */}
+            {/* Cards grid — primero para que los productos sean lo primero visible */}
             {filtered.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 {sorted.map((result) => (
                   <ResultCard
                     key={result.id}
@@ -214,7 +176,7 @@ export default function BuscarClient() {
             ) : (
               <div className="text-center py-16">
                 <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">
-                  Sin {typeFilter === 'generic' ? 'genericos' : 'medicamentos de marca'}
+                  Sin {typeFilter === 'generic' ? 'genéricos' : 'medicamentos de marca'}
                 </p>
                 <button
                   onClick={() => setTypeFilter('all')}
@@ -224,6 +186,23 @@ export default function BuscarClient() {
                 </button>
               </div>
             )}
+
+            {/* Graficas — dos columnas en desktop, apiladas en movil */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <PriceChart results={filtered} minPrice={minPrice} />
+              {history && (
+                <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6">
+                  <div className="flex items-center justify-between mb-1">
+                    <h2 className="text-[14px] font-bold text-[#1a1b1f]">Historial de precios</h2>
+                    <span className="text-[11px] text-[#c1c6d7] font-medium">
+                      Ultimos 12 meses
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-[#717786] mb-4">{history.label}</p>
+                  <PriceHistoryChart histories={history.histories} unit={history.unit} />
+                </div>
+              )}
+            </div>
           </>
         )}
       </section>

@@ -24,7 +24,7 @@ export function PriceChart({ results, minPrice }: Props) {
   const medColor = MED_COLORS[ingredient] ?? '#0058bc'
 
   return (
-    <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl p-4 sm:p-5 shadow-sm mb-6">
+    <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl p-4 sm:p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
         <h2 className="text-[12px] font-semibold tracking-[0.05em] uppercase text-[#717786]">
