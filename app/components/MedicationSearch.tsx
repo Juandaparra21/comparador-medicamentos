@@ -161,6 +161,45 @@ const MOCK_DATA: PharmacyResult[] = [
     availability: 'limited',
     url: '#',
   },
+  {
+    id: '13',
+    pharmacy: 'Drogas La Rebaja',
+    productName: 'Glucophage 850',
+    activeIngredient: 'Metformina',
+    concentration: '850mg',
+    presentation: 'Tableta',
+    quantity: 30,
+    price: 28000,
+    pricePerUnit: 933,
+    availability: 'available',
+    url: '#',
+  },
+  {
+    id: '14',
+    pharmacy: 'Colsubsidio',
+    productName: 'Metformina MK',
+    activeIngredient: 'Metformina',
+    concentration: '850mg',
+    presentation: 'Tableta',
+    quantity: 30,
+    price: 12400,
+    pricePerUnit: 413,
+    availability: 'available',
+    url: '#',
+  },
+  {
+    id: '15',
+    pharmacy: 'Cruz Verde',
+    productName: 'Metformina Genfar',
+    activeIngredient: 'Metformina',
+    concentration: '850mg',
+    presentation: 'Tableta',
+    quantity: 30,
+    price: 14800,
+    pricePerUnit: 493,
+    availability: 'available',
+    url: '#',
+  },
 ]
 
 type SortKey = 'price-asc' | 'price-desc' | 'unit-asc' | 'pharmacy-asc'
@@ -214,7 +253,6 @@ export default function MedicationSearch() {
     setQuery(trimmed)
     setPhase('loading')
     setLastQuery(trimmed)
-    // Simulated delay; will be replaced by fetch/server action
     setTimeout(() => {
       setResults(searchMock(trimmed))
       setPhase('done')
@@ -238,41 +276,57 @@ export default function MedicationSearch() {
 
   return (
     <>
+      {/* ── Hero / Search section ── */}
       <section
-        className={`bg-white border-b border-gray-200 transition-all duration-300 ${
-          phase === 'idle' ? 'py-20 sm:py-28' : 'py-8'
+        className={`transition-all duration-300 ${
+          phase === 'idle' ? 'py-24 sm:py-32' : 'py-8 sm:py-10'
         }`}
       >
-        <div className="mx-auto px-4 max-w-2xl text-center">
+        <div className="mx-auto px-5 max-w-2xl">
+          {/* Headline — only on idle */}
           {phase === 'idle' && (
-            <div className="mb-8">
-              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-3 leading-tight">
+            <div className="text-center mb-10">
+              <h1 className="text-[28px] sm:text-[34px] font-bold leading-tight tracking-[-0.02em] text-[#1a1b1f] mb-3">
                 Compara precios de{' '}
-                <span className="text-blue-600">medicamentos</span>
+                <span className="text-primary">medicamentos</span>
               </h1>
-              <p className="text-base sm:text-lg text-gray-500">
+              <p className="text-[17px] text-[#414755] leading-[22px]">
                 Encuentra el mejor precio en las principales farmacias de Colombia
               </p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+          {/* Glass search bar */}
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-stretch bg-white/70 backdrop-blur-[30px] rounded-xl border border-white/50 shadow-[0_2px_24px_rgba(0,88,188,0.08)] overflow-hidden"
+          >
+            <div className="flex items-center pl-4 text-[#717786] shrink-0" aria-hidden="true">
+              <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Ej: acetaminofén, ibuprofeno, losartán..."
-              className="flex-1 px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 py-3.5 px-3 bg-transparent text-[15px] text-[#1a1b1f] placeholder:text-[#8e8e93] focus:outline-none min-w-0"
             />
             <button
               type="submit"
               disabled={!query.trim() || phase === 'loading'}
-              className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold transition-colors whitespace-nowrap cursor-pointer"
+              className="m-1.5 px-5 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[15px] font-semibold rounded-lg shrink-0 disabled:opacity-50 hover:opacity-90 transition-opacity cursor-pointer whitespace-nowrap"
             >
               {phase === 'loading' ? 'Buscando...' : 'Buscar'}
             </button>
           </form>
 
+          {/* Quick search chips */}
           {phase === 'idle' && (
             <div className="mt-5 flex flex-wrap justify-center gap-2">
               {QUICK_SEARCHES.map((med) => (
@@ -280,7 +334,7 @@ export default function MedicationSearch() {
                   key={med}
                   type="button"
                   onClick={() => runSearch(med)}
-                  className="text-sm px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors cursor-pointer"
+                  className="text-[12px] font-semibold tracking-wide px-3.5 py-1.5 rounded-full bg-white/60 backdrop-blur-sm border border-[#c1c6d7]/60 text-[#414755] hover:bg-white/80 hover:border-primary/40 hover:text-primary transition-all cursor-pointer"
                 >
                   {med}
                 </button>
@@ -290,38 +344,43 @@ export default function MedicationSearch() {
         </div>
       </section>
 
+      {/* ── Results section ── */}
       {phase !== 'idle' && (
-        <section className="mx-auto px-4 max-w-5xl py-8 w-full">
+        <section className="mx-auto px-5 max-w-5xl pb-16 w-full">
           {phase === 'loading' ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-4 text-gray-400">
-              <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
-              <p className="text-sm">Buscando precios...</p>
+            <div className="flex flex-col items-center justify-center py-28 gap-4 text-[#717786]">
+              <div className="w-10 h-10 border-4 border-white/50 border-t-primary rounded-full animate-spin" />
+              <p className="text-[15px]">Buscando precios...</p>
             </div>
           ) : results.length === 0 ? (
-            <div className="text-center py-24">
-              <p className="text-lg font-semibold text-gray-700 mb-2">
+            <div className="text-center py-28">
+              <p className="text-[20px] font-semibold text-[#1a1b1f] mb-2">
                 Sin resultados para &ldquo;{lastQuery}&rdquo;
               </p>
-              <p className="text-sm text-gray-400">
+              <p className="text-[15px] text-[#717786]">
                 Intenta con el nombre generico o el principio activo del medicamento
               </p>
             </div>
           ) : (
             <>
+              {/* Results header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-                <p className="text-sm text-gray-500">
-                  <span className="font-semibold text-gray-900">{results.length}</span> resultado
-                  {results.length !== 1 ? 's' : ''} para &ldquo;{lastQuery}&rdquo;
+                <p className="text-[15px] text-[#717786]">
+                  <span className="font-semibold text-[#1a1b1f]">{results.length}</span>{' '}
+                  resultado{results.length !== 1 ? 's' : ''} para &ldquo;{lastQuery}&rdquo;
                 </p>
-                <div className="flex items-center gap-2">
-                  <label htmlFor="sort" className="text-sm text-gray-500 whitespace-nowrap">
+                <div className="flex items-center gap-2.5">
+                  <label
+                    htmlFor="sort"
+                    className="text-[12px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap"
+                  >
                     Ordenar por
                   </label>
                   <select
                     id="sort"
                     value={sortKey}
                     onChange={(e) => setSortKey(e.target.value as SortKey)}
-                    className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    className="text-[13px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                   >
                     {SORT_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -332,6 +391,7 @@ export default function MedicationSearch() {
                 </div>
               </div>
 
+              {/* Cards grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sorted.map((result) => (
                   <ResultCard
