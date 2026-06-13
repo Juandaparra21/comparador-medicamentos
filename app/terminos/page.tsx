@@ -44,9 +44,9 @@ Antes de iniciar, modificar o suspender cualquier tratamiento farmacologico, con
   },
   {
     title: '5. Gratuidad del servicio',
-    body: `El uso de MediCompara es completamente gratuito para los usuarios. No cobramos comisiones por busquedas, comparaciones ni clics hacia farmacias. No participamos en el precio que paga el usuario al momento de comprar en una farmacia.
+    body: `El uso basico de MediCompara es gratuito para los usuarios. No intervenimos en el precio que paga el usuario al momento de comprar en una farmacia.
 
-En el futuro, la plataforma puede incorporar publicidad o modelos de monetizacion, los cuales seran claramente identificados como tal.`,
+La plataforma puede incorporar modelos de monetizacion en el futuro, los cuales seran claramente identificados como tal.`,
   },
   {
     title: '6. Propiedad intelectual',

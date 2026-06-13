@@ -87,7 +87,7 @@ export default async function MedicamentoPage({ params }: Props) {
             MediCompara es un comparador de precios, no una farmacia
           </p>
           <p className="text-[12px] text-amber-700 leading-relaxed">
-            No vendemos medicamentos ni cobramos comisiones. Toda la informacion medica es de caracter educativo y no reemplaza la consulta con un profesional de salud. Para comprar, seras redirigido al sitio oficial de cada farmacia.{' '}
+            No vendemos medicamentos. Toda la informacion medica es de caracter educativo y no reemplaza la consulta con un profesional de salud. Para comprar, seras redirigido al sitio oficial de cada farmacia.{' '}
             <Link href="/terminos" className="underline font-semibold hover:text-amber-900 transition-colors">
               Ver condiciones del sitio
             </Link>

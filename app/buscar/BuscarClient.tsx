@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { PharmacyResult, MedicationType } from '@/app/types'
-import { searchMock, sortResults, SORT_OPTIONS, type SortKey } from '@/app/utils/search'
+import { searchMock, sortResults, SORT_OPTIONS, normalize, type SortKey } from '@/app/utils/search'
+import { getMedicationHistory } from '@/app/utils/priceHistory'
 import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
 import { PriceChart } from '@/app/components/PriceChart'
+import { PriceHistoryChart } from '@/app/components/PriceHistoryChart'
 
 type TypeFilter = 'all' | MedicationType
 
@@ -51,6 +53,8 @@ export default function BuscarClient() {
 
   const genericCount = results.filter((r) => r.type === 'generic').length
   const brandCount   = results.filter((r) => r.type === 'brand').length
+
+  const history = getMedicationHistory(normalize(q))
 
   return (
     <>
@@ -176,8 +180,22 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Price chart */}
+            {/* Price chart — current prices bar */}
             <PriceChart results={filtered} minPrice={minPrice} />
+
+            {/* Price history chart — evolution over time */}
+            {history && (
+              <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="text-[14px] font-bold text-[#1a1b1f]">Historial de precios — ultimos 12 meses</h2>
+                  <span className="text-[11px] text-[#c1c6d7] font-medium hidden sm:block">
+                    Pasa el cursor para ver detalles
+                  </span>
+                </div>
+                <p className="text-[12px] text-[#717786] mb-4">{history.label}</p>
+                <PriceHistoryChart histories={history.histories} unit={history.unit} />
+              </div>
+            )}
 
             {/* Cards grid */}
             {filtered.length > 0 ? (

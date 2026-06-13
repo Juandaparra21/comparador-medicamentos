@@ -4,6 +4,7 @@ import { PharmacyLogo } from './PharmacyLogo'
 import { MedicationImage } from './MedicationImage'
 import { WishlistButton } from './WishlistButton'
 import { formatCOP } from '@/app/utils/format'
+import { normalize } from '@/app/utils/search'
 
 const AVAILABILITY_LABEL: Record<PharmacyResult['availability'], string> = {
   available: 'Disponible',
@@ -29,10 +30,12 @@ interface Props {
 }
 
 export default function ResultCard({ result, isCheapest }: Props) {
+  const slug = normalize(result.activeIngredient)
+
   return (
     <article
       className={`
-        group relative flex flex-col
+        group relative flex flex-col cursor-pointer
         bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl shadow-sm
         hover:bg-white/85 hover:backdrop-blur-[40px]
         hover:shadow-[0_8px_32px_rgba(0,88,188,0.10)]
@@ -40,10 +43,17 @@ export default function ResultCard({ result, isCheapest }: Props) {
         ${result.availability === 'unavailable' ? 'opacity-65' : ''}
       `}
     >
+      {/* Full-card link to medicine detail — sits behind all interactive elements */}
+      <Link
+        href={`/medicamento/${encodeURIComponent(slug)}`}
+        className="absolute inset-0 z-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        aria-label={`Ver informacion de ${result.activeIngredient}`}
+      />
+
       {/* Medication image banner */}
       <MedicationImage ingredient={result.activeIngredient} height={80} />
 
-      {/* Discount badge over image */}
+      {/* Discount badge */}
       {result.discount && (
         <span className="absolute top-2 left-2 bg-red-500 text-white text-[11px] font-black px-2 py-0.5 rounded-lg shadow-sm z-10">
           -{result.discount}%
@@ -51,8 +61,8 @@ export default function ResultCard({ result, isCheapest }: Props) {
       )}
 
       <div className="flex flex-col gap-3 p-4 sm:p-4.5 flex-1">
-        {/* Pharmacy row: logo + name + wishlist */}
-        <div className="flex items-start gap-2.5">
+        {/* Pharmacy row — relative so WishlistButton floats above the card link */}
+        <div className="relative z-10 flex items-start gap-2.5">
           <PharmacyLogo name={result.pharmacy} size={36} />
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-1.5">
@@ -84,19 +94,13 @@ export default function ResultCard({ result, isCheapest }: Props) {
             {result.type === 'generic' ? 'Genérico' : 'Marca'}
           </span>
           <p className="text-[12px] font-medium text-[#414755] leading-snug">
-            <Link
-              href={`/medicamento/${encodeURIComponent(result.activeIngredient.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, ''))}`}
-              className="hover:text-primary transition-colors underline-offset-2 hover:underline"
-            >
-              {result.activeIngredient}
-            </Link>
-            {' '}{result.concentration}
+            {result.activeIngredient} {result.concentration}
             <span className="text-[#c1c6d7] mx-1">&bull;</span>
             {result.quantity} {result.presentation}s
           </p>
         </div>
 
-        {/* Price — glass-on-glass sub-layer */}
+        {/* Price */}
         <div className="flex items-baseline justify-between bg-white/60 border border-white/40 rounded-lg px-3.5 py-2.5">
           <div>
             {result.referencePrice && (
@@ -113,8 +117,8 @@ export default function ResultCard({ result, isCheapest }: Props) {
           </span>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between mt-auto">
+        {/* Footer — relative so links float above the card link */}
+        <div className="relative z-10 flex items-center justify-between mt-auto">
           <div className="flex items-center gap-1.5">
             <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${AVAILABILITY_DOT[result.availability]}`} />
             <span className={`text-[11px] sm:text-[12px] font-semibold ${AVAILABILITY_TEXT[result.availability]}`}>
@@ -122,12 +126,6 @@ export default function ResultCard({ result, isCheapest }: Props) {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Link
-              href={`/medicamento/${encodeURIComponent(result.activeIngredient.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, ''))}`}
-              className="text-[11px] font-semibold text-[#717786] hover:text-primary transition-colors"
-            >
-              Info
-            </Link>
             <Link
               href={`/historial/${encodeURIComponent(result.activeIngredient.toLowerCase())}`}
               className="text-[11px] font-semibold text-[#717786] hover:text-primary transition-colors"
