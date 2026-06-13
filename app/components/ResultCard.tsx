@@ -84,7 +84,13 @@ export default function ResultCard({ result, isCheapest }: Props) {
             {result.type === 'generic' ? 'Genérico' : 'Marca'}
           </span>
           <p className="text-[12px] font-medium text-[#414755] leading-snug">
-            {result.activeIngredient} {result.concentration}
+            <Link
+              href={`/medicamento/${encodeURIComponent(result.activeIngredient.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, ''))}`}
+              className="hover:text-primary transition-colors underline-offset-2 hover:underline"
+            >
+              {result.activeIngredient}
+            </Link>
+            {' '}{result.concentration}
             <span className="text-[#c1c6d7] mx-1">&bull;</span>
             {result.quantity} {result.presentation}s
           </p>
@@ -116,6 +122,12 @@ export default function ResultCard({ result, isCheapest }: Props) {
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href={`/medicamento/${encodeURIComponent(result.activeIngredient.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, ''))}`}
+              className="text-[11px] font-semibold text-[#717786] hover:text-primary transition-colors"
+            >
+              Info
+            </Link>
             <Link
               href={`/historial/${encodeURIComponent(result.activeIngredient.toLowerCase())}`}
               className="text-[11px] font-semibold text-[#717786] hover:text-primary transition-colors"

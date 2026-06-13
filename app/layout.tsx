@@ -69,8 +69,17 @@ export default function RootLayout({
           {children}
         </main>
 
-        <footer className="border-t border-[#c1c6d7]/30 py-5 sm:py-6 text-center text-[12px] text-[#717786] px-4">
-          Precios consultados directamente de las farmacias. Sujetos a cambios.
+        <footer className="border-t border-[#c1c6d7]/30 py-5 sm:py-6 px-4">
+          <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-[#717786]">
+            <p>Precios consultados directamente de las farmacias. Sujetos a cambios.</p>
+            <div className="flex items-center gap-4">
+              <Link href="/terminos" className="hover:text-primary transition-colors font-medium">
+                Condiciones del sitio
+              </Link>
+              <span className="text-[#c1c6d7]">&bull;</span>
+              <span>MediCompara no vende medicamentos</span>
+            </div>
+          </div>
         </footer>
       </body>
     </html>
