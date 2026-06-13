@@ -71,18 +71,13 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Sync when initialValue changes (back/forward nav)
+  // Sync when initialValue changes (back/forward nav) — always close dropdown
   useEffect(() => {
     setQuery(initialValue)
-  }, [initialValue])
-
-  // Update suggestions when query changes
-  useEffect(() => {
-    const next = computeSuggestions(query)
-    setSuggestions(next)
+    setSuggestions([])
+    setOpen(false)
     setActiveIdx(-1)
-    setOpen(next.length > 0)
-  }, [query])
+  }, [initialValue])
 
   // Close on outside click
   useEffect(() => {
@@ -152,7 +147,14 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value
+            setQuery(val)
+            const next = computeSuggestions(val)
+            setSuggestions(next)
+            setActiveIdx(-1)
+            setOpen(next.length > 0)
+          }}
           onFocus={() => suggestions.length > 0 && setOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={compact ? 'Buscar medicamento...' : 'Ej: acetaminofén, Dolex, ibuprofeno...'}
