@@ -19,6 +19,8 @@ const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
   { value: 'brand',   label: 'Marca' },
 ]
 
+const N = TYPE_FILTERS.length
+
 export default function BuscarClient() {
   const searchParams = useSearchParams()
   const q = searchParams.get('q') ?? ''
@@ -54,11 +56,20 @@ export default function BuscarClient() {
   const genericCount = results.filter((r) => r.type === 'generic').length
   const brandCount   = results.filter((r) => r.type === 'brand').length
 
+  // Ahorro real entre el más barato genérico vs el más barato de marca
+  const avail = results.filter((r) => r.availability !== 'unavailable')
+  const minG = avail.filter((r) => r.type === 'generic').reduce((m, r) => Math.min(m, r.price), Infinity)
+  const minB = avail.filter((r) => r.type === 'brand').reduce((m, r) => Math.min(m, r.price), Infinity)
+  const savingsPct = isFinite(minG) && isFinite(minB) && minG < minB
+    ? Math.round((1 - minG / minB) * 100)
+    : null
+
   const history = getMedicationHistory(normalize(q))
+  const selectedIndex = TYPE_FILTERS.findIndex((f) => f.value === typeFilter)
 
   return (
     <>
-      {/* Sticky sub-header with search bar */}
+      {/* Sticky sub-header */}
       <div className="sticky top-14 z-10 bg-white/60 backdrop-blur-xl border-b border-white/40 shadow-[0_1px_0_rgba(0,0,0,0.03)]">
         <div className="mx-auto px-4 sm:px-5 max-w-2xl py-3">
           <SearchBar key={q} initialValue={q} compact />
@@ -88,58 +99,123 @@ export default function BuscarClient() {
           </div>
         ) : (
           <>
-            {/* Control bar: count + type filters + sort — una sola fila compacta */}
-            <div className="flex flex-wrap items-center gap-2.5 mb-4 p-3 sm:p-3.5 bg-white/60 backdrop-blur-[20px] border border-white/50 rounded-xl">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0 flex-wrap text-[12px]">
-                <span className="font-bold text-[#1a1b1f]">{filtered.length}</span>
-                <span className="text-[#717786]">resultados para &ldquo;{q}&rdquo;</span>
-                <span className="text-[#c1c6d7] hidden sm:inline">&bull;</span>
-                <span className="font-semibold text-secondary hidden sm:inline">{genericCount} genéricos</span>
-                <span className="text-[#c1c6d7] hidden sm:inline">&bull;</span>
-                <span className="font-semibold text-primary hidden sm:inline">{brandCount} de marca</span>
+            {/* ── Tarjeta grande: ¿Genérico o de marca? ── */}
+            <div className="mb-5 p-5 sm:p-6 bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm">
+
+              {/* Cabecera */}
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1a1b1f] tracking-tight leading-snug">
+                    ¿Genérico o de marca?
+                  </h2>
+                  <p className="text-[13px] sm:text-[14px] text-[#717786] mt-1.5 leading-relaxed">
+                    {savingsPct !== null
+                      ? `El genérico puede ser hasta ${savingsPct}% más barato con el mismo principio activo.`
+                      : 'Elige según tu preferencia y presupuesto.'}
+                  </p>
+                </div>
+
+                {/* Contadores */}
+                <div className="flex items-center gap-5 shrink-0">
+                  <div className="text-center">
+                    <p className="text-[28px] sm:text-[32px] font-bold text-secondary leading-none tabular-nums">
+                      {genericCount}
+                    </p>
+                    <p className="text-[11px] text-[#717786] mt-1">genéricos</p>
+                  </div>
+                  <div className="w-px h-10 bg-[#e5e7eb]" />
+                  <div className="text-center">
+                    <p className="text-[28px] sm:text-[32px] font-bold text-primary leading-none tabular-nums">
+                      {brandCount}
+                    </p>
+                    <p className="text-[11px] text-[#717786] mt-1">de marca</p>
+                  </div>
+                </div>
               </div>
 
-              {/* Type filter pills */}
-              <div className="flex gap-1.5 shrink-0">
-                {TYPE_FILTERS.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => setTypeFilter(f.value)}
-                    className={`text-[12px] font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer ${
-                      typeFilter === f.value
-                        ? f.value === 'generic'
-                          ? 'bg-secondary text-white'
-                          : f.value === 'brand'
-                          ? 'bg-primary text-white'
-                          : 'bg-[#1a1b1f] text-white'
-                        : 'bg-white/60 text-[#414755] border border-white/50 hover:border-[#c1c6d7]'
-                    }`}
-                  >
-                    {f.label}
-                    {f.value !== 'all' && (
-                      <span className="ml-1 opacity-70">
-                        ({f.value === 'generic' ? genericCount : brandCount})
+              {/* ── Control deslizante estilo Apple ── */}
+              <div className="relative flex bg-black/[0.06] rounded-[14px] p-1">
+                {/* Indicador blanco deslizante — usa transform para GPU-smooth */}
+                <div
+                  className="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]"
+                  style={{
+                    left: '4px',
+                    width: `calc((100% - 8px) / ${N})`,
+                    transform: `translateX(calc(${selectedIndex} * 100%))`,
+                    transition: 'transform 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  }}
+                />
+
+                {TYPE_FILTERS.map((f, i) => {
+                  const isSelected = typeFilter === f.value
+                  const count = f.value === 'generic' ? genericCount : f.value === 'brand' ? brandCount : null
+                  return (
+                    <button
+                      key={f.value}
+                      onClick={() => setTypeFilter(f.value)}
+                      className="relative z-10 flex-1 flex flex-col items-center gap-1 py-4 px-2 rounded-[10px] cursor-pointer select-none"
+                    >
+                      <span
+                        className="text-[15px] sm:text-[17px] font-semibold leading-tight"
+                        style={{
+                          color: isSelected ? '#1a1b1f' : '#9ca3af',
+                          transition: 'color 220ms ease',
+                        }}
+                      >
+                        {f.label}
                       </span>
-                    )}
-                  </button>
-                ))}
+                      {count !== null && (
+                        <span
+                          className="text-[12px] leading-tight"
+                          style={{
+                            color: isSelected
+                              ? f.value === 'generic' ? '#006e28' : '#0058bc'
+                              : '#c1c6d7',
+                            fontWeight: isSelected ? 600 : 400,
+                            transition: 'color 220ms ease',
+                          }}
+                        >
+                          {count} disponibles
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
-
-              {/* Sort */}
-              <select
-                value={sortKey}
-                onChange={(e) => setSortKey(e.target.value as SortKey)}
-                className="text-[12px] bg-white/70 border border-[#c1c6d7]/60 rounded-lg px-2.5 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0"
-              >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
             </div>
 
-            {/* Stats pills */}
+            {/* Resultados + ordenar (fila compacta) */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <p className="text-[13px] text-[#717786]">
+                <span className="font-semibold text-[#1a1b1f]">{filtered.length}</span>{' '}
+                resultado{filtered.length !== 1 ? 's' : ''}
+                {typeFilter !== 'all' && (
+                  <span className="text-[#9ca3af]">
+                    {' '}&middot; {typeFilter === 'generic' ? 'genéricos' : 'de marca'}
+                  </span>
+                )}
+              </p>
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="sort"
+                  className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap"
+                >
+                  Ordenar
+                </label>
+                <select
+                  id="sort"
+                  value={sortKey}
+                  onChange={(e) => setSortKey(e.target.value as SortKey)}
+                  className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Precios min / max */}
             {minPrice !== null && maxPrice !== null && (
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
@@ -159,7 +235,7 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Cards grid — primero para que los productos sean lo primero visible */}
+            {/* Tarjetas — primero para visibilidad inmediata */}
             {filtered.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 {sorted.map((result) => (
@@ -187,16 +263,14 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Graficas — dos columnas en desktop, apiladas en movil */}
+            {/* Gráficas — dos columnas en desktop */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <PriceChart results={filtered} minPrice={minPrice} />
               {history && (
                 <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-1">
                     <h2 className="text-[14px] font-bold text-[#1a1b1f]">Historial de precios</h2>
-                    <span className="text-[11px] text-[#c1c6d7] font-medium">
-                      Ultimos 12 meses
-                    </span>
+                    <span className="text-[11px] text-[#c1c6d7] font-medium">Ultimos 12 meses</span>
                   </div>
                   <p className="text-[12px] text-[#717786] mb-4">{history.label}</p>
                   <PriceHistoryChart histories={history.histories} unit={history.unit} />
