@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import type { PharmacyResult } from '@/app/types'
+import { formatCOP } from '@/app/utils/format'
 import ResultCard from './ResultCard'
+import { PriceChart } from './PriceChart'
 
 const MOCK_DATA: PharmacyResult[] = [
   {
@@ -205,19 +207,16 @@ const MOCK_DATA: PharmacyResult[] = [
 type SortKey = 'price-asc' | 'price-desc' | 'unit-asc' | 'pharmacy-asc'
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: 'price-asc', label: 'Menor precio' },
-  { value: 'price-desc', label: 'Mayor precio' },
-  { value: 'unit-asc', label: 'Precio por unidad' },
-  { value: 'pharmacy-asc', label: 'Farmacia A-Z' },
+  { value: 'price-asc',     label: 'Menor precio' },
+  { value: 'price-desc',    label: 'Mayor precio' },
+  { value: 'unit-asc',      label: 'Precio/unidad' },
+  { value: 'pharmacy-asc',  label: 'Farmacia A-Z' },
 ]
 
 const QUICK_SEARCHES = ['Acetaminofén', 'Ibuprofeno', 'Losartán', 'Metformina']
 
 function normalize(s: string) {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Mn}/gu, '')
+  return s.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, '')
 }
 
 function searchMock(query: string): PharmacyResult[] {
@@ -231,9 +230,9 @@ function searchMock(query: string): PharmacyResult[] {
 
 function sortResults(results: PharmacyResult[], key: SortKey): PharmacyResult[] {
   return [...results].sort((a, b) => {
-    if (key === 'price-asc') return a.price - b.price
-    if (key === 'price-desc') return b.price - a.price
-    if (key === 'unit-asc') return a.pricePerUnit - b.pricePerUnit
+    if (key === 'price-asc')     return a.price - b.price
+    if (key === 'price-desc')    return b.price - a.price
+    if (key === 'unit-asc')      return a.pricePerUnit - b.pricePerUnit
     return a.pharmacy.localeCompare(b.pharmacy, 'es')
   })
 }
@@ -241,11 +240,11 @@ function sortResults(results: PharmacyResult[], key: SortKey): PharmacyResult[] 
 type Phase = 'idle' | 'loading' | 'done'
 
 export default function MedicationSearch() {
-  const [query, setQuery] = useState('')
-  const [phase, setPhase] = useState<Phase>('idle')
-  const [results, setResults] = useState<PharmacyResult[]>([])
+  const [query,     setQuery]     = useState('')
+  const [phase,     setPhase]     = useState<Phase>('idle')
+  const [results,   setResults]   = useState<PharmacyResult[]>([])
   const [lastQuery, setLastQuery] = useState('')
-  const [sortKey, setSortKey] = useState<SortKey>('price-asc')
+  const [sortKey,   setSortKey]   = useState<SortKey>('price-asc')
 
   function runSearch(q: string) {
     const trimmed = q.trim()
@@ -265,43 +264,42 @@ export default function MedicationSearch() {
   }
 
   const sorted = sortResults(results, sortKey)
-  const minPrice =
-    results.length > 0
-      ? Math.min(
-          ...results
-            .filter((r) => r.availability !== 'unavailable')
-            .map((r) => r.price)
-        )
-      : null
+
+  const availableResults = results.filter((r) => r.availability !== 'unavailable')
+  const minPrice = availableResults.length > 0
+    ? Math.min(...availableResults.map((r) => r.price))
+    : null
+  const maxPrice = availableResults.length > 0
+    ? Math.max(...availableResults.map((r) => r.price))
+    : null
 
   return (
     <>
-      {/* ── Hero / Search section ── */}
+      {/* ── Hero / Search ── */}
       <section
         className={`transition-all duration-300 ${
-          phase === 'idle' ? 'py-24 sm:py-32' : 'py-8 sm:py-10'
+          phase === 'idle' ? 'py-20 sm:py-32' : 'py-6 sm:py-10'
         }`}
       >
-        <div className="mx-auto px-5 max-w-2xl">
-          {/* Headline — only on idle */}
+        <div className="mx-auto px-4 sm:px-5 max-w-2xl">
           {phase === 'idle' && (
             <div className="text-center mb-10">
-              <h1 className="text-[28px] sm:text-[34px] font-bold leading-tight tracking-[-0.02em] text-[#1a1b1f] mb-3">
+              <h1 className="text-[26px] sm:text-[34px] font-bold leading-tight tracking-[-0.02em] text-[#1a1b1f] mb-3">
                 Compara precios de{' '}
                 <span className="text-primary">medicamentos</span>
               </h1>
-              <p className="text-[17px] text-[#414755] leading-[22px]">
+              <p className="text-[15px] sm:text-[17px] text-[#414755] leading-[22px]">
                 Encuentra el mejor precio en las principales farmacias de Colombia
               </p>
             </div>
           )}
 
-          {/* Glass search bar */}
+          {/* Search bar */}
           <form
             onSubmit={handleSubmit}
             className="flex items-stretch bg-white/70 backdrop-blur-[30px] rounded-xl border border-white/50 shadow-[0_2px_24px_rgba(0,88,188,0.08)] overflow-hidden"
           >
-            <div className="flex items-center pl-4 text-[#717786] shrink-0" aria-hidden="true">
+            <div className="flex items-center pl-3.5 sm:pl-4 text-[#717786] shrink-0" aria-hidden="true">
               <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
@@ -314,13 +312,13 @@ export default function MedicationSearch() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ej: acetaminofén, ibuprofeno, losartán..."
-              className="flex-1 py-3.5 px-3 bg-transparent text-[15px] text-[#1a1b1f] placeholder:text-[#8e8e93] focus:outline-none min-w-0"
+              placeholder="Ej: acetaminofén, ibuprofeno..."
+              className="flex-1 py-3.5 px-2.5 sm:px-3 bg-transparent text-[14px] sm:text-[15px] text-[#1a1b1f] placeholder:text-[#8e8e93] focus:outline-none min-w-0"
             />
             <button
               type="submit"
               disabled={!query.trim() || phase === 'loading'}
-              className="m-1.5 px-5 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[15px] font-semibold rounded-lg shrink-0 disabled:opacity-50 hover:opacity-90 transition-opacity cursor-pointer whitespace-nowrap"
+              className="m-1.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[14px] sm:text-[15px] font-semibold rounded-lg shrink-0 disabled:opacity-50 hover:opacity-90 transition-opacity cursor-pointer whitespace-nowrap"
             >
               {phase === 'loading' ? 'Buscando...' : 'Buscar'}
             </button>
@@ -344,9 +342,9 @@ export default function MedicationSearch() {
         </div>
       </section>
 
-      {/* ── Results section ── */}
+      {/* ── Results ── */}
       {phase !== 'idle' && (
-        <section className="mx-auto px-5 max-w-5xl pb-16 w-full">
+        <section className="mx-auto px-4 sm:px-5 max-w-5xl pb-16 w-full">
           {phase === 'loading' ? (
             <div className="flex flex-col items-center justify-center py-28 gap-4 text-[#717786]">
               <div className="w-10 h-10 border-4 border-white/50 border-t-primary rounded-full animate-spin" />
@@ -364,23 +362,23 @@ export default function MedicationSearch() {
           ) : (
             <>
               {/* Results header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-                <p className="text-[15px] text-[#717786]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <p className="text-[14px] sm:text-[15px] text-[#717786]">
                   <span className="font-semibold text-[#1a1b1f]">{results.length}</span>{' '}
                   resultado{results.length !== 1 ? 's' : ''} para &ldquo;{lastQuery}&rdquo;
                 </p>
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <label
                     htmlFor="sort"
-                    className="text-[12px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap"
+                    className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap"
                   >
-                    Ordenar por
+                    Ordenar
                   </label>
                   <select
                     id="sort"
                     value={sortKey}
                     onChange={(e) => setSortKey(e.target.value as SortKey)}
-                    className="text-[13px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                    className="flex-1 sm:flex-none text-[13px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                   >
                     {SORT_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -391,6 +389,29 @@ export default function MedicationSearch() {
                 </div>
               </div>
 
+              {/* Stats strip */}
+              {minPrice !== null && maxPrice !== null && (
+                <div className="flex flex-wrap gap-2 mb-5">
+                  <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
+                    Min: {formatCOP(minPrice)}
+                  </span>
+                  <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 text-[#414755] border border-white/40">
+                    Max: {formatCOP(maxPrice)}
+                  </span>
+                  {maxPrice - minPrice > 1000 && (
+                    <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                      Ahorra hasta {formatCOP(maxPrice - minPrice)}
+                    </span>
+                  )}
+                  <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 text-[#414755] border border-white/40">
+                    {availableResults.length} farmacias disponibles
+                  </span>
+                </div>
+              )}
+
+              {/* Price chart */}
+              <PriceChart results={results} minPrice={minPrice} />
+
               {/* Cards grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sorted.map((result) => (
@@ -398,7 +419,8 @@ export default function MedicationSearch() {
                     key={result.id}
                     result={result}
                     isCheapest={
-                      result.availability !== 'unavailable' && result.price === minPrice
+                      result.availability !== 'unavailable' &&
+                      result.price === minPrice
                     }
                   />
                 ))}
