@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { PharmacyResult } from '@/app/types'
 import { PharmacyLogo } from './PharmacyLogo'
 import { MedicationImage } from './MedicationImage'
@@ -114,14 +115,22 @@ export default function ResultCard({ result, isCheapest }: Props) {
               {AVAILABILITY_LABEL[result.availability]}
             </span>
           </div>
-          <a
-            href={result.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[12px] font-semibold text-primary hover:text-primary-container transition-colors"
-          >
-            Ver &rarr;
-          </a>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/historial/${encodeURIComponent(result.activeIngredient.toLowerCase())}`}
+              className="text-[11px] font-semibold text-[#717786] hover:text-primary transition-colors"
+            >
+              Historial
+            </Link>
+            <a
+              href={result.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[12px] font-semibold text-primary hover:text-primary-container transition-colors"
+            >
+              Ver &rarr;
+            </a>
+          </div>
         </div>
       </div>
     </article>
