@@ -2,24 +2,33 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import type { PharmacyResult } from '@/app/types'
+import type { PharmacyResult, MedicationType } from '@/app/types'
 import { searchMock, sortResults, SORT_OPTIONS, type SortKey } from '@/app/utils/search'
 import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
 import { PriceChart } from '@/app/components/PriceChart'
 
+type TypeFilter = 'all' | MedicationType
+
+const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
+  { value: 'all',     label: 'Todos' },
+  { value: 'generic', label: 'Genérico' },
+  { value: 'brand',   label: 'Marca' },
+]
+
 export default function BuscarClient() {
   const searchParams = useSearchParams()
   const q = searchParams.get('q') ?? ''
 
-  const [results, setResults] = useState<PharmacyResult[]>([])
-  const [loading, setLoading] = useState(true)
-  const [sortKey, setSortKey] = useState<SortKey>('price-asc')
+  const [results,    setResults]    = useState<PharmacyResult[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [sortKey,    setSortKey]    = useState<SortKey>('price-asc')
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
 
-  // Re-run search whenever the URL query changes (back/forward nav included)
   useEffect(() => {
     setLoading(true)
+    setTypeFilter('all')
     const timer = setTimeout(() => {
       setResults(searchMock(q))
       setLoading(false)
@@ -27,21 +36,27 @@ export default function BuscarClient() {
     return () => clearTimeout(timer)
   }, [q])
 
-  const availableResults = results.filter((r) => r.availability !== 'unavailable')
-  const minPrice = availableResults.length > 0
-    ? Math.min(...availableResults.map((r) => r.price))
+  const filtered = typeFilter === 'all'
+    ? results
+    : results.filter((r) => r.type === typeFilter)
+
+  const availableFiltered = filtered.filter((r) => r.availability !== 'unavailable')
+  const minPrice = availableFiltered.length > 0
+    ? Math.min(...availableFiltered.map((r) => r.price))
     : null
-  const maxPrice = availableResults.length > 0
-    ? Math.max(...availableResults.map((r) => r.price))
+  const maxPrice = availableFiltered.length > 0
+    ? Math.max(...availableFiltered.map((r) => r.price))
     : null
-  const sorted = sortResults(results, sortKey)
+  const sorted = sortResults(filtered, sortKey)
+
+  const genericCount = results.filter((r) => r.type === 'generic').length
+  const brandCount   = results.filter((r) => r.type === 'brand').length
 
   return (
     <>
-      {/* Search bar — always visible on results page */}
+      {/* Sticky sub-header with search bar */}
       <div className="sticky top-14 z-10 bg-white/60 backdrop-blur-xl border-b border-white/40 shadow-[0_1px_0_rgba(0,0,0,0.03)]">
         <div className="mx-auto px-4 sm:px-5 max-w-2xl py-3">
-          {/* key=q forces SearchBar to remount with correct initialValue on back/forward nav */}
           <SearchBar key={q} initialValue={q} compact />
         </div>
       </div>
@@ -54,7 +69,7 @@ export default function BuscarClient() {
           </div>
         ) : !q ? (
           <div className="text-center py-28">
-            <p className="text-[18px] font-semibold text-[#1a1b1f] mb-2">
+            <p className="text-[18px] font-semibold text-[#1a1b1f]">
               Escribe un medicamento para buscar
             </p>
           </div>
@@ -69,11 +84,55 @@ export default function BuscarClient() {
           </div>
         ) : (
           <>
+            {/* Generic / Brand highlight bar */}
+            <div className="flex flex-wrap items-center gap-3 mb-5 p-4 bg-white/60 backdrop-blur-[20px] border border-white/50 rounded-xl">
+              <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
+                <svg className="w-4 h-4 text-[#717786] shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
+                </svg>
+                <span className="text-[12px] text-[#717786]">
+                  <span className="font-semibold text-secondary">{genericCount} genericos</span>
+                  {' '}&middot;{' '}
+                  <span className="font-semibold text-primary">{brandCount} de marca</span>
+                  {' '}disponibles para &ldquo;{q}&rdquo;
+                </span>
+              </div>
+
+              {/* Type filter pills */}
+              <div className="flex gap-1.5 shrink-0">
+                {TYPE_FILTERS.map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => setTypeFilter(f.value)}
+                    className={`text-[12px] font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                      typeFilter === f.value
+                        ? f.value === 'generic'
+                          ? 'bg-secondary text-white'
+                          : f.value === 'brand'
+                          ? 'bg-primary text-white'
+                          : 'bg-[#1a1b1f] text-white'
+                        : 'bg-white/60 text-[#414755] border border-white/50 hover:border-[#c1c6d7]'
+                    }`}
+                  >
+                    {f.label}
+                    {f.value !== 'all' && (
+                      <span className="ml-1 opacity-70">
+                        ({f.value === 'generic' ? genericCount : brandCount})
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Results header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <p className="text-[14px] sm:text-[15px] text-[#717786]">
-                <span className="font-semibold text-[#1a1b1f]">{results.length}</span>{' '}
-                resultado{results.length !== 1 ? 's' : ''} para &ldquo;{q}&rdquo;
+              <p className="text-[14px] text-[#717786]">
+                <span className="font-semibold text-[#1a1b1f]">{filtered.length}</span>{' '}
+                resultado{filtered.length !== 1 ? 's' : ''}
+                {typeFilter !== 'all' && (
+                  <span> &middot; {typeFilter === 'generic' ? 'genericos' : 'de marca'}</span>
+                )}
               </p>
               <div className="flex items-center gap-2">
                 <label
@@ -112,27 +171,41 @@ export default function BuscarClient() {
                   </span>
                 )}
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 text-[#414755] border border-white/40">
-                  {availableResults.length} farmacias disponibles
+                  {availableFiltered.length} farmacias disponibles
                 </span>
               </div>
             )}
 
             {/* Price chart */}
-            <PriceChart results={results} minPrice={minPrice} />
+            <PriceChart results={filtered} minPrice={minPrice} />
 
             {/* Cards grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sorted.map((result) => (
-                <ResultCard
-                  key={result.id}
-                  result={result}
-                  isCheapest={
-                    result.availability !== 'unavailable' &&
-                    result.price === minPrice
-                  }
-                />
-              ))}
-            </div>
+            {filtered.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sorted.map((result) => (
+                  <ResultCard
+                    key={result.id}
+                    result={result}
+                    isCheapest={
+                      result.availability !== 'unavailable' &&
+                      result.price === minPrice
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">
+                  Sin {typeFilter === 'generic' ? 'genericos' : 'medicamentos de marca'}
+                </p>
+                <button
+                  onClick={() => setTypeFilter('all')}
+                  className="text-[13px] text-primary font-semibold hover:opacity-75 transition-opacity cursor-pointer"
+                >
+                  Ver todos los resultados
+                </button>
+              </div>
+            )}
           </>
         )}
       </section>

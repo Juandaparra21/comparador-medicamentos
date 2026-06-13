@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Hanken_Grotesk } from 'next/font/google'
 import Link from 'next/link'
+import { WishlistNav } from '@/app/components/WishlistNav'
 import './globals.css'
 
 const hanken = Hanken_Grotesk({
@@ -13,7 +14,7 @@ const hanken = Hanken_Grotesk({
 export const metadata: Metadata = {
   title: 'MediCompara - Comparador de medicamentos en Colombia',
   description:
-    'Compara precios de medicamentos en las principales farmacias de Colombia en tiempo real.',
+    'Compara precios de medicamentos en las principales farmacias de Colombia. Genericos y marcas.',
 }
 
 export default function RootLayout({
@@ -29,19 +30,23 @@ export default function RootLayout({
           <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-tertiary/10 blur-[80px]" />
         </div>
 
-        {/* Header — shared across all pages */}
+        {/* Header */}
         <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-          <div className="mx-auto px-4 sm:px-5 max-w-5xl h-14 flex items-center justify-between">
+          <div className="mx-auto px-4 sm:px-5 max-w-5xl h-14 flex items-center justify-between gap-4">
             <Link
               href="/"
-              className="font-bold text-[17px] tracking-tight select-none hover:opacity-75 transition-opacity"
+              className="font-bold text-[17px] tracking-tight select-none hover:opacity-75 transition-opacity shrink-0"
             >
               <span className="text-[#1a1b1f]">Medi</span>
               <span className="text-primary">Compara</span>
             </Link>
-            <span className="text-[11px] sm:text-[12px] font-semibold tracking-[0.05em] uppercase text-[#717786] hidden sm:block">
-              Farmacias de Colombia
-            </span>
+
+            <div className="flex items-center gap-4">
+              <span className="text-[11px] sm:text-[12px] font-semibold tracking-[0.05em] uppercase text-[#717786] hidden sm:block">
+                Farmacias de Colombia
+              </span>
+              <WishlistNav />
+            </div>
           </div>
         </header>
 
