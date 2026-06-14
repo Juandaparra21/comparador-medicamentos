@@ -134,11 +134,12 @@ def _map_hit(hit: dict) -> ScrapedProduct | None:
 
     product_id = hit.get("productId", "")
     slug = hit.get("pageURL", "")
-    page_url = (
-        f"https://www.cruzverde.com.co/medicamentos/{slug}"
-        if slug
-        else f"https://www.cruzverde.com.co/buscar?q={product_id}"
-    )
+    if slug and product_id:
+        page_url = f"https://www.cruzverde.com.co/{slug}/{product_id}.html"
+    elif slug:
+        page_url = f"https://www.cruzverde.com.co/{slug}.html"
+    else:
+        page_url = f"https://www.cruzverde.com.co/buscar?q={name.replace(' ', '+')}"
 
     quantity = 1
 

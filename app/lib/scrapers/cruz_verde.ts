@@ -59,13 +59,11 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   const rawSlug = String(hit.pageURL ?? '')
   const productId = String(hit.productId ?? '')
 
-  // Cruz Verde runs Salesforce Commerce Cloud (not VTEX). pageURL is a bare slug.
-  // Their storefront URL is https://www.cruzverde.com.co/medicamentos/{slug}
+  // Cruz Verde SFCC URL format: /{slug}/{productId}.html
   function buildCruzVerdeUrl(slug: string, id: string): string {
-    if (!slug) return `https://www.cruzverde.com.co/buscar?q=${encodeURIComponent(String(hit.productName ?? id))}`
-    if (slug.startsWith('http')) return slug
-    const s = slug.startsWith('/') ? slug.slice(1) : slug
-    return `https://www.cruzverde.com.co/medicamentos/${s}`
+    if (slug && id) return `https://www.cruzverde.com.co/${slug}/${id}.html`
+    if (slug) return `https://www.cruzverde.com.co/${slug}.html`
+    return `https://www.cruzverde.com.co/buscar?q=${encodeURIComponent(String(hit.productName ?? ''))}`
   }
 
   const availability: ScrapedProduct['availability'] =
