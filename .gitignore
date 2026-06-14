@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scraper debug/cache files (may contain API keys)
+scraper/debug_*.json
+scraper/__pycache__/
+scraper/scrapers/__pycache__/
