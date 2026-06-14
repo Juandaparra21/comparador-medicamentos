@@ -37,6 +37,7 @@ function toPharmacyResult(p: ScrapedProduct, index: number): PharmacyResult {
     url: p.url,
     discount: p.discountPct,
     referencePrice: p.referencePrice,
+    imageUrl: p.imageUrl,
   }
 }
 

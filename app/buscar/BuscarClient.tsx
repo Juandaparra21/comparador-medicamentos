@@ -25,10 +25,11 @@ export default function BuscarClient() {
   const searchParams = useSearchParams()
   const q = searchParams.get('q') ?? ''
 
-  const [results,    setResults]    = useState<PharmacyResult[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [sortKey,    setSortKey]    = useState<SortKey>('price-asc')
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
+  const [results,        setResults]        = useState<PharmacyResult[]>([])
+  const [loading,        setLoading]        = useState(true)
+  const [sortKey,        setSortKey]        = useState<SortKey>('price-asc')
+  const [typeFilter,     setTypeFilter]     = useState<TypeFilter>('all')
+  const [concFilter,     setConcFilter]     = useState<string>('')
 
   useEffect(() => {
     if (!q.trim()) {
@@ -38,6 +39,7 @@ export default function BuscarClient() {
     }
     setLoading(true)
     setTypeFilter('all')
+    setConcFilter('')
     const controller = new AbortController()
     fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
       .then((r) => r.json())
@@ -54,9 +56,24 @@ export default function BuscarClient() {
     return () => controller.abort()
   }, [q])
 
-  const filtered = typeFilter === 'all'
+  // Unique concentrations from the current results (sorted by count desc)
+  const concentrations: string[] = (() => {
+    const counts: Record<string, number> = {}
+    for (const r of results) {
+      if (r.concentration) counts[r.concentration] = (counts[r.concentration] ?? 0) + 1
+    }
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([c]) => c)
+  })()
+
+  const byType = typeFilter === 'all'
     ? results
     : results.filter((r) => r.type === typeFilter)
+
+  const filtered = concFilter
+    ? byType.filter((r) => r.concentration === concFilter)
+    : byType
 
   const availableFiltered = filtered.filter((r) => r.availability !== 'unavailable')
   const minPrice = availableFiltered.length > 0
@@ -197,6 +214,35 @@ export default function BuscarClient() {
                 })}
               </div>
             </div>
+
+            {/* Concentration filter chips */}
+            {concentrations.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 mt-4">
+                <button
+                  onClick={() => setConcFilter('')}
+                  className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
+                    concFilter === ''
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-white/60 text-[#414755] border-[#c1c6d7]/60 hover:border-primary/40'
+                  }`}
+                >
+                  Todas
+                </button>
+                {concentrations.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setConcFilter(concFilter === c ? '' : c)}
+                    className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer whitespace-nowrap ${
+                      concFilter === c
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white/60 text-[#414755] border-[#c1c6d7]/60 hover:border-primary/40'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Resultados + ordenar (fila compacta) */}
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4">

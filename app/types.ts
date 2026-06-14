@@ -14,8 +14,9 @@ export interface PharmacyResult {
   availability: Availability
   url: string
   type: MedicationType
-  discount?: number       // % de descuento vs referencePrice
-  referencePrice?: number // precio de referencia antes del descuento
+  discount?: number
+  referencePrice?: number
+  imageUrl?: string
 }
 
 export interface WishlistItem {

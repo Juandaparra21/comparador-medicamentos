@@ -56,11 +56,27 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   if (price <= 0 || price > 5_000_000) return null
 
   const brand = (String(hit.brand ?? '')).trim()
-  const slug = String(hit.pageURL ?? '')
+  const rawSlug = String(hit.pageURL ?? '')
   const productId = String(hit.productId ?? '')
+
+  // Cruz Verde runs Salesforce Commerce Cloud (not VTEX). pageURL is a bare slug.
+  // Their storefront URL is https://www.cruzverde.com.co/medicamentos/{slug}
+  function buildCruzVerdeUrl(slug: string, id: string): string {
+    if (!slug) return `https://www.cruzverde.com.co/buscar?q=${encodeURIComponent(String(hit.productName ?? id))}`
+    if (slug.startsWith('http')) return slug
+    const s = slug.startsWith('/') ? slug.slice(1) : slug
+    return `https://www.cruzverde.com.co/medicamentos/${s}`
+  }
 
   const availability: ScrapedProduct['availability'] =
     (hit.homeDelivery || hit.storePickup) ? 'available' : 'unavailable'
+
+  // Cruz Verde search API: hit.image = { disBaseLink, link, alt, title }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const imgObj = (hit.image ?? {}) as Record<string, any>
+  const imageUrl: string = String(
+    imgObj.disBaseLink ?? imgObj.link ?? hit.imageUrl ?? ''
+  ).replace('beta1.cruzverde.com.co', 'www.cruzverde.com.co')
 
   return {
     pharmacyId: 'cruz-verde',
@@ -75,9 +91,8 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
     referencePrice: refPrice,
     discountPct: discount,
     availability,
-    url: slug
-      ? `https://www.cruzverde.com.co/${slug}/p`
-      : `https://www.cruzverde.com.co/producto/${productId}/p`,
+    url: buildCruzVerdeUrl(rawSlug, productId),
+    imageUrl: imageUrl || undefined,
   }
 }
 

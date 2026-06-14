@@ -48,6 +48,9 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   // La Rebaja indica RX con spec; no-RX tiende a ser genérico
   const isRx = spec(p, 'Producto RX').toUpperCase() === 'SI'
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const firstImage = (items[0] as any).images?.[0]?.imageUrl as string | undefined
+
   return {
     pharmacyId: 'la-rebaja',
     productName: name,
@@ -62,6 +65,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     discountPct: discount,
     availability,
     url: (p.link as string) || `https://www.larebajavirtual.com/${p.linkText ?? ''}/p`,
+    imageUrl: firstImage || undefined,
   }
 }
 

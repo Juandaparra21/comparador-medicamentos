@@ -1,0 +1,25 @@
+{
+  "url": "https://api-search.farmatodo.com/1/indexes/properties/WEB.HEADER.CONFIG?x-algolia-agent=Algolia%20for%20JavaScript%20(4.5.1)%3B%20Browser",
+  "body": {
+    "config": {
+      "header_primary_color": "#ffffff",
+      "header_secondary_color": "#418fde",
+      "header_user_icon": "https://lh3.googleusercontent.com/piGVXO-z-CpUxftT5vqhQFnpXvARBlxH8SRrke6hIbU5OKrCgLS1iqyY-6Amx5GsVVPXxqWs5hEV4EI6iWZoau9cvStHGKCga7atRlzeGg7hUbV3=s80",
+      "header_location_icon": "https://lh3.googleusercontent.com/pGtqdwI0osXfgoj36j32LbmeVMnptXna_dC7cCF7PpoXkXMY6PR1B0GE2QVDK8cvQ4fgJXNyWilTZ8oxYpK9QnCdJc9Z4eevqO3qiTLc_vTZ8cc",
+      "header_cart_icon": "https://lh3.googleusercontent.com/27GIY9RyHCbWDEdT8LqVxtqoG9WRwTjUvvXmj5cMDEPlUpJ1eRKoiIkB43W7XaM06P3nsOcACE_8IXvkGUVlPGHO5Y8wd71RZQk8Q78qCmVzZOWMoQ",
+      "header_coupon_icon": "https://lh3.googleusercontent.com/hWvHzOck3yzJG-ki-zSItZkIjLNmle7CiOEmy8SqIZ0nj7BV9_SeWf7LUp0LN1JMzs6fStQQmmg8giOxAngzIiC_517Pgwb1uOXpPgeQJzyiKyU",
+      "header_background_img": "https://lh3.googleusercontent.com/KblGAs-9Oi9D8tgGdOLnT5oulWR1KPQW2mUv39k5F8O87-jTQxYOeE0Zz5b83Pv77BlewkTPMA4tRNkQwpEALz4XNfStfEmXO8oOoynb5_ZIa8g=s3000",
+      "header_background_img_mobile": "https://lh3.googleusercontent.com/gR2mjaWMgLOKo1lWl-QQ9wZ0nvlkuQ61FUwuRKv8wIQ-DwUQdtsPWXUOLiq0RXLaX9q0txWXzlHU1F-KP3Xk5oVYGdItnAZDooAdVlPjPzALsjbc2Q=s3000",
+      "header_background_img_toolbar": "https://lh3.googleusercontent.com/gR2mjaWMgLOKo1lWl-QQ9wZ0nvlkuQ61FUwuRKv8wIQ-DwUQdtsPWXUOLiq0RXLaX9q0txWXzlHU1F-KP3Xk5oVYGdItnAZDooAdVlPjPzALsjbc2Q=s3000",
+      "header_background_img_android_home": "https://lh3.googleusercontent.com/wDfxyzpaXGEJ3XeL-IEhntrkRcXb24XgyG7R5QhOeUKTbCrHPtcekmSfE3ZrHz0dj8-Db8HGLh_YgWsoLA_nB9_CxilEETnx7E4Q0o5F0zfrt-m2-w=s3000",
+      "header_background_img_ios_home_1": "https://lh3.googleusercontent.com/wDfxyzpaXGEJ3XeL-IEhntrkRcXb24XgyG7R5QhOeUKTbCrHPtcekmSfE3ZrHz0dj8-Db8HGLh_YgWsoLA_nB9_CxilEETnx7E4Q0o5F0zfrt-m2-w=s3000",
+      "header_background_img_ios_home_2": "https://lh3.googleusercontent.com/wDfxyzpaXGEJ3XeL-IEhntrkRcXb24XgyG7R5QhOeUKTbCrHPtcekmSfE3ZrHz0dj8-Db8HGLh_YgWsoLA_nB9_CxilEETnx7E4Q0o5F0zfrt-m2-w=s3000",
+      "product_petal_icon": "",
+      "cart_background_color": "#ebebeb",
+      "cart_color_text": "#b0b0b0"
+    },
+    "active": false,
+    "info": "Config to set colors and icons of web headers",
+    "objectID": "WEB.HEADER.CONFIG"
+  }
+}

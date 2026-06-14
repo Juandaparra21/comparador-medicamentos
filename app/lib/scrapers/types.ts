@@ -12,4 +12,5 @@ export interface ScrapedProduct {
   discountPct?: number
   availability: 'available' | 'limited' | 'unavailable'
   url: string
+  imageUrl?: string
 }

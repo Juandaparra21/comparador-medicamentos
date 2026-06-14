@@ -1,0 +1,128 @@
+{
+  "url": "https://cdn.contentful.com/spaces/1weu96fhrx5b/environments/master/entries?content_type=ml-rich-text&fields.name=HAB_MODAL_TXT_SUBTITLE&include=1",
+  "size": 2076,
+  "body": {
+    "sys": {
+      "type": "Array"
+    },
+    "total": 2,
+    "skip": 0,
+    "limit": 100,
+    "items": [
+      {
+        "metadata": {
+          "tags": [],
+          "concepts": []
+        },
+        "sys": {
+          "space": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Space",
+              "id": "1weu96fhrx5b"
+            }
+          },
+          "id": "1zIOODzCaaBpmRt7raQ6z9",
+          "type": "Entry",
+          "createdAt": "2026-05-07T16:02:06.425Z",
+          "updatedAt": "2026-05-07T16:02:06.425Z",
+          "environment": {
+            "sys": {
+              "id": "master",
+              "type": "Link",
+              "linkType": "Environment"
+            }
+          },
+          "publishedVersion": 2,
+          "revision": 1,
+          "contentType": {
+            "sys": {
+              "type": "Link",
+              "linkType": "ContentType",
+              "id": "ml-rich-text"
+            }
+          },
+          "locale": "en-US"
+        },
+        "fields": {
+          "name": "HAB_MODAL_TXT_SUBTITLE",
+          "richText": {
+            "nodeType": "document",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "<div style=\"text-align: center; justify-content: center; display: flex; flex-direction: column; color: #555555; font-size: 16px; font-family: Open Sans; font-weight: 400; line-height: 22px; word-wrap: break-word\">Inscribe para obtener los beneficios que ofrece Los Habituales</div> ",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "metadata": {
+          "tags": [],
+          "concepts": []
+        },
+        "sys": {
+          "space": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Space",
+              "id": "1weu96fhrx5b"
+            }
+          },
+          "id": "5cssQXTkh51GFSd4J7qMkp",
+          "type": "Entry",
+          "createdAt": "2026-05-07T14:20:34.925Z",
+          "updatedAt": "2026-05-07T14:20:34.925Z",
+          "environment": {
+            "sys": {
+              "id": "master",
+              "type": "Link",
+              "linkType": "Environment"
+            }
+          },
+          "publishedVersion": 3,
+          "revision": 1,
+          "contentType": {
+            "sys": {
+              "type": "Link",
+              "linkType": "ContentType",
+              "id": "ml-rich-text"
+            }
+          },
+          "locale": "en-US"
+        },
+        "fields": {
+          "name": "HAB_MODAL_TXT_SUBTITLE",
+          "richText": {
+            "nodeType": "document",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "<div style=\"text-align: center; justify-content: center; display: flex; flex-direction: column; color: #555555; font-size: 16px; font-family: Open Sans; font-weight: 400; line-height: 22px; word-wrap: break-word\">Inscribe para obtener los beneficios que ofrece Los Habituales</div> ",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
