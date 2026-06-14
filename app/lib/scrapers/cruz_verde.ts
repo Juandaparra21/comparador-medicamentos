@@ -72,9 +72,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   // Cruz Verde search API: hit.image = { disBaseLink, link, alt, title }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const imgObj = (hit.image ?? {}) as Record<string, any>
-  const imageUrl: string = String(
-    imgObj.disBaseLink ?? imgObj.link ?? hit.imageUrl ?? ''
-  ).replace('beta1.cruzverde.com.co', 'www.cruzverde.com.co')
+  const imageUrl: string = String(imgObj.disBaseLink ?? imgObj.link ?? '')
 
   return {
     pharmacyId: 'cruz-verde',

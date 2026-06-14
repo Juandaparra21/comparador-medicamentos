@@ -48,7 +48,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
 
   const productId = String(hit.id ?? '')
 
-  const imageUrl: string = String(hit.imageURL ?? hit.img ?? hit.thumbnail ?? '')
+  const imageUrl: string = String(hit.mediaImageUrl ?? hit.imageURL ?? '')
 
   return {
     pharmacyId: 'farmatodo',
