@@ -1,5 +1,9 @@
 import { useId } from 'react'
 
+function normalize(s: string) {
+  return s.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, '')
+}
+
 interface Theme {
   bg: string
   bgAccent: string
@@ -24,9 +28,15 @@ interface Props {
   height?: number
 }
 
+// Mapa normalizado para lookup sin acentos
+const THEMES_NORMALIZED: [string, Theme][] = Object.entries(THEMES).map(
+  ([k, v]) => [normalize(k), v]
+)
+
 export function MedicationImage({ ingredient, height = 88 }: Props) {
   const uid = useId().replace(/:/g, '')
-  const t = THEMES[ingredient] ?? DEFAULT_THEME
+  const normIngredient = normalize(ingredient.split(/\s/)[0] ?? '')
+  const t = THEMES_NORMALIZED.find(([k]) => k === normIngredient)?.[1] ?? DEFAULT_THEME
 
   return (
     <div

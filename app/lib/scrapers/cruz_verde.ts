@@ -76,8 +76,8 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
     discountPct: discount,
     availability,
     url: slug
-      ? `https://www.cruzverde.com.co/${slug}`
-      : `https://www.cruzverde.com.co/producto/${productId}`,
+      ? `https://www.cruzverde.com.co/${slug}/p`
+      : `https://www.cruzverde.com.co/producto/${productId}/p`,
   }
 }
 

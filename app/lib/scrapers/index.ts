@@ -21,9 +21,9 @@ function hashId(pharmacyId: string, productName: string): string {
   return (h >>> 0).toString(36)
 }
 
-function toPharmacyResult(p: ScrapedProduct): PharmacyResult {
+function toPharmacyResult(p: ScrapedProduct, index: number): PharmacyResult {
   return {
-    id: hashId(p.pharmacyId, p.productName),
+    id: `${hashId(p.pharmacyId, p.productName)}-${index}`,
     pharmacy: PHARMACY_NAMES[p.pharmacyId] ?? p.pharmacyId,
     productName: p.productName,
     type: p.type,
@@ -49,9 +49,10 @@ export async function searchAllPharmacies(query: string): Promise<PharmacyResult
   ])
 
   const all: PharmacyResult[] = []
+  let idx = 0
   for (const result of settled) {
     if (result.status === 'fulfilled') {
-      all.push(...result.value.map(toPharmacyResult))
+      all.push(...result.value.map(p => toPharmacyResult(p, idx++)))
     }
   }
 
