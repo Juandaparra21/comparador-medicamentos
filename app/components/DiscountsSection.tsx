@@ -5,12 +5,12 @@ import { PharmacyLogo } from './PharmacyLogo'
 import { MedicationImage } from './MedicationImage'
 import type { PharmacyResult } from '@/app/types'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-)
-
 async function getFeaturedDiscounts(): Promise<PharmacyResult[]> {
+  const url = process.env.SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_KEY
+  if (!url || !key) return []
+
+  const supabase = createClient(url, key)
   const { data } = await supabase
     .from('search_results')
     .select('*')
