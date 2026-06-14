@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { SearchBar } from '@/app/components/SearchBar'
 import { QuickChips } from '@/app/components/QuickChips'
 import { DiscountsSection } from '@/app/components/DiscountsSection'
@@ -36,7 +37,9 @@ export default function Home() {
       <LocationPicker />
 
       {/* Discounts */}
-      <DiscountsSection />
+      <Suspense fallback={null}>
+        <DiscountsSection />
+      </Suspense>
     </>
   )
 }

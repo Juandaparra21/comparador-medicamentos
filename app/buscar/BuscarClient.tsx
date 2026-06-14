@@ -31,13 +31,27 @@ export default function BuscarClient() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
 
   useEffect(() => {
+    if (!q.trim()) {
+      setResults([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setTypeFilter('all')
-    const timer = setTimeout(() => {
-      setResults(searchMock(q))
-      setLoading(false)
-    }, 400)
-    return () => clearTimeout(timer)
+    const controller = new AbortController()
+    fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        setResults(data.results ?? [])
+        setLoading(false)
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          setResults(searchMock(q))
+          setLoading(false)
+        }
+      })
+    return () => controller.abort()
   }, [q])
 
   const filtered = typeFilter === 'all'
