@@ -8,10 +8,13 @@ import { getMedicationHistory } from '@/app/utils/priceHistory'
 import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
+import { ProductGroupCard } from '@/app/components/ProductGroupCard'
 import { PriceChart } from '@/app/components/PriceChart'
 import { PriceHistoryChart } from '@/app/components/PriceHistoryChart'
+import { groupResults } from '@/app/utils/groupResults'
 
 type TypeFilter = 'all' | MedicationType
+type ViewMode   = 'grouped' | 'all'
 
 const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
   { value: 'all',     label: 'Todos' },
@@ -30,6 +33,7 @@ export default function BuscarClient() {
   const [sortKey,        setSortKey]        = useState<SortKey>('price-asc')
   const [typeFilter,     setTypeFilter]     = useState<TypeFilter>('all')
   const [concFilter,     setConcFilter]     = useState<string>('')
+  const [viewMode,       setViewMode]       = useState<ViewMode>('grouped')
 
   useEffect(() => {
     if (!q.trim()) {
@@ -45,6 +49,7 @@ export default function BuscarClient() {
       .then((r) => r.json())
       .then((data) => {
         setResults(data.results ?? [])
+        setViewMode('grouped')
         setLoading(false)
       })
       .catch((err) => {
@@ -83,6 +88,7 @@ export default function BuscarClient() {
     ? Math.max(...availableFiltered.map((r) => r.price))
     : null
   const sorted = sortResults(filtered, sortKey)
+  const groups = groupResults(filtered)
 
   const genericCount = results.filter((r) => r.type === 'generic').length
   const brandCount   = results.filter((r) => r.type === 'brand').length
@@ -244,35 +250,53 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Resultados + ordenar (fila compacta) */}
+            {/* Resultados + view toggle + ordenar */}
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <p className="text-[13px] text-[#717786]">
-                <span className="font-semibold text-[#1a1b1f]">{filtered.length}</span>{' '}
-                resultado{filtered.length !== 1 ? 's' : ''}
-                {typeFilter !== 'all' && (
-                  <span className="text-[#9ca3af]">
-                    {' '}&middot; {typeFilter === 'generic' ? 'genéricos' : 'de marca'}
-                  </span>
-                )}
-              </p>
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="sort"
-                  className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap"
-                >
-                  Ordenar
-                </label>
-                <select
-                  id="sort"
-                  value={sortKey}
-                  onChange={(e) => setSortKey(e.target.value as SortKey)}
-                  className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
+              <div className="flex items-center gap-3">
+                <p className="text-[13px] text-[#717786]">
+                  <span className="font-semibold text-[#1a1b1f]">
+                    {viewMode === 'grouped' ? groups.length : filtered.length}
+                  </span>{' '}
+                  {viewMode === 'grouped' ? `producto${groups.length !== 1 ? 's' : ''}` : `resultado${filtered.length !== 1 ? 's' : ''}`}
+                </p>
+                {/* Toggle grouped / all */}
+                <div className="flex items-center bg-black/[0.05] rounded-lg p-0.5">
+                  <button
+                    onClick={() => setViewMode('grouped')}
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      viewMode === 'grouped' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'
+                    }`}
+                  >
+                    Comparar
+                  </button>
+                  <button
+                    onClick={() => setViewMode('all')}
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                      viewMode === 'all' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                </div>
               </div>
+              {viewMode === 'all' && (
+                <div className="flex items-center gap-2">
+                  <label htmlFor="sort"
+                    className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap">
+                    Ordenar
+                  </label>
+                  <select
+                    id="sort"
+                    value={sortKey}
+                    onChange={(e) => setSortKey(e.target.value as SortKey)}
+                    className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                  >
+                    {SORT_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Precios min / max */}
@@ -295,20 +319,28 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Tarjetas — primero para visibilidad inmediata */}
+            {/* Tarjetas */}
             {filtered.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                {sorted.map((result) => (
-                  <ResultCard
-                    key={result.id}
-                    result={result}
-                    isCheapest={
-                      result.availability !== 'unavailable' &&
-                      result.price === minPrice
-                    }
-                  />
-                ))}
-              </div>
+              viewMode === 'grouped' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+                  {groups.map((group) => (
+                    <ProductGroupCard key={group.key} group={group} />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                  {sorted.map((result) => (
+                    <ResultCard
+                      key={result.id}
+                      result={result}
+                      isCheapest={
+                        result.availability !== 'unavailable' &&
+                        result.price === minPrice
+                      }
+                    />
+                  ))}
+                </div>
+              )
             ) : (
               <div className="text-center py-16">
                 <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">
