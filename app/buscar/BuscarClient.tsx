@@ -11,7 +11,7 @@ import ResultCard from '@/app/components/ResultCard'
 import { ProductGroupCard } from '@/app/components/ProductGroupCard'
 import { PriceChart } from '@/app/components/PriceChart'
 import { PriceHistoryChart } from '@/app/components/PriceHistoryChart'
-import { groupResults } from '@/app/utils/groupResults'
+import { groupResults, type GroupedResults } from '@/app/utils/groupResults'
 
 type TypeFilter = 'all' | MedicationType
 type ViewMode   = 'grouped' | 'all'
@@ -89,7 +89,7 @@ export default function BuscarClient() {
     ? Math.max(...availableFiltered.map((r) => r.price))
     : null
   const sorted = sortResults(filtered, sortKey)
-  const groups = groupResults(filtered)
+  const { comparisons, singles } = groupResults(filtered)
 
   const genericCount = results.filter((r) => r.type === 'generic').length
   const brandCount   = results.filter((r) => r.type === 'brand').length
@@ -254,10 +254,13 @@ export default function BuscarClient() {
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-3 flex-wrap">
                 <p className="text-[13px] text-[#717786]">
-                  <span className="font-semibold text-[#1a1b1f]">
-                    {viewMode === 'grouped' ? groups.length : filtered.length}
-                  </span>{' '}
-                  {viewMode === 'grouped' ? `producto${groups.length !== 1 ? 's' : ''}` : `resultado${filtered.length !== 1 ? 's' : ''}`}
+                  <span className="font-semibold text-[#1a1b1f]">{filtered.length}</span>{' '}
+                  resultado{filtered.length !== 1 ? 's' : ''}
+                  {viewMode === 'grouped' && comparisons.length > 0 && (
+                    <span className="text-secondary font-semibold">
+                      {' '}· {comparisons.length} comparacion{comparisons.length !== 1 ? 'es' : ''}
+                    </span>
+                  )}
                 </p>
                 <div className="flex bg-black/[0.05] rounded-lg p-0.5">
                   <button
@@ -274,21 +277,19 @@ export default function BuscarClient() {
                   </button>
                 </div>
               </div>
-              {viewMode === 'all' && (
-                <div className="flex items-center gap-2">
-                  <label htmlFor="sort" className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap">
-                    Ordenar
-                  </label>
-                  <select
-                    id="sort"
-                    value={sortKey}
-                    onChange={(e) => setSortKey(e.target.value as SortKey)}
-                    className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                  >
-                    {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <label htmlFor="sort" className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap">
+                  Ordenar
+                </label>
+                <select
+                  id="sort"
+                  value={sortKey}
+                  onChange={(e) => setSortKey(e.target.value as SortKey)}
+                  className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                >
+                  {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
             </div>
 
             {/* Precios min / max */}
@@ -314,10 +315,42 @@ export default function BuscarClient() {
             {/* Tarjetas */}
             {filtered.length > 0 ? (
               viewMode === 'grouped' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                  {groups.map((group) => (
-                    <ProductGroupCard key={group.key} group={group} />
-                  ))}
+                <div className="flex flex-col gap-6 mb-8">
+                  {/* Comparison groups — same product in 2+ pharmacies */}
+                  {comparisons.length > 0 && (
+                    <div>
+                      <p className="text-[11px] font-bold tracking-widest uppercase text-[#717786] mb-3">
+                        Mismo producto, distintas farmacias
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {comparisons.map((group) => (
+                          <ProductGroupCard key={group.key} group={group} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* Singles — products found in only one pharmacy */}
+                  {singles.length > 0 && (
+                    <div>
+                      {comparisons.length > 0 && (
+                        <p className="text-[11px] font-bold tracking-widest uppercase text-[#717786] mb-3">
+                          Solo en una farmacia
+                        </p>
+                      )}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {sortResults(singles, sortKey).map((result) => (
+                          <ResultCard
+                            key={result.id}
+                            result={result}
+                            isCheapest={
+                              result.availability !== 'unavailable' &&
+                              result.price === minPrice
+                            }
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
