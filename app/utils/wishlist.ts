@@ -1,5 +1,5 @@
 import type { PharmacyResult, WishlistItem } from '@/app/types'
-import { getBrowserClient } from '@/app/lib/supabase/browser'
+import { getBrowserClient, isBrowserClientAvailable } from '@/app/lib/supabase/browser'
 
 const KEY   = 'medicompara_wishlist'
 const EVENT = 'medicompara:wishlist'
@@ -47,6 +47,7 @@ export function WISHLIST_EVENT() { return EVENT }
 // ---- Supabase (authenticated) ----
 
 export async function getWishlistDB(): Promise<WishlistItem[]> {
+  if (!isBrowserClientAvailable()) return []
   const sb = getBrowserClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (sb.from('wishlists') as any).select('*').order('added_at', { ascending: false }) as { data: Record<string, any>[] | null }
@@ -66,6 +67,7 @@ export async function getWishlistDB(): Promise<WishlistItem[]> {
 }
 
 export async function addToWishlistDB(result: PharmacyResult): Promise<void> {
+  if (!isBrowserClientAvailable()) return
   const sb = getBrowserClient()
   const { data: { user } } = await sb.auth.getUser()
   if (!user) return
@@ -85,12 +87,14 @@ export async function addToWishlistDB(result: PharmacyResult): Promise<void> {
 }
 
 export async function removeFromWishlistDB(productId: string): Promise<void> {
+  if (!isBrowserClientAvailable()) return
   const sb = getBrowserClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (sb.from('wishlists') as any).delete().eq('product_id', productId)
 }
 
 export async function isInWishlistDB(productId: string): Promise<boolean> {
+  if (!isBrowserClientAvailable()) return false
   const sb = getBrowserClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { count } = await (sb.from('wishlists') as any)

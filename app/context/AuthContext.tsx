@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { getBrowserClient } from '@/app/lib/supabase/browser'
+import { getBrowserClient, isBrowserClientAvailable } from '@/app/lib/supabase/browser'
 
 interface AuthCtx {
   user: User | null
@@ -20,8 +20,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user,    setUser]    = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Only run in the browser — never during SSR pre-rendering
   useEffect(() => {
+    if (!isBrowserClientAvailable()) {
+      setLoading(false)
+      return
+    }
     const sb = getBrowserClient()
     sb.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null)
@@ -34,11 +37,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
+    if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
     const { error } = await getBrowserClient().auth.signInWithPassword({ email, password })
     return error ? translateError(error.message) : null
   }, [])
 
   const signUp = useCallback(async (email: string, password: string, name: string) => {
+    if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
     const { error } = await getBrowserClient().auth.signUp({
       email,
       password,
@@ -48,10 +53,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = useCallback(async () => {
+    if (!isBrowserClientAvailable()) return
     await getBrowserClient().auth.signOut()
   }, [])
 
   const signInWithGoogle = useCallback(async () => {
+    if (!isBrowserClientAvailable()) return
     await getBrowserClient().auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${location.origin}/auth/callback` },
@@ -59,6 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const resetPassword = useCallback(async (email: string) => {
+    if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
     const { error } = await getBrowserClient().auth.resetPasswordForEmail(email, {
       redirectTo: `${location.origin}/auth/callback?next=/login`,
     })
