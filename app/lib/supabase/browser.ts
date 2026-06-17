@@ -1,21 +1,16 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-const url  = process.env.NEXT_PUBLIC_SUPABASE_URL
-const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+// These are public keys — safe to expose in client code (anon key has no elevated privileges)
+const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? 'https://rcjidvjbybbtutfeerzk.supabase.co'
+const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'sb_publishable_7V2QG3IJ3VvuXJu8q3uagQ_vzOtwsV4'
 
 let client: SupabaseClient | null = null
 
 export function getBrowserClient(): SupabaseClient {
-  if (!url || !anon) {
-    throw new Error(
-      'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. ' +
-      'Add these to your Vercel environment variables and redeploy.'
-    )
-  }
-  if (!client) client = createClient(url, anon)
+  if (!client) client = createClient(SUPABASE_URL, SUPABASE_ANON)
   return client
 }
 
 export function isBrowserClientAvailable(): boolean {
-  return Boolean(url && anon)
+  return true
 }
