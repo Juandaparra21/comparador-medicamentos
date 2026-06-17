@@ -6,10 +6,8 @@ export interface ProductGroup {
   concentration: string
   presentation: string
   quantity: number
-  brand: string
   imageUrl?: string
-  /** All results sorted: cheapest available first, unavailable last */
-  results: PharmacyResult[]
+  results: PharmacyResult[]   // sorted: cheapest available first, unavailable last
   minPrice: number
   maxPrice: number
   savings: number
@@ -21,49 +19,45 @@ function norm(s: string): string {
 }
 
 /**
- * Strips ingredient, concentration, quantity and presentation words from a
- * product name to isolate the manufacturer/brand label.
- * e.g. "IBUPROFENO COASPHARMA 400MG X 10 TABLETAS" → "coaspharma"
+ * Produces a canonical key from a product name so that the same product
+ * formatted differently across pharmacies maps to the same key, while
+ * different brands/labs (Coaspharma vs Memphis) remain distinct.
+ *
+ * Steps:
+ *  1. Lowercase + remove accents
+ *  2. Join split number+unit → "400 mg" → "400mg"
+ *  3. Normalize decimal: "400,5" → "400.5"
+ *  4. Collapse "x 10" / "× 10" quantity prefixes → just the number
+ *  5. Remove presentation noise words
+ *  6. Split into tokens, sort alphabetically, rejoin
+ *
+ * Result: "IBUPROFENO COASPHARMA 400MG X 10 TABLETAS" →  "10|400mg|coaspharma|ibuprofeno"
+ *         "IBUPROFENO MEMPHIS 400MG X 10 TABLETAS"    →  "10|400mg|ibuprofeno|memphis"
  */
-function extractBrand(productName: string, activeIngredient: string): string {
+function makeKey(productName: string): string {
   let s = norm(productName)
 
-  // Remove active ingredient words
-  const ing = norm(activeIngredient)
-  if (ing) {
-    s = s.replace(new RegExp(ing.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '')
-  }
+  // Join number + unit (handle "400 mg" → "400mg")
+  s = s.replace(/(\d+(?:[.,]\d+)?)\s*(mg|g|ml|mcg|ui|ug|%|ui\/ml|mg\/ml)/g, (_, n, u) =>
+    n.replace(',', '.') + u
+  )
 
-  // Remove concentration (e.g. 400mg, 500.5 mcg)
-  s = s.replace(/\d+(?:[.,]\d+)?\s*(?:mg|g|ml|mcg|ui|%|ug)\b/g, '')
+  // Normalize quantity prefix: x10, x 10, ×10 → just the number
+  s = s.replace(/[x×]\s*(\d+)/g, ' $1 ')
 
-  // Remove quantity patterns (x10, x 10, 10 tabletas, 30 caps)
-  s = s.replace(/\bx\s*\d+\b/g, '')
-  s = s.replace(/\d+\s*(?:tabletas?|capsulas?|comprimidos?|ampollas?|jeringas?|unidades?|caps?|und)\b/g, '')
-  s = s.replace(/\b\d+\b/g, '')
+  // Strip packaging/presentation noise words
+  s = s.replace(
+    /\b(?:tabletas?|capsulas?|comprimidos?|ampollas?|jeringas?|plumas?|viales?|jarabe|suspen[sc]ion|solucion|crema|gel|pomada|spray|aerosol|gotas|polvo|supositorio|parche|ovulo|inyectable|encapsulado|refrigerado|frasco|fco|caja|blister|sobre|sachet|ampolleta|unidades?|und)\b/g,
+    ' '
+  )
 
-  // Remove presentation words
-  s = s.replace(/\b(?:tabletas?|capsulas?|comprimidos?|ampollas?|jeringas?|plumas?|viales?|jarabe|suspen[sc]ion|solucion|crema|gel|pomada|spray|aerosol|gotas|polvo|supositorio|parche|ovulo|inyectable|encapsulado|refrigerado)\b/g, '')
+  // Tokenize: keep alphanumeric tokens of length >= 1
+  const tokens = s.split(/[\s\-\/,.()+]+/).filter(t => /[a-z0-9]/.test(t))
 
-  // Clean up — only letters remain
-  return s.replace(/[^a-z]/g, ' ').replace(/\s+/g, ' ').trim()
-}
+  // Sort for order-independence across pharmacy naming conventions
+  tokens.sort()
 
-/**
- * Returns a group key only when ALL required fields are present and non-empty,
- * AND including the extracted brand/lab so that Coaspharma ≠ Memphis.
- */
-function makeKey(r: PharmacyResult): string {
-  const ing   = norm(r.activeIngredient)
-  const conc  = r.concentration.trim()
-  const pres  = norm(r.presentation)
-  const qty   = r.quantity
-  const brand = extractBrand(r.productName, r.activeIngredient)
-
-  // All four spec fields must be meaningful
-  if (!ing || !conc || !pres || qty < 1) return `__solo__${r.id}`
-
-  return `${ing}|${conc}|${pres}|${qty}|${brand}`
+  return tokens.join('|')
 }
 
 function sortItems(items: PharmacyResult[]): PharmacyResult[] {
@@ -76,9 +70,9 @@ function sortItems(items: PharmacyResult[]): PharmacyResult[] {
 }
 
 export interface GroupedResults {
-  /** Groups with 2+ pharmacies — true cross-pharmacy comparisons */
+  /** Groups with 2+ distinct pharmacies — true cross-pharmacy comparisons */
   comparisons: ProductGroup[]
-  /** Results with no match in other pharmacies */
+  /** Results with no equivalent in another pharmacy */
   singles: PharmacyResult[]
 }
 
@@ -86,7 +80,8 @@ export function groupResults(results: PharmacyResult[]): GroupedResults {
   const map = new Map<string, PharmacyResult[]>()
 
   for (const r of results) {
-    const key = makeKey(r)
+    const key = makeKey(r.productName)
+    if (!key) continue
     const arr = map.get(key) ?? []
     arr.push(r)
     map.set(key, arr)
@@ -97,7 +92,8 @@ export function groupResults(results: PharmacyResult[]): GroupedResults {
 
   for (const [key, items] of map.entries()) {
     const uniquePharmacies = new Set(items.map(r => r.pharmacy)).size
-    if (key.startsWith('__solo__') || uniquePharmacies < 2) {
+
+    if (uniquePharmacies < 2) {
       singles.push(...items)
       continue
     }
@@ -107,15 +103,16 @@ export function groupResults(results: PharmacyResult[]): GroupedResults {
     const prices = avail.map(r => r.price)
     const min    = prices.length ? Math.min(...prices) : sorted[0].price
     const max    = prices.length ? Math.max(...prices) : sorted[0].price
-    const brand  = extractBrand(items[0].productName, items[0].activeIngredient)
+
+    // Pick the richest representative for display fields
+    const rep = items.find(r => r.activeIngredient) ?? items[0]
 
     comparisons.push({
       key,
-      activeIngredient: items[0].activeIngredient,
-      concentration:    items[0].concentration,
-      presentation:     items[0].presentation,
-      quantity:         items[0].quantity,
-      brand,
+      activeIngredient: rep.activeIngredient,
+      concentration:    rep.concentration,
+      presentation:     rep.presentation,
+      quantity:         rep.quantity,
       imageUrl:         items.find(r => r.imageUrl)?.imageUrl,
       results:          sorted,
       minPrice:         min,

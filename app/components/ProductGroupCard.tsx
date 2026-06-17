@@ -53,26 +53,24 @@ export function ProductGroupCard({ group }: Props) {
       <div className="flex flex-col gap-3 p-4 flex-1">
 
         {/* Product info header */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-              results[0]?.type === 'generic'
-                ? 'bg-secondary/10 text-secondary border border-secondary/20'
-                : 'bg-primary/10 text-primary border border-primary/20'
-            }`}>
-              {results[0]?.type === 'generic' ? 'Generico' : 'Marca'}
-            </span>
-            {group.brand && (
-              <span className="text-[10px] font-bold uppercase tracking-wide text-[#717786]">
-                {group.brand}
-              </span>
-            )}
-          </div>
+        <div className="flex items-start gap-2 flex-wrap">
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+            results[0]?.type === 'generic'
+              ? 'bg-secondary/10 text-secondary border border-secondary/20'
+              : 'bg-primary/10 text-primary border border-primary/20'
+          }`}>
+            {results[0]?.type === 'generic' ? 'Generico' : 'Marca'}
+          </span>
           <p className="text-[11px] font-medium text-[#414755] leading-snug">
-            {group.activeIngredient}{group.concentration ? ` ${group.concentration}` : ''}
-            {group.presentation && (
-              <><span className="text-[#c1c6d7] mx-1">&bull;</span>{group.quantity} {group.presentation}s</>
-            )}
+            {group.activeIngredient
+              ? <>
+                  {group.activeIngredient}{group.concentration ? ` ${group.concentration}` : ''}
+                  {group.presentation && (
+                    <><span className="text-[#c1c6d7] mx-1">&bull;</span>{group.quantity} {group.presentation}s</>
+                  )}
+                </>
+              : results[0]?.productName
+            }
           </p>
         </div>
 
