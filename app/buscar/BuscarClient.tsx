@@ -8,10 +8,13 @@ import { getMedicationHistory } from '@/app/utils/priceHistory'
 import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
+import { ProductGroupCard } from '@/app/components/ProductGroupCard'
 import { PriceChart } from '@/app/components/PriceChart'
 import { PriceHistoryChart } from '@/app/components/PriceHistoryChart'
+import { groupResults } from '@/app/utils/groupResults'
 
 type TypeFilter = 'all' | MedicationType
+type ViewMode   = 'grouped' | 'all'
 
 const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
   { value: 'all',     label: 'Todos' },
@@ -30,6 +33,9 @@ export default function BuscarClient() {
   const [sortKey,        setSortKey]        = useState<SortKey>('price-asc')
   const [typeFilter,     setTypeFilter]     = useState<TypeFilter>('all')
   const [concFilter,     setConcFilter]     = useState<string>('')
+  const [presentFilter,  setPresentFilter]  = useState<string>('')
+  const [qtyFilter,      setQtyFilter]      = useState<number | null>(null)
+  const [viewMode,       setViewMode]       = useState<ViewMode>('grouped')
 
   useEffect(() => {
     if (!q.trim()) {
@@ -40,6 +46,9 @@ export default function BuscarClient() {
     setLoading(true)
     setTypeFilter('all')
     setConcFilter('')
+    setPresentFilter('')
+    setQtyFilter(null)
+    setViewMode('grouped')
     const controller = new AbortController()
     fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
       .then((r) => r.json())
@@ -56,24 +65,21 @@ export default function BuscarClient() {
     return () => controller.abort()
   }, [q])
 
-  // Unique concentrations from the current results (sorted by count desc)
-  const concentrations: string[] = (() => {
-    const counts: Record<string, number> = {}
-    for (const r of results) {
-      if (r.concentration) counts[r.concentration] = (counts[r.concentration] ?? 0) + 1
-    }
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([c]) => c)
-  })()
+  // Unique filter options (sorted by frequency)
+  function topValues<T extends string | number>(arr: T[]): T[] {
+    const counts = new Map<T, number>()
+    for (const v of arr) counts.set(v, (counts.get(v) ?? 0) + 1)
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([v]) => v)
+  }
 
-  const byType = typeFilter === 'all'
-    ? results
-    : results.filter((r) => r.type === typeFilter)
+  const concentrations = topValues(results.map(r => r.concentration).filter(Boolean))
+  const presentations  = topValues(results.map(r => r.presentation).filter(Boolean))
+  const quantities     = topValues(results.map(r => r.quantity).filter(q => q > 1)) as number[]
 
-  const filtered = concFilter
-    ? byType.filter((r) => r.concentration === concFilter)
-    : byType
+  const byType    = typeFilter === 'all' ? results : results.filter(r => r.type === typeFilter)
+  const byConc    = concFilter    ? byType.filter(r => r.concentration === concFilter) : byType
+  const byPresent = presentFilter ? byConc.filter(r => r.presentation === presentFilter) : byConc
+  const filtered  = qtyFilter     ? byPresent.filter(r => r.quantity === qtyFilter) : byPresent
 
   const availableFiltered = filtered.filter((r) => r.availability !== 'unavailable')
   const minPrice = availableFiltered.length > 0
@@ -83,6 +89,7 @@ export default function BuscarClient() {
     ? Math.max(...availableFiltered.map((r) => r.price))
     : null
   const sorted = sortResults(filtered, sortKey)
+  const groups = groupResults(filtered)
 
   const genericCount = results.filter((r) => r.type === 'generic').length
   const brandCount   = results.filter((r) => r.type === 'brand').length
@@ -215,64 +222,73 @@ export default function BuscarClient() {
               </div>
             </div>
 
-            {/* Concentration filter chips */}
-            {concentrations.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 mt-4">
-                <button
-                  onClick={() => setConcFilter('')}
-                  className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
-                    concFilter === ''
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-white/60 text-[#414755] border-[#c1c6d7]/60 hover:border-primary/40'
-                  }`}
-                >
-                  Todas
-                </button>
-                {concentrations.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setConcFilter(concFilter === c ? '' : c)}
-                    className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer whitespace-nowrap ${
-                      concFilter === c
-                        ? 'bg-primary text-white border-primary'
-                        : 'bg-white/60 text-[#414755] border-[#c1c6d7]/60 hover:border-primary/40'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Resultados + ordenar (fila compacta) */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <p className="text-[13px] text-[#717786]">
-                <span className="font-semibold text-[#1a1b1f]">{filtered.length}</span>{' '}
-                resultado{filtered.length !== 1 ? 's' : ''}
-                {typeFilter !== 'all' && (
-                  <span className="text-[#9ca3af]">
-                    {' '}&middot; {typeFilter === 'generic' ? 'genéricos' : 'de marca'}
-                  </span>
-                )}
-              </p>
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="sort"
-                  className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap"
-                >
-                  Ordenar
-                </label>
-                <select
-                  id="sort"
-                  value={sortKey}
-                  onChange={(e) => setSortKey(e.target.value as SortKey)}
-                  className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+            {/* ── Filter chips ── */}
+            <div className="mt-4 flex flex-col gap-2">
+              {concentrations.length > 1 && (
+                <FilterRow label="Concentracion">
+                  <Chip active={concFilter === ''} onClick={() => setConcFilter('')}>Todas</Chip>
+                  {concentrations.map(c => (
+                    <Chip key={c} active={concFilter === c} onClick={() => setConcFilter(concFilter === c ? '' : c)}>{c}</Chip>
                   ))}
-                </select>
+                </FilterRow>
+              )}
+              {presentations.length > 1 && (
+                <FilterRow label="Tipo">
+                  <Chip active={presentFilter === ''} onClick={() => setPresentFilter('')}>Todos</Chip>
+                  {presentations.map(p => (
+                    <Chip key={p} active={presentFilter === p} onClick={() => setPresentFilter(presentFilter === p ? '' : p)}>{p}</Chip>
+                  ))}
+                </FilterRow>
+              )}
+              {quantities.length > 1 && (
+                <FilterRow label="Unidades">
+                  <Chip active={qtyFilter === null} onClick={() => setQtyFilter(null)}>Todas</Chip>
+                  {quantities.map(q => (
+                    <Chip key={q} active={qtyFilter === q} onClick={() => setQtyFilter(qtyFilter === q ? null : q)}>× {q}</Chip>
+                  ))}
+                </FilterRow>
+              )}
+            </div>
+
+            {/* ── Results header: count + view toggle + sort ── */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-3 flex-wrap">
+                <p className="text-[13px] text-[#717786]">
+                  <span className="font-semibold text-[#1a1b1f]">
+                    {viewMode === 'grouped' ? groups.length : filtered.length}
+                  </span>{' '}
+                  {viewMode === 'grouped' ? `producto${groups.length !== 1 ? 's' : ''}` : `resultado${filtered.length !== 1 ? 's' : ''}`}
+                </p>
+                <div className="flex bg-black/[0.05] rounded-lg p-0.5">
+                  <button
+                    onClick={() => setViewMode('grouped')}
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all cursor-pointer ${viewMode === 'grouped' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'}`}
+                  >
+                    Comparar
+                  </button>
+                  <button
+                    onClick={() => setViewMode('all')}
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all cursor-pointer ${viewMode === 'all' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'}`}
+                  >
+                    Todos
+                  </button>
+                </div>
               </div>
+              {viewMode === 'all' && (
+                <div className="flex items-center gap-2">
+                  <label htmlFor="sort" className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap">
+                    Ordenar
+                  </label>
+                  <select
+                    id="sort"
+                    value={sortKey}
+                    onChange={(e) => setSortKey(e.target.value as SortKey)}
+                    className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                  >
+                    {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Precios min / max */}
@@ -295,30 +311,38 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Tarjetas — primero para visibilidad inmediata */}
+            {/* Tarjetas */}
             {filtered.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                {sorted.map((result) => (
-                  <ResultCard
-                    key={result.id}
-                    result={result}
-                    isCheapest={
-                      result.availability !== 'unavailable' &&
-                      result.price === minPrice
-                    }
-                  />
-                ))}
-              </div>
+              viewMode === 'grouped' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                  {groups.map((group) => (
+                    <ProductGroupCard key={group.key} group={group} />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                  {sorted.map((result) => (
+                    <ResultCard
+                      key={result.id}
+                      result={result}
+                      isCheapest={
+                        result.availability !== 'unavailable' &&
+                        result.price === minPrice
+                      }
+                    />
+                  ))}
+                </div>
+              )
             ) : (
               <div className="text-center py-16">
                 <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">
-                  Sin {typeFilter === 'generic' ? 'genéricos' : 'medicamentos de marca'}
+                  Sin resultados para los filtros seleccionados
                 </p>
                 <button
-                  onClick={() => setTypeFilter('all')}
+                  onClick={() => { setTypeFilter('all'); setPresentFilter(''); setQtyFilter(null); setConcFilter('') }}
                   className="text-[13px] text-primary font-semibold hover:opacity-75 transition-opacity cursor-pointer"
                 >
-                  Ver todos los resultados
+                  Limpiar filtros
                 </button>
               </div>
             )}
@@ -341,5 +365,33 @@ export default function BuscarClient() {
         )}
       </section>
     </>
+  )
+}
+
+function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 overflow-x-auto pb-0.5 -mx-1 px-1">
+      <span className="text-[10px] font-bold tracking-widest uppercase text-[#c1c6d7] shrink-0 w-[70px]">
+        {label}
+      </span>
+      <div className="flex gap-1.5 flex-nowrap">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer whitespace-nowrap ${
+        active
+          ? 'bg-primary text-white border-primary'
+          : 'bg-white/60 text-[#414755] border-[#c1c6d7]/60 hover:border-primary/40'
+      }`}
+    >
+      {children}
+    </button>
   )
 }

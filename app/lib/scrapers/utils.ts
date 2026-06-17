@@ -11,14 +11,29 @@ export function extractConcentration(name: string): string {
 }
 
 export function extractPresentation(name: string): string {
-  const forms = [
-    'tabletas', 'capsulas', 'capsula', 'tableta', 'jarabe', 'suspension',
-    'solucion', 'gotas', 'ampolla', 'supositorio', 'crema', 'gel',
-    'pomada', 'spray', 'parche', 'polvo', 'inyectable',
+  // Normalize: remove accents, lowercase
+  const s = name.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, '')
+  // Order matters — more specific first
+  const forms: [string[], string][] = [
+    [['jeringa', 'jeringas', 'pluma', 'pen '],         'Jeringa'],
+    [['inyectable', 'inyeccion', 'ampolla', 'vial'],   'Inyectable'],
+    [['jarabe', 'suspension', 'suspencion'],            'Jarabe'],
+    [['solucion', 'solucion oral'],                    'Solucion'],
+    [['capsula', 'capsulas', 'encapsulado'],            'Capsula'],
+    [['tableta', 'tabletas', 'comprimido', 'tab '],    'Tableta'],
+    [['crema'],                                         'Crema'],
+    [['pomada', 'unguento'],                            'Pomada'],
+    [['gel'],                                           'Gel'],
+    [['spray', 'aerosol', 'inhalador'],                 'Spray'],
+    [['gotas', 'drops'],                                'Gotas'],
+    [['polvo'],                                         'Polvo'],
+    [['supositorio'],                                   'Supositorio'],
+    [['parche'],                                        'Parche'],
+    [['ovulo'],                                         'Ovulo'],
+    [['refrigerado', 'refrigerar'],                     'Refrigerado'],
   ]
-  const lower = name.toLowerCase()
-  for (const form of forms) {
-    if (lower.includes(form)) return form.charAt(0).toUpperCase() + form.slice(1)
+  for (const [keywords, label] of forms) {
+    if (keywords.some(k => s.includes(k))) return label
   }
   return ''
 }
