@@ -9,6 +9,18 @@ def normalize(text: str) -> str:
     return unicodedata.normalize("NFD", text.lower()).encode("ascii", "ignore").decode("ascii")
 
 
+def normalize_concentration(value: str) -> str:
+    """Estandariza concentraciones: '300 MG' -> '300mg', '500,5 Mcg' -> '500.5mcg'."""
+    import re
+    value = value.strip()
+    m = re.search(r'(\d+(?:[.,]\d+)?)\s*(mg|g|ml|mcg|ui|%|ug)', value, re.IGNORECASE)
+    if not m:
+        return value
+    num  = m.group(1).replace(',', '.')
+    unit = m.group(2).lower()
+    return f"{num}{unit}"
+
+
 def _classify(name: str) -> str:
     name_lower = name.lower()
     generic_hints = ["genfar", " mk", "laproff", "procaps", "chalver", "best",
@@ -99,7 +111,9 @@ def _map_item(item: dict, pharmacy_id: str, source_url: str) -> ScrapedProduct |
         flat.get("activeingredient") or flat.get("principioactivo") or
         flat.get("genericname") or ""
     )
-    concentration = flat.get("concentration") or flat.get("concentracion") or ""
+    concentration = normalize_concentration(
+        flat.get("concentration") or flat.get("concentracion") or ""
+    )
     presentation = flat.get("presentation") or flat.get("presentacion") or flat.get("form") or ""
     quantity_raw = flat.get("quantity") or flat.get("cantidad") or flat.get("units") or 1
     try:

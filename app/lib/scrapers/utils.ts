@@ -3,8 +3,11 @@ export function normalize(s: string): string {
 }
 
 export function extractConcentration(name: string): string {
-  const m = name.match(/(\d+(?:[.,]\d+)?\s*(?:mg|g|ml|mcg|ui|%|ug))/i)
-  return m ? m[1].trim() : ''
+  const m = name.match(/(\d+(?:[.,]\d+)?)\s*(mg|g|ml|mcg|ui|%|ug)/i)
+  if (!m) return ''
+  const num  = m[1].replace(',', '.')
+  const unit = m[2].toLowerCase()
+  return `${num}${unit}`
 }
 
 export function extractPresentation(name: string): string {
