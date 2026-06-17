@@ -1,22 +1,34 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { getWishlist, WISHLIST_EVENT } from '@/app/utils/wishlist'
+import { useAuth } from '@/app/context/AuthContext'
+import { getWishlist, WISHLIST_EVENT, getWishlistDB } from '@/app/utils/wishlist'
 
 export function WishlistNav() {
+  const { user } = useAuth()
   const [count, setCount] = useState(0)
+  const userRef = useRef(user)
+  userRef.current = user
 
   useEffect(() => {
-    const update = () => setCount(getWishlist().length)
-    update()
-    window.addEventListener(WISHLIST_EVENT(), update)
-    window.addEventListener('storage', update)
-    return () => {
-      window.removeEventListener(WISHLIST_EVENT(), update)
-      window.removeEventListener('storage', update)
+    async function refresh() {
+      if (userRef.current) {
+        const items = await getWishlistDB()
+        setCount(items.length)
+      } else {
+        setCount(getWishlist().length)
+      }
     }
-  }, [])
+
+    refresh()
+    window.addEventListener(WISHLIST_EVENT(), refresh)
+    window.addEventListener('storage', refresh)
+    return () => {
+      window.removeEventListener(WISHLIST_EVENT(), refresh)
+      window.removeEventListener('storage', refresh)
+    }
+  }, [user])
 
   return (
     <Link

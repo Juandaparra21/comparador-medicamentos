@@ -2,38 +2,65 @@
 
 import { useState, useEffect } from 'react'
 import type { PharmacyResult } from '@/app/types'
-import { addToWishlist, removeFromWishlist, isInWishlist, WISHLIST_EVENT } from '@/app/utils/wishlist'
+import { useAuth } from '@/app/context/AuthContext'
+import {
+  addToWishlist, removeFromWishlist, isInWishlist, WISHLIST_EVENT,
+  addToWishlistDB, removeFromWishlistDB, isInWishlistDB,
+} from '@/app/utils/wishlist'
 
-interface Props {
-  result: PharmacyResult
+function dispatchWishlistEvent() {
+  window.dispatchEvent(new Event(WISHLIST_EVENT()))
 }
 
+interface Props { result: PharmacyResult }
+
 export function WishlistButton({ result }: Props) {
-  const [saved, setSaved] = useState(false)
+  const { user } = useAuth()
+  const [saved,    setSaved]    = useState(false)
+  const [pending,  setPending]  = useState(false)
 
   useEffect(() => {
-    setSaved(isInWishlist(result.id))
-    const sync = () => setSaved(isInWishlist(result.id))
-    window.addEventListener(WISHLIST_EVENT(), sync)
-    return () => window.removeEventListener(WISHLIST_EVENT(), sync)
-  }, [result.id])
+    if (user) {
+      isInWishlistDB(result.id).then(setSaved)
+    } else {
+      setSaved(isInWishlist(result.id))
+      const sync = () => setSaved(isInWishlist(result.id))
+      window.addEventListener(WISHLIST_EVENT(), sync)
+      return () => window.removeEventListener(WISHLIST_EVENT(), sync)
+    }
+  }, [result.id, user])
 
-  function toggle(e: React.MouseEvent) {
+  async function toggle(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    if (saved) {
-      removeFromWishlist(result.id)
+    if (pending) return
+    if (user) {
+      setPending(true)
+      if (saved) {
+        await removeFromWishlistDB(result.id)
+        setSaved(false)
+      } else {
+        await addToWishlistDB(result)
+        setSaved(true)
+      }
+      dispatchWishlistEvent()
+      setPending(false)
     } else {
-      addToWishlist(result)
+      if (saved) {
+        removeFromWishlist(result.id)
+      } else {
+        addToWishlist(result)
+      }
+      setSaved(!saved)
     }
-    setSaved(!saved)
   }
 
   return (
     <button
       onClick={toggle}
+      disabled={pending}
       aria-label={saved ? 'Quitar de lista de deseos' : 'Agregar a lista de deseos'}
-      className={`w-8 h-8 flex items-center justify-center rounded-full transition-all cursor-pointer shrink-0 ${
+      className={`w-8 h-8 flex items-center justify-center rounded-full transition-all cursor-pointer shrink-0 disabled:opacity-50 ${
         saved
           ? 'text-red-500 bg-red-50'
           : 'text-[#c1c6d7] hover:text-red-400 hover:bg-red-50/60'

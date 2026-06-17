@@ -27,5 +27,7 @@ export interface WishlistItem {
   pharmacy: string
   price: number
   type: MedicationType
+  url: string
+  imageUrl?: string
   addedAt: number
 }
