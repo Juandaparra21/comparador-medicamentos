@@ -19,9 +19,10 @@ const Ctx = createContext<AuthCtx | null>(null)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user,    setUser]    = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const sb = getBrowserClient()
 
+  // Only run in the browser — never during SSR pre-rendering
   useEffect(() => {
+    const sb = getBrowserClient()
     sb.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null)
       setLoading(false)
@@ -30,39 +31,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
-  }, [sb])
+  }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await sb.auth.signInWithPassword({ email, password })
+    const { error } = await getBrowserClient().auth.signInWithPassword({ email, password })
     return error ? translateError(error.message) : null
-  }, [sb])
+  }, [])
 
   const signUp = useCallback(async (email: string, password: string, name: string) => {
-    const { error } = await sb.auth.signUp({
+    const { error } = await getBrowserClient().auth.signUp({
       email,
       password,
       options: { data: { full_name: name } },
     })
     return error ? translateError(error.message) : null
-  }, [sb])
+  }, [])
 
   const signOut = useCallback(async () => {
-    await sb.auth.signOut()
-  }, [sb])
+    await getBrowserClient().auth.signOut()
+  }, [])
 
   const signInWithGoogle = useCallback(async () => {
-    await sb.auth.signInWithOAuth({
+    await getBrowserClient().auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${location.origin}/auth/callback` },
     })
-  }, [sb])
+  }, [])
 
   const resetPassword = useCallback(async (email: string) => {
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
+    const { error } = await getBrowserClient().auth.resetPasswordForEmail(email, {
       redirectTo: `${location.origin}/auth/callback?next=/login`,
     })
     return error ? translateError(error.message) : null
-  }, [sb])
+  }, [])
 
   return (
     <Ctx.Provider value={{ user, loading, signIn, signUp, signOut, signInWithGoogle, resetPassword }}>
