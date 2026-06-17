@@ -66,8 +66,10 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
     return `https://www.cruzverde.com.co/buscar?q=${encodeURIComponent(String(hit.productName ?? ''))}`
   }
 
+  // Only mark unavailable when both fields are explicitly false.
+  // undefined means the API didn't tell us — product appeared in search, assume available.
   const availability: ScrapedProduct['availability'] =
-    (hit.homeDelivery || hit.storePickup) ? 'available' : 'unavailable'
+    (hit.homeDelivery === false && hit.storePickup === false) ? 'unavailable' : 'available'
 
   // Cruz Verde search API: hit.image = { disBaseLink, link, alt, title }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

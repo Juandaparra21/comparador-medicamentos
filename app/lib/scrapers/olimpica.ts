@@ -37,8 +37,9 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   const listPrice = Number(offer.ListPrice) || 0
   const refPrice = listPrice > salePrice ? Math.round(listPrice) : undefined
   const discount = refPrice ? Math.round((1 - price / refPrice) * 100) : undefined
-  const availQty = Number(offer.AvailableQuantity) || 0
-  const availability: ScrapedProduct['availability'] = availQty > 0 ? 'available' : 'unavailable'
+  const rawQty = offer.AvailableQuantity
+  const availability: ScrapedProduct['availability'] =
+    rawQty === undefined ? 'available' : Number(rawQty) === 0 ? 'unavailable' : Number(rawQty) < 5 ? 'limited' : 'available'
 
   let quantity = 1
   const qtyRaw = spec(p, 'unit_multiplier')

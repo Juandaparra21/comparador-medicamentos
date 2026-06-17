@@ -222,33 +222,42 @@ export default function BuscarClient() {
               </div>
             </div>
 
-            {/* ── Filter chips ── */}
-            <div className="mt-4 flex flex-col gap-2">
-              {concentrations.length > 1 && (
-                <FilterRow label="Concentracion">
-                  <Chip active={concFilter === ''} onClick={() => setConcFilter('')}>Todas</Chip>
-                  {concentrations.map(c => (
-                    <Chip key={c} active={concFilter === c} onClick={() => setConcFilter(concFilter === c ? '' : c)}>{c}</Chip>
-                  ))}
-                </FilterRow>
-              )}
-              {presentations.length > 1 && (
-                <FilterRow label="Tipo">
-                  <Chip active={presentFilter === ''} onClick={() => setPresentFilter('')}>Todos</Chip>
-                  {presentations.map(p => (
-                    <Chip key={p} active={presentFilter === p} onClick={() => setPresentFilter(presentFilter === p ? '' : p)}>{p}</Chip>
-                  ))}
-                </FilterRow>
-              )}
-              {quantities.length > 1 && (
-                <FilterRow label="Unidades">
-                  <Chip active={qtyFilter === null} onClick={() => setQtyFilter(null)}>Todas</Chip>
-                  {quantities.map(q => (
-                    <Chip key={q} active={qtyFilter === q} onClick={() => setQtyFilter(qtyFilter === q ? null : q)}>× {q}</Chip>
-                  ))}
-                </FilterRow>
-              )}
-            </div>
+            {/* ── Filtros ── */}
+            {(concentrations.length > 1 || presentations.length > 1 || quantities.length > 1) && (
+              <div className="mt-4 bg-white/40 backdrop-blur-sm border border-white/50 rounded-2xl p-4 flex flex-col gap-4">
+                {concentrations.length > 1 && (
+                  <FilterGroup
+                    label="Concentracion"
+                    allLabel="Todas"
+                    active={concFilter}
+                    options={concentrations}
+                    onSelect={(v) => setConcFilter(concFilter === v ? '' : v)}
+                    onClear={() => setConcFilter('')}
+                  />
+                )}
+                {presentations.length > 1 && (
+                  <FilterGroup
+                    label="Presentacion"
+                    allLabel="Todas"
+                    active={presentFilter}
+                    options={presentations}
+                    onSelect={(v) => setPresentFilter(presentFilter === v ? '' : v)}
+                    onClear={() => setPresentFilter('')}
+                  />
+                )}
+                {quantities.length > 1 && (
+                  <FilterGroup
+                    label="Unidades"
+                    allLabel="Todas"
+                    active={qtyFilter !== null ? String(qtyFilter) : ''}
+                    options={quantities.map(String)}
+                    renderLabel={(v) => `× ${v}`}
+                    onSelect={(v) => setQtyFilter(qtyFilter === Number(v) ? null : Number(v))}
+                    onClear={() => setQtyFilter(null)}
+                  />
+                )}
+              </div>
+            )}
 
             {/* ── Results header: count + view toggle + sort ── */}
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
@@ -401,30 +410,45 @@ export default function BuscarClient() {
   )
 }
 
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-0.5 -mx-1 px-1">
-      <span className="text-[10px] font-bold tracking-widest uppercase text-[#c1c6d7] shrink-0 w-[70px]">
-        {label}
-      </span>
-      <div className="flex gap-1.5 flex-nowrap">
-        {children}
-      </div>
-    </div>
-  )
+interface FilterGroupProps {
+  label: string
+  allLabel: string
+  active: string
+  options: string[]
+  renderLabel?: (v: string) => string
+  onSelect: (v: string) => void
+  onClear: () => void
 }
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function FilterGroup({ label, allLabel, active, options, renderLabel, onSelect, onClear }: FilterGroupProps) {
   return (
-    <button
-      onClick={onClick}
-      className={`shrink-0 text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-colors cursor-pointer whitespace-nowrap ${
-        active
-          ? 'bg-primary text-white border-primary'
-          : 'bg-white/60 text-[#414755] border-[#c1c6d7]/60 hover:border-primary/40'
-      }`}
-    >
-      {children}
-    </button>
+    <div>
+      <p className="text-[10px] font-bold tracking-widest uppercase text-[#c1c6d7] mb-2">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          onClick={onClear}
+          className={`text-[12px] font-semibold px-3 py-1.5 rounded-full border transition-all cursor-pointer whitespace-nowrap ${
+            active === ''
+              ? 'bg-primary text-white border-primary shadow-sm shadow-primary/20'
+              : 'bg-white/60 text-[#717786] border-[#e5e7eb] hover:border-primary/30 hover:text-primary'
+          }`}
+        >
+          {allLabel}
+        </button>
+        {options.map(v => (
+          <button
+            key={v}
+            onClick={() => onSelect(v)}
+            className={`text-[12px] font-semibold px-3 py-1.5 rounded-full border transition-all cursor-pointer whitespace-nowrap ${
+              active === v
+                ? 'bg-primary text-white border-primary shadow-sm shadow-primary/20'
+                : 'bg-white/60 text-[#414755] border-[#e5e7eb] hover:border-primary/30 hover:text-primary'
+            }`}
+          >
+            {renderLabel ? renderLabel(v) : v}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }

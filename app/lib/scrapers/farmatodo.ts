@@ -41,10 +41,12 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   let quantity = 1
   try { quantity = parseInt(String(hit.measurePum ?? 1)) || 1 } catch {}
 
-  const withoutStock = Boolean(hit.without_stock ?? true)
+  // without_stock: true = out of stock. If field absent, assume in stock (product appeared in search).
+  const withoutStock = Boolean(hit.without_stock ?? false)
   const stock = parseInt(String(hit.stock ?? 0)) || 0
-  let availability: ScrapedProduct['availability'] = 'unavailable'
-  if (!withoutStock) availability = stock < 5 ? 'limited' : 'available'
+  let availability: ScrapedProduct['availability'] = 'available'
+  if (withoutStock) availability = 'unavailable'
+  else if (stock > 0 && stock < 5) availability = 'limited'
 
   const productId = String(hit.id ?? '')
 
