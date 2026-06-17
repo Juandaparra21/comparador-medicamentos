@@ -1,5 +1,5 @@
 import type { ScrapedProduct } from './types'
-import { extractConcentration, extractPresentation, classify, normalize } from './utils'
+import { extractConcentration, extractPresentation, extractPackQuantity, LIQUID_PRESENTATIONS, classify, normalize } from './utils'
 
 const SEARCH_URL = 'https://www.larebajavirtual.com/api/catalog_system/pub/products/search/'
 const BASE_HEADERS = {
@@ -31,42 +31,51 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   const salePrice = Number(offer.Price) || 0
   if (salePrice <= 0 || salePrice > 5_000_000) return null
 
-  const price = Math.round(salePrice)
+  const price     = Math.round(salePrice)
   const listPrice = Number(offer.ListPrice) || 0
-  const refPrice = listPrice > salePrice ? Math.round(listPrice) : undefined
-  const discount = refPrice ? Math.round((1 - price / refPrice) * 100) : undefined
-  // AvailableQuantity absent means the API didn't report it — product in search results = assume available.
-  const rawQty = offer.AvailableQuantity
+  const refPrice  = listPrice > salePrice ? Math.round(listPrice) : undefined
+  const discount  = refPrice ? Math.round((1 - price / refPrice) * 100) : undefined
+  const rawQty    = offer.AvailableQuantity
   const availability: ScrapedProduct['availability'] =
     rawQty === undefined ? 'available' : Number(rawQty) === 0 ? 'unavailable' : Number(rawQty) < 5 ? 'limited' : 'available'
 
-  const ingredient = spec(p, 'Principio activo') || spec(p, 'Principio Activo') || name.split(/\s/)[0]
+  const ingredient   = spec(p, 'Principio activo') || spec(p, 'Principio Activo') || name.split(/\s/)[0]
   const presentation = spec(p, 'Presentacion') || extractPresentation(name)
 
-  let quantity = 1
-  const qtyStr = spec(p, 'Cantidadunidadesmedida')
-  if (qtyStr) { const n = parseInt(qtyStr); if (n > 0) quantity = n }
+  // For liquids, Cantidadunidadesmedida often holds the ml volume (not unit count).
+  // Use name-based extraction for liquids; the spec field for solids.
+  let quantity: number
+  if (LIQUID_PRESENTATIONS.has(presentation)) {
+    quantity = extractPackQuantity(name, presentation)
+  } else {
+    const qtyStr = spec(p, 'Cantidadunidadesmedida')
+    const specQty = qtyStr ? parseInt(qtyStr) : 0
+    // Only trust spec quantity for solid forms and reasonable values
+    if (specQty >= 2 && specQty <= 1000) {
+      quantity = specQty
+    } else {
+      quantity = extractPackQuantity(name, presentation)
+    }
+  }
 
-  // La Rebaja indica RX con spec; no-RX tiende a ser genérico
   const isRx = spec(p, 'Producto RX').toUpperCase() === 'SI'
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const firstImage = (items[0] as any).images?.[0]?.imageUrl as string | undefined
 
   return {
-    pharmacyId: 'la-rebaja',
-    productName: name,
-    type: classify(!isRx, name),
+    pharmacyId:     'la-rebaja',
+    productName:    name,
+    type:           classify(!isRx, name),
     activeIngredient: ingredient,
-    concentration: extractConcentration(name),
+    concentration:  extractConcentration(name),
     presentation,
-    quantity: Math.max(quantity, 1),
+    quantity:       Math.max(quantity, 1),
     price,
-    pricePerUnit: Math.round(price / Math.max(quantity, 1)),
+    pricePerUnit:   Math.round(price / Math.max(quantity, 1)),
     referencePrice: refPrice,
-    discountPct: discount,
+    discountPct:    discount,
     availability,
-    url: (p.link as string) || `https://www.larebajavirtual.com/${p.linkText ?? ''}/p`,
+    url:      (p.link as string) || `https://www.larebajavirtual.com/${p.linkText ?? ''}/p`,
     imageUrl: firstImage || undefined,
   }
 }
@@ -91,7 +100,7 @@ export async function searchLaRebaja(query: string): Promise<ScrapedProduct[]> {
     console.error('[la-rebaja] Error:', e)
   }
 
-  const q = normalize(query)
+  const q        = normalize(query)
   const filtered = results.filter(r =>
     normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
   )

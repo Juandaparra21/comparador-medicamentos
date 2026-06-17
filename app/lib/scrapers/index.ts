@@ -1,15 +1,17 @@
-import type { PharmacyResult } from '@/app/types'
+﻿import type { PharmacyResult } from '@/app/types'
 import type { ScrapedProduct } from './types'
-import { searchFarmatodo } from './farmatodo'
-import { searchCruzVerde } from './cruz_verde'
-import { searchLaRebaja } from './la_rebaja'
-import { searchOlimpica } from './olimpica'
+import { searchFarmatodo }   from './farmatodo'
+import { searchCruzVerde }   from './cruz_verde'
+import { searchLaRebaja }    from './la_rebaja'
+import { searchOlimpica }    from './olimpica'
+import { searchColsubsidio } from './colsubsidio'
 
 const PHARMACY_NAMES: Record<string, string> = {
-  'farmatodo':  'Farmatodo',
-  'cruz-verde': 'Cruz Verde',
-  'la-rebaja':  'Drogas La Rebaja',
-  'olimpica':   'Olimpica Drogueria',
+  'farmatodo':   'Farmatodo',
+  'cruz-verde':  'Cruz Verde',
+  'la-rebaja':   'Drogas La Rebaja',
+  'olimpica':    'Olimpica Drogueria',
+  'colsubsidio': 'Drogueria Colsubsidio',
 }
 
 function hashId(pharmacyId: string, productName: string): string {
@@ -23,21 +25,21 @@ function hashId(pharmacyId: string, productName: string): string {
 
 function toPharmacyResult(p: ScrapedProduct, index: number): PharmacyResult {
   return {
-    id: `${hashId(p.pharmacyId, p.productName)}-${index}`,
-    pharmacy: PHARMACY_NAMES[p.pharmacyId] ?? p.pharmacyId,
-    productName: p.productName,
-    type: p.type,
+    id:               `${hashId(p.pharmacyId, p.productName)}-${index}`,
+    pharmacy:         PHARMACY_NAMES[p.pharmacyId] ?? p.pharmacyId,
+    productName:      p.productName,
+    type:             p.type,
     activeIngredient: p.activeIngredient,
-    concentration: p.concentration,
-    presentation: p.presentation,
-    quantity: p.quantity,
-    price: p.price,
-    pricePerUnit: p.pricePerUnit,
-    availability: p.availability,
-    url: p.url,
-    discount: p.discountPct,
-    referencePrice: p.referencePrice,
-    imageUrl: p.imageUrl,
+    concentration:    p.concentration,
+    presentation:     p.presentation,
+    quantity:         p.quantity,
+    price:            p.price,
+    pricePerUnit:     p.pricePerUnit,
+    availability:     p.availability,
+    url:              p.url,
+    discount:         p.discountPct,
+    referencePrice:   p.referencePrice,
+    imageUrl:         p.imageUrl,
   }
 }
 
@@ -47,6 +49,7 @@ export async function searchAllPharmacies(query: string): Promise<PharmacyResult
     searchCruzVerde(query),
     searchLaRebaja(query),
     searchOlimpica(query),
+    searchColsubsidio(query),
   ])
 
   const all: PharmacyResult[] = []

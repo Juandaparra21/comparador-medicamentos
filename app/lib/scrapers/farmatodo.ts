@@ -1,33 +1,5 @@
 import type { ScrapedProduct } from './types'
-import { extractConcentration, extractPresentation, classify, normalize } from './utils'
-
-const LIQUID_FORMS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray', 'Solución', 'Suspensión'])
-
-/**
- * Extracts the number of units (tablets/capsules) or volume (ml/g) from a
- * Farmatodo product name. measurePum from Algolia is the *price* per unit of
- * measure (PUM regulation), NOT the pack quantity — do not use it as quantity.
- */
-function extractPackQuantity(name: string, presentation: string): number {
-  if (LIQUID_FORMS.has(presentation)) {
-    // Liquid: extract total volume → "120ML", "120 ML", "60ml"
-    const m = name.match(/\b(\d+)\s*ml\b/i)
-    if (m) return parseInt(m[1])
-    // gram-based: "30G"
-    const g = name.match(/\b(\d+)\s*g\b(?!\s*\/)/i)
-    if (g) return parseInt(g[1])
-    return 1
-  }
-  // Solid: "X 10 TABLETAS", "X 30 CAPSULAS", or just "X 10"
-  const explicit = name.match(/\bx\s*(\d+)\s*(?:tabletas?|capsulas?|comprimidos?|grageas?|ovulos?|supositorios?)/i)
-  if (explicit) return parseInt(explicit[1])
-  const xOnly = name.match(/\bx\s*(\d+)\b/i)
-  if (xOnly) {
-    const n = parseInt(xOnly[1])
-    if (n >= 1 && n <= 500) return n
-  }
-  return 1
-}
+import { extractConcentration, extractPresentation, extractPackQuantity, classify, normalize } from './utils'
 
 const ALGOLIA_URL = 'https://api-search.farmatodo.com/1/indexes/products/query'
 const ALGOLIA_HEADERS = {
@@ -41,13 +13,13 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   const name = (String(hit.description ?? hit.mediaDescription ?? '')).trim()
   if (!name) return null
 
-  const fullPrice = Number(hit.fullPrice) || 0
+  const fullPrice  = Number(hit.fullPrice)  || 0
   const offerPrice = Number(hit.offerPrice) || 0
-
+  // measurePum = precio por unidad de medida (PUM regulation) — NOT pack count
   const price = offerPrice > 0 ? Math.round(offerPrice) : Math.round(fullPrice)
   if (price <= 0 || price > 5_000_000) return null
 
-  const refPrice = fullPrice && Math.round(fullPrice) > price ? Math.round(fullPrice) : undefined
+  const refPrice = fullPrice > 0 && Math.round(fullPrice) > price ? Math.round(fullPrice) : undefined
 
   let discount: number | undefined
   const offerText = String(hit.offerText ?? '')
@@ -56,7 +28,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   if (!discount && refPrice) discount = Math.round((1 - price / refPrice) * 100)
 
   const largDesc = String(hit.large_description ?? '')
-  const supDesc = String(hit.sup_description ?? '')
+  const supDesc  = String(hit.sup_description  ?? '')
 
   let ingredient = ''
   if (largDesc) {
@@ -67,34 +39,32 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   if (!ingredient) ingredient = name.split(/\s/)[0] ?? ''
 
   const presentation = extractPresentation(name)
-  const quantity = extractPackQuantity(name, presentation)
+  const quantity     = extractPackQuantity(name, presentation)
 
-  // without_stock: true = out of stock. If field absent, assume in stock (product appeared in search).
   const withoutStock = Boolean(hit.without_stock ?? false)
-  const stock = parseInt(String(hit.stock ?? 0)) || 0
+  const stock        = parseInt(String(hit.stock ?? 0)) || 0
   let availability: ScrapedProduct['availability'] = 'available'
   if (withoutStock) availability = 'unavailable'
   else if (stock > 0 && stock < 5) availability = 'limited'
 
   const productId = String(hit.id ?? '')
-
-  const imageUrl: string = String(hit.mediaImageUrl ?? hit.imageURL ?? '')
+  const imageUrl  = String(hit.mediaImageUrl ?? hit.imageURL ?? '')
 
   return {
-    pharmacyId: 'farmatodo',
-    productName: name,
-    type: classify(Boolean(hit.isGeneric || hit.generic), name),
+    pharmacyId:     'farmatodo',
+    productName:    name,
+    type:           classify(Boolean(hit.isGeneric || hit.generic), name),
     activeIngredient: ingredient,
-    concentration: extractConcentration(name),
+    concentration:  extractConcentration(name),
     presentation,
-    quantity: Math.max(quantity, 1),
+    quantity:       Math.max(quantity, 1),
     price,
-    pricePerUnit: Math.round(price / Math.max(quantity, 1)),
+    pricePerUnit:   Math.round(price / Math.max(quantity, 1)),
     referencePrice: refPrice,
-    discountPct: discount,
+    discountPct:    discount,
     availability,
-    url: productId ? `https://www.farmatodo.com.co/product/${productId}` : '',
-    imageUrl: imageUrl || undefined,
+    url:       productId ? `https://www.farmatodo.com.co/product/${productId}` : '',
+    imageUrl:  imageUrl || undefined,
   }
 }
 
@@ -111,9 +81,9 @@ export async function searchFarmatodo(query: string): Promise<ScrapedProduct[]> 
     })
     const data = await res.json()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hits = (data.hits ?? []) as Record<string, any>[]
-    const all = hits.flatMap(h => { const p = mapHit(h); return p ? [p] : [] })
-    const q = normalize(query)
+    const hits    = (data.hits ?? []) as Record<string, any>[]
+    const all     = hits.flatMap(h => { const p = mapHit(h); return p ? [p] : [] })
+    const q       = normalize(query)
     const results = all.filter(r =>
       normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
     )
