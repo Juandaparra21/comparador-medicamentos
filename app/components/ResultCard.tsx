@@ -9,6 +9,14 @@ import { WishlistButton } from './WishlistButton'
 import { formatCOP } from '@/app/utils/format'
 import { normalize } from '@/app/utils/search'
 
+const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
+
+function qtyDisplay(quantity: number, presentation: string): string {
+  if (LIQUID_PRESENTATIONS.has(presentation)) return `${quantity}ml`
+  if (!presentation) return `× ${quantity}`
+  return `${quantity} ${presentation}${quantity !== 1 ? 's' : ''}`
+}
+
 const AVAILABILITY_LABEL: Record<PharmacyResult['availability'], string> = {
   available: 'Disponible',
   limited: 'Stock limitado',
@@ -122,7 +130,7 @@ export default function ResultCard({ result, isCheapest }: Props) {
             {result.presentation ? (
               <>
                 <span className="text-[#c1c6d7] mx-1">&bull;</span>
-                {result.quantity} {result.presentation}s
+                {qtyDisplay(result.quantity, result.presentation)}
               </>
             ) : null}
           </p>
@@ -141,7 +149,7 @@ export default function ResultCard({ result, isCheapest }: Props) {
             </span>
           </div>
           <span className="text-[11px] font-semibold text-[#717786] tabular-nums">
-            {formatCOP(result.pricePerUnit)}/und
+            {formatCOP(result.pricePerUnit)}{LIQUID_PRESENTATIONS.has(result.presentation) ? '/ml' : '/und'}
           </span>
         </div>
 

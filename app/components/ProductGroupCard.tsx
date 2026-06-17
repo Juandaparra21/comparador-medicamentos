@@ -9,6 +9,14 @@ import { WishlistButton } from './WishlistButton'
 import { formatCOP } from '@/app/utils/format'
 import { normalize } from '@/app/utils/search'
 
+const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
+
+function qtyDisplay(quantity: number, presentation: string): string {
+  if (LIQUID_PRESENTATIONS.has(presentation)) return `${quantity}ml`
+  if (!presentation) return `× ${quantity}`
+  return `${quantity} ${presentation}${quantity !== 1 ? 's' : ''}`
+}
+
 interface Props { group: ProductGroup }
 
 function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
@@ -66,7 +74,7 @@ export function ProductGroupCard({ group }: Props) {
               ? <>
                   {group.activeIngredient}{group.concentration ? ` ${group.concentration}` : ''}
                   {group.presentation && (
-                    <><span className="text-[#c1c6d7] mx-1">&bull;</span>{group.quantity} {group.presentation}s</>
+                    <><span className="text-[#c1c6d7] mx-1">&bull;</span>{qtyDisplay(group.quantity, group.presentation)}</>
                   )}
                 </>
               : results[0]?.productName

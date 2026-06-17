@@ -1,6 +1,34 @@
 import type { ScrapedProduct } from './types'
 import { extractConcentration, extractPresentation, classify, normalize } from './utils'
 
+const LIQUID_FORMS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray', 'Solución', 'Suspensión'])
+
+/**
+ * Extracts the number of units (tablets/capsules) or volume (ml/g) from a
+ * Farmatodo product name. measurePum from Algolia is the *price* per unit of
+ * measure (PUM regulation), NOT the pack quantity — do not use it as quantity.
+ */
+function extractPackQuantity(name: string, presentation: string): number {
+  if (LIQUID_FORMS.has(presentation)) {
+    // Liquid: extract total volume → "120ML", "120 ML", "60ml"
+    const m = name.match(/\b(\d+)\s*ml\b/i)
+    if (m) return parseInt(m[1])
+    // gram-based: "30G"
+    const g = name.match(/\b(\d+)\s*g\b(?!\s*\/)/i)
+    if (g) return parseInt(g[1])
+    return 1
+  }
+  // Solid: "X 10 TABLETAS", "X 30 CAPSULAS", or just "X 10"
+  const explicit = name.match(/\bx\s*(\d+)\s*(?:tabletas?|capsulas?|comprimidos?|grageas?|ovulos?|supositorios?)/i)
+  if (explicit) return parseInt(explicit[1])
+  const xOnly = name.match(/\bx\s*(\d+)\b/i)
+  if (xOnly) {
+    const n = parseInt(xOnly[1])
+    if (n >= 1 && n <= 500) return n
+  }
+  return 1
+}
+
 const ALGOLIA_URL = 'https://api-search.farmatodo.com/1/indexes/products/query'
 const ALGOLIA_HEADERS = {
   'x-algolia-api-key': 'eb9544fe7bfe7ec4c1aa5e5bf7740feb',
@@ -38,8 +66,8 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   if (!ingredient && supDesc) ingredient = supDesc.split(/\s/)[0]?.trim() ?? ''
   if (!ingredient) ingredient = name.split(/\s/)[0] ?? ''
 
-  let quantity = 1
-  try { quantity = parseInt(String(hit.measurePum ?? 1)) || 1 } catch {}
+  const presentation = extractPresentation(name)
+  const quantity = extractPackQuantity(name, presentation)
 
   // without_stock: true = out of stock. If field absent, assume in stock (product appeared in search).
   const withoutStock = Boolean(hit.without_stock ?? false)
@@ -58,7 +86,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
     type: classify(Boolean(hit.isGeneric || hit.generic), name),
     activeIngredient: ingredient,
     concentration: extractConcentration(name),
-    presentation: extractPresentation(name),
+    presentation,
     quantity: Math.max(quantity, 1),
     price,
     pricePerUnit: Math.round(price / Math.max(quantity, 1)),
