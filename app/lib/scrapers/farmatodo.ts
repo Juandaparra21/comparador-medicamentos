@@ -39,7 +39,10 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   if (!ingredient) ingredient = name.split(/\s/)[0] ?? ''
 
   const presentation = extractPresentation(name)
-  const quantity     = extractPackQuantity(name, presentation)
+  // measurePum stores the pack unit count (ml for liquids, tablets for solids)
+  // It is more reliable than text extraction from the product name
+  const pumQty       = Number(hit.measurePum) || 0
+  const quantity     = pumQty >= 2 ? pumQty : extractPackQuantity(name, presentation)
 
   const withoutStock = Boolean(hit.without_stock ?? false)
   const stock        = parseInt(String(hit.stock ?? 0)) || 0

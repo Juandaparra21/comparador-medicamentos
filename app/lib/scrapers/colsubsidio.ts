@@ -1,7 +1,7 @@
 import type { ScrapedProduct } from './types'
 import { extractConcentration, extractPresentation, extractPackQuantity, LIQUID_PRESENTATIONS, classify, normalize } from './utils'
 
-const SEARCH_URL = 'https://tienda.colsubsidio.com/api/catalog_system/pub/products/search/'
+const SEARCH_URL = 'https://colsubsidio.myvtex.com/api/catalog_system/pub/products/search/'
 const BASE_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
   'Accept': 'application/json',
@@ -39,20 +39,21 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   const availability: ScrapedProduct['availability'] =
     rawQty === undefined ? 'available' : Number(rawQty) === 0 ? 'unavailable' : Number(rawQty) < 5 ? 'limited' : 'available'
 
-  const ingredient   = spec(p, 'Principio activo') || spec(p, 'Principio Activo') || name.split(/\s/)[0]
-  const presentation = spec(p, 'Presentacion')     || extractPresentation(name)
+  // Colsubsidio myvtex fields use accented field names
+  const ingredient     = spec(p, 'Principio Activo') || name.split(/\s/)[0]
+  const presentation   = extractPresentation(name)
+  // Presentación contains pack description e.g. "BLISTER X 10 TAB", "FRASCO X 120 ML"
+  const specPresent    = spec(p, 'Presentación')
 
   let quantity: number
   if (LIQUID_PRESENTATIONS.has(presentation)) {
-    quantity = extractPackQuantity(name, presentation)
+    // For liquids, look for ml in the name or spec presentation
+    quantity = extractPackQuantity(specPresent || name, presentation)
+    if (quantity <= 1) quantity = extractPackQuantity(name, presentation)
   } else {
-    const qtyStr  = spec(p, 'Cantidadunidadesmedida') || spec(p, 'Cantidad')
-    const specQty = qtyStr ? parseInt(qtyStr) : 0
-    if (specQty >= 2 && specQty <= 1000) {
-      quantity = specQty
-    } else {
-      quantity = extractPackQuantity(name, presentation)
-    }
+    // For solids, extract from the pack description (e.g. "BLISTER X 10 TAB" → 10)
+    const fromSpec = specPresent ? extractPackQuantity(specPresent, presentation) : 0
+    quantity = fromSpec >= 2 ? fromSpec : extractPackQuantity(name, presentation)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,7 +73,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     referencePrice: refPrice,
     discountPct:    discount,
     availability,
-    url:      (p.link as string) || (linkText ? `https://tienda.colsubsidio.com/${linkText}/p` : ''),
+    url:      linkText ? `https://tienda.colsubsidio.com/${linkText}/p` : '',
     imageUrl: firstImage || undefined,
   }
 }

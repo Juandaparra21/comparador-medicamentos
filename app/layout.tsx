@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { AuthProvider } from '@/app/context/AuthContext'
 import { NavAuth } from '@/app/components/NavAuth'
 import { WishlistNav } from '@/app/components/WishlistNav'
+import { CartNav } from '@/app/components/CartNav'
 import './globals.css'
 
 const hanken = Hanken_Grotesk({
@@ -49,6 +50,7 @@ export default function RootLayout({
                   Farmacias de Colombia
                 </span>
                 <NavAuth />
+                <CartNav />
                 <WishlistNav />
               </div>
             </div>

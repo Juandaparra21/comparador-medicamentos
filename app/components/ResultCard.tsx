@@ -6,6 +6,7 @@ import type { PharmacyResult } from '@/app/types'
 import { PharmacyLogo } from './PharmacyLogo'
 import { MedicationImage } from './MedicationImage'
 import { WishlistButton } from './WishlistButton'
+import { CartButton } from './CartButton'
 import { formatCOP } from '@/app/utils/format'
 import { normalize } from '@/app/utils/search'
 
@@ -123,7 +124,10 @@ export default function ResultCard({ result, isCheapest, distanceKm }: Props) {
               {result.productName}
             </p>
           </div>
-          <WishlistButton result={result} />
+          <div className="flex items-center gap-1 shrink-0">
+            <CartButton result={result} />
+            <WishlistButton result={result} />
+          </div>
         </div>
 
         {/* Generic/Brand badge + ingredient */}

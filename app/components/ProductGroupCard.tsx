@@ -6,6 +6,7 @@ import type { ProductGroup } from '@/app/utils/groupResults'
 import { MedicationImage } from './MedicationImage'
 import { PharmacyLogo } from './PharmacyLogo'
 import { WishlistButton } from './WishlistButton'
+import { CartButton } from './CartButton'
 import { formatCOP } from '@/app/utils/format'
 import { normalize } from '@/app/utils/search'
 import type { PharmacyDistances } from '@/app/hooks/useNearbyPharmacies'
@@ -170,7 +171,12 @@ export function ProductGroupCard({ group, distances }: Props) {
               Info
             </Link>
           </div>
-          {cheapest && <WishlistButton result={cheapest} />}
+          {cheapest && (
+            <div className="flex items-center gap-1">
+              <CartButton result={cheapest} />
+              <WishlistButton result={cheapest} />
+            </div>
+          )}
         </div>
 
         {/* CTA — cheapest pharmacy */}

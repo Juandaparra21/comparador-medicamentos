@@ -17,7 +17,7 @@ export function WishlistNav() {
         const items = await getWishlistDB()
         setCount(items.length)
       } else {
-        setCount(getWishlist().length)
+        setCount(0)
       }
     }
 
