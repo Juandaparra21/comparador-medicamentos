@@ -89,7 +89,10 @@ export default function ListaClient() {
     )
   }
 
-  const total = items.reduce((s, i) => s + i.price, 0)
+  const total   = items.reduce((s, i) => s + i.price, 0)
+  const savings = items.reduce((s, i) =>
+    i.referencePrice && i.referencePrice > i.price ? s + (i.referencePrice - i.price) : s, 0
+  )
 
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl pt-8 pb-16">
@@ -208,7 +211,26 @@ export default function ListaClient() {
               <p className="text-[13px] font-semibold text-[#414755]">Total estimado</p>
               <p className="text-[16px] font-bold text-[#1a1b1f] tabular-nums">{formatCOP(total)}</p>
             </div>
-            <p className="text-[10px] text-[#c1c6d7] mt-2">
+
+            {/* Savings callout */}
+            {savings > 0 && (
+              <div className="mt-3 p-3 rounded-xl bg-secondary/10 border border-secondary/20">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <svg className="w-4 h-4 text-secondary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8v1m0 10v1m0-12V4m0 16v-1" />
+                  </svg>
+                  <p className="text-[11px] font-bold text-secondary">Has ahorrado</p>
+                </div>
+                <p className="text-[22px] font-black text-secondary tabular-nums leading-tight">
+                  {formatCOP(savings)}
+                </p>
+                <p className="text-[10px] text-secondary/70 mt-0.5">
+                  al elegir el precio mas bajo frente al precio de referencia
+                </p>
+              </div>
+            )}
+
+            <p className="text-[10px] text-[#c1c6d7] mt-3">
               Los precios pueden variar. Verifica en cada farmacia.
             </p>
           </div>

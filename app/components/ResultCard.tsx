@@ -38,6 +38,11 @@ const AVAILABILITY_TEXT: Record<PharmacyResult['availability'], string> = {
 interface Props {
   result: PharmacyResult
   isCheapest: boolean
+  distanceKm?: number
+}
+
+function formatDist(km: number): string {
+  return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`
 }
 
 function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
@@ -59,7 +64,7 @@ function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredi
   return <MedicationImage ingredient={ingredient} height={80} />
 }
 
-export default function ResultCard({ result, isCheapest }: Props) {
+export default function ResultCard({ result, isCheapest, distanceKm }: Props) {
   const slug = normalize(result.activeIngredient)
 
   function goToPharmacy(e: React.MouseEvent) {
@@ -104,9 +109,16 @@ export default function ResultCard({ result, isCheapest }: Props) {
         <div className="flex items-start gap-2.5">
           <PharmacyLogo name={result.pharmacy} size={32} />
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-[13px] leading-[18px] text-[#1a1b1f] truncate">
-              {result.pharmacy}
-            </p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <p className="font-semibold text-[13px] leading-[18px] text-[#1a1b1f] truncate">
+                {result.pharmacy}
+              </p>
+              {distanceKm !== undefined && (
+                <span className="shrink-0 text-[10px] font-semibold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full leading-none">
+                  {formatDist(distanceKm)}
+                </span>
+              )}
+            </div>
             <p className="text-[11px] text-[#717786] mt-0.5 truncate leading-snug">
               {result.productName}
             </p>

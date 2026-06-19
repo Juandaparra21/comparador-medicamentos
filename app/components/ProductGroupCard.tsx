@@ -8,6 +8,7 @@ import { PharmacyLogo } from './PharmacyLogo'
 import { WishlistButton } from './WishlistButton'
 import { formatCOP } from '@/app/utils/format'
 import { normalize } from '@/app/utils/search'
+import type { PharmacyDistances } from '@/app/hooks/useNearbyPharmacies'
 
 const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
 
@@ -17,7 +18,11 @@ function qtyDisplay(quantity: number, presentation: string): string {
   return `${quantity} ${presentation}${quantity !== 1 ? 's' : ''}`
 }
 
-interface Props { group: ProductGroup }
+function formatDist(km: number): string {
+  return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`
+}
+
+interface Props { group: ProductGroup; distances?: PharmacyDistances }
 
 function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -31,7 +36,7 @@ function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredien
   return <MedicationImage ingredient={ingredient} height={80} />
 }
 
-export function ProductGroupCard({ group }: Props) {
+export function ProductGroupCard({ group, distances }: Props) {
   const { results, minPrice, maxPrice, savings } = group
   const avail    = results.filter(r => r.availability !== 'unavailable')
   const cheapest = avail[0] ?? null
@@ -112,8 +117,13 @@ export function ProductGroupCard({ group }: Props) {
                 className={`flex items-center gap-2 px-2.5 py-2 ${unavail ? 'opacity-40' : isBest ? 'bg-secondary/[0.04]' : ''}`}
               >
                 <PharmacyLogo name={r.pharmacy} size={22} />
-                <span className="text-[11px] font-semibold text-[#414755] flex-1 truncate min-w-0">
+                <span className="text-[11px] font-semibold text-[#414755] flex-1 truncate min-w-0 flex items-center gap-1">
                   {r.pharmacy}
+                  {distances?.[r.pharmacy] !== undefined && (
+                    <span className="shrink-0 text-[9px] font-bold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full leading-none">
+                      {formatDist(distances[r.pharmacy])}
+                    </span>
+                  )}
                 </span>
                 <span className={`text-[12px] font-bold tabular-nums shrink-0 ${isBest ? 'text-secondary' : 'text-[#1a1b1f]'}`}>
                   {formatCOP(r.price)}

@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { PharmacyResult, MedicationType } from '@/app/types'
 import { searchMock, sortResults, SORT_OPTIONS, normalize, type SortKey } from '@/app/utils/search'
+import { useNearbyPharmacies } from '@/app/hooks/useNearbyPharmacies'
+
+// Presentation names that use volume (ml) as quantity unit
+const LIQUID_FILTER_NAMES = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
 import { getMedicationHistory } from '@/app/utils/priceHistory'
 import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
@@ -65,21 +69,42 @@ export default function BuscarClient() {
     return () => controller.abort()
   }, [q])
 
-  // Unique filter options (sorted by frequency)
+  const { distances, loading: locLoading, error: locError, hasDistances, request: requestLoc, clear: clearLoc } = useNearbyPharmacies()
+
+  // Cascading filter options: each layer's options come from results that pass all *other* active filters.
   function topValues<T extends string | number>(arr: T[]): T[] {
     const counts = new Map<T, number>()
     for (const v of arr) counts.set(v, (counts.get(v) ?? 0) + 1)
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([v]) => v)
   }
 
-  const concentrations = topValues(results.map(r => r.concentration).filter(Boolean))
-  const presentations  = topValues(results.map(r => r.presentation).filter(Boolean))
-  const quantities     = topValues(results.map(r => r.quantity).filter(q => q > 1)) as number[]
+  const afterType    = typeFilter === 'all' ? results : results.filter(r => r.type === typeFilter)
+  const presentations = topValues(afterType.map(r => r.presentation).filter(Boolean))
 
-  const byType    = typeFilter === 'all' ? results : results.filter(r => r.type === typeFilter)
-  const byConc    = concFilter    ? byType.filter(r => r.concentration === concFilter) : byType
-  const byPresent = presentFilter ? byConc.filter(r => r.presentation === presentFilter) : byConc
-  const filtered  = qtyFilter     ? byPresent.filter(r => r.quantity === qtyFilter) : byPresent
+  const afterPresent  = presentFilter ? afterType.filter(r => r.presentation === presentFilter) : afterType
+  const concentrations = topValues(afterPresent.map(r => r.concentration).filter(Boolean))
+
+  const afterConc    = concFilter ? afterPresent.filter(r => r.concentration === concFilter) : afterPresent
+  const quantities   = topValues(afterConc.map(r => r.quantity).filter(q => q > 1)) as number[]
+
+  // Is current presentation a liquid? (drives quantity unit label)
+  const isLiquidFilter = LIQUID_FILTER_NAMES.has(presentFilter)
+
+  const byType    = afterType
+  const byPresent = afterPresent
+  const byConc    = afterConc
+  const filtered  = qtyFilter ? byConc.filter(r => r.quantity === qtyFilter) : byConc
+
+  // Setters that auto-reset downstream filters to prevent impossible combinations
+  function changePresentation(v: string) {
+    setPresentFilter(prev => prev === v ? '' : v)
+    setConcFilter('')
+    setQtyFilter(null)
+  }
+  function changeConcentration(v: string) {
+    setConcFilter(prev => prev === v ? '' : v)
+    setQtyFilter(null)
+  }
 
   const availableFiltered = filtered.filter((r) => r.availability !== 'unavailable')
   const minPrice = availableFiltered.length > 0
@@ -88,7 +113,7 @@ export default function BuscarClient() {
   const maxPrice = availableFiltered.length > 0
     ? Math.max(...availableFiltered.map((r) => r.price))
     : null
-  const sorted = sortResults(filtered, sortKey)
+  const sorted = sortResults(filtered, sortKey, distances)
   const { comparisons, singles } = groupResults(filtered)
 
   const genericCount = results.filter((r) => r.type === 'generic').length
@@ -102,8 +127,8 @@ export default function BuscarClient() {
     ? Math.round((1 - minG / minB) * 100)
     : null
 
-  const history = getMedicationHistory(normalize(q))
   const selectedIndex = TYPE_FILTERS.findIndex((f) => f.value === typeFilter)
+  const history = getMedicationHistory(normalize(q))
 
   return (
     <>
@@ -223,35 +248,35 @@ export default function BuscarClient() {
             </div>
 
             {/* ── Filtros ── */}
-            {(concentrations.length > 1 || presentations.length > 1 || quantities.length > 1) && (
+            {(presentations.length > 1 || concentrations.length > 1 || quantities.length > 1) && (
               <div className="mt-4 bg-white/40 backdrop-blur-sm border border-white/50 rounded-2xl p-4 flex flex-col gap-4">
-                {concentrations.length > 1 && (
-                  <FilterGroup
-                    label="Concentracion"
-                    allLabel="Todas"
-                    active={concFilter}
-                    options={concentrations}
-                    onSelect={(v) => setConcFilter(concFilter === v ? '' : v)}
-                    onClear={() => setConcFilter('')}
-                  />
-                )}
                 {presentations.length > 1 && (
                   <FilterGroup
                     label="Presentacion"
                     allLabel="Todas"
                     active={presentFilter}
                     options={presentations}
-                    onSelect={(v) => setPresentFilter(presentFilter === v ? '' : v)}
-                    onClear={() => setPresentFilter('')}
+                    onSelect={changePresentation}
+                    onClear={() => changePresentation('')}
+                  />
+                )}
+                {concentrations.length > 1 && (
+                  <FilterGroup
+                    label="Concentracion"
+                    allLabel="Todas"
+                    active={concFilter}
+                    options={concentrations}
+                    onSelect={changeConcentration}
+                    onClear={() => changeConcentration('')}
                   />
                 )}
                 {quantities.length > 1 && (
                   <FilterGroup
-                    label="Unidades"
-                    allLabel="Todas"
+                    label={isLiquidFilter ? 'Volumen' : 'Unidades'}
+                    allLabel="Todos"
                     active={qtyFilter !== null ? String(qtyFilter) : ''}
                     options={quantities.map(String)}
-                    renderLabel={(v) => `× ${v}`}
+                    renderLabel={(v) => isLiquidFilter ? `${v}ml` : `× ${v}`}
                     onSelect={(v) => setQtyFilter(qtyFilter === Number(v) ? null : Number(v))}
                     onClear={() => setQtyFilter(null)}
                   />
@@ -286,7 +311,23 @@ export default function BuscarClient() {
                   </button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Location button */}
+                <button
+                  onClick={hasDistances ? clearLoc : requestLoc}
+                  disabled={locLoading}
+                  className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-50 ${
+                    hasDistances
+                      ? 'bg-secondary/10 text-secondary border-secondary/30'
+                      : 'bg-white/70 text-[#717786] border-[#c1c6d7]/60 hover:text-primary hover:border-primary/30'
+                  }`}
+                  title={locError ?? undefined}
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                  </svg>
+                  {locLoading ? 'Buscando...' : hasDistances ? 'Ubicacion activa' : 'Mas cercano'}
+                </button>
                 <label htmlFor="sort" className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap">
                   Ordenar
                 </label>
@@ -296,7 +337,9 @@ export default function BuscarClient() {
                   onChange={(e) => setSortKey(e.target.value as SortKey)}
                   className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                 >
-                  {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  {SORT_OPTIONS.filter(o => o.value !== 'nearest' || hasDistances).map((o) =>
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  )}
                 </select>
               </div>
             </div>
@@ -333,7 +376,7 @@ export default function BuscarClient() {
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {comparisons.map((group) => (
-                          <ProductGroupCard key={group.key} group={group} />
+                          <ProductGroupCard key={group.key} group={group} distances={distances} />
                         ))}
                       </div>
                     </div>
@@ -347,14 +390,12 @@ export default function BuscarClient() {
                         </p>
                       )}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {sortResults(singles, sortKey).map((result) => (
+                        {sortResults(singles, sortKey, distances).map((result) => (
                           <ResultCard
                             key={result.id}
                             result={result}
-                            isCheapest={
-                              result.availability !== 'unavailable' &&
-                              result.price === minPrice
-                            }
+                            isCheapest={result.availability !== 'unavailable' && result.price === minPrice}
+                            distanceKm={distances[result.pharmacy]}
                           />
                         ))}
                       </div>
@@ -367,10 +408,8 @@ export default function BuscarClient() {
                     <ResultCard
                       key={result.id}
                       result={result}
-                      isCheapest={
-                        result.availability !== 'unavailable' &&
-                        result.price === minPrice
-                      }
+                      isCheapest={result.availability !== 'unavailable' && result.price === minPrice}
+                      distanceKm={distances[result.pharmacy]}
                     />
                   ))}
                 </div>
@@ -381,7 +420,7 @@ export default function BuscarClient() {
                   Sin resultados para los filtros seleccionados
                 </p>
                 <button
-                  onClick={() => { setTypeFilter('all'); setPresentFilter(''); setQtyFilter(null); setConcFilter('') }}
+                  onClick={() => { setTypeFilter('all'); setPresentFilter(''); setConcFilter(''); setQtyFilter(null) }}
                   className="text-[13px] text-primary font-semibold hover:opacity-75 transition-opacity cursor-pointer"
                 >
                   Limpiar filtros
