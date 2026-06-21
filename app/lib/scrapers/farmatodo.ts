@@ -34,16 +34,15 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   if (!name) return null
 
   const fullPrice  = Number(hit.fullPrice)  || 0
-  const offerPrice = Number(hit.offerPrice) || 0
-  const price    = offerPrice > 0 && offerPrice < fullPrice ? Math.round(offerPrice) : Math.round(fullPrice)
-  const refPrice = offerPrice > 0 && offerPrice < fullPrice && fullPrice > 0 ? Math.round(fullPrice) : undefined
+  // offerPrice in Algolia can be stale (expired promotions) — always use fullPrice
+  // as the primary price to match what the user will actually pay on the site.
+  const price = Math.round(fullPrice)
   if (price <= 0 || price > 5_000_000) return null
 
   let discount: number | undefined
   const offerText = String(hit.offerText ?? '').trim()
   const dm = offerText.match(/(\d+)/)
   if (dm) discount = parseInt(dm[1])
-  if (!discount && refPrice) discount = Math.round((1 - price / refPrice) * 100)
 
   const largDesc = String(hit.large_description ?? '')
   const supDesc  = String(hit.sup_description  ?? '')
@@ -90,7 +89,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
     quantity:         Math.max(quantity, 1),
     price,
     pricePerUnit:     Math.round(price / Math.max(quantity, 1)),
-    referencePrice:   refPrice,
+    referencePrice:   undefined,
     discountPct:      discount,
     availability,
     url:      urlSlug ? `https://www.farmatodo.com.co/producto/${urlSlug}` : '',
