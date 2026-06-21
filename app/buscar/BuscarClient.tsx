@@ -13,9 +13,10 @@ import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
 import { ProductGroupCard } from '@/app/components/ProductGroupCard'
+import { RadioFilter, QuantitySlider } from '@/app/components/FilterControls'
 import { PriceChart } from '@/app/components/PriceChart'
 import { PriceHistoryChart } from '@/app/components/PriceHistoryChart'
-import { groupResults, type GroupedResults } from '@/app/utils/groupResults'
+import { groupResults } from '@/app/utils/groupResults'
 
 type TypeFilter = 'all' | MedicationType
 type ViewMode   = 'grouped' | 'all'
@@ -93,19 +94,22 @@ export default function BuscarClient() {
   // Is current presentation a liquid? (drives quantity unit label)
   const isLiquidFilter = LIQUID_FILTER_NAMES.has(presentFilter)
 
-  const byType    = afterType
-  const byPresent = afterPresent
-  const byConc    = afterConc
-  const filtered  = qtyFilter ? byConc.filter(r => r.quantity === qtyFilter) : byConc
+  // Display order: concentrations ascending by mg, quantities ascending by pack size.
+  // (topValues sorts by frequency, so keep the most-common one to tag it.)
+  const mostCommonConc  = concentrations[0]
+  const concentrationsAsc = [...concentrations].sort((a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0))
+  const quantitiesAsc     = [...quantities].sort((a, b) => a - b)
+
+  const filtered = qtyFilter ? afterConc.filter(r => r.quantity === qtyFilter) : afterConc
 
   // Setters that auto-reset downstream filters to prevent impossible combinations
   function changePresentation(v: string) {
-    setPresentFilter(prev => prev === v ? '' : v)
+    setPresentFilter(v)
     setConcFilter('')
     setQtyFilter(null)
   }
   function changeConcentration(v: string) {
-    setConcFilter(prev => prev === v ? '' : v)
+    setConcFilter(v)
     setQtyFilter(null)
   }
 
@@ -252,37 +256,40 @@ export default function BuscarClient() {
 
             {/* ── Filtros ── */}
             {(presentations.length > 1 || concentrations.length > 1 || quantities.length > 1) && (
-              <div className="mt-4 bg-white/40 backdrop-blur-sm border border-white/50 rounded-2xl p-4 flex flex-col gap-4">
+              <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm divide-y divide-[#f0f1f5]">
                 {presentations.length > 1 && (
-                  <FilterGroup
-                    label="Presentacion"
-                    allLabel="Todas"
-                    active={presentFilter}
-                    options={presentations}
-                    onSelect={changePresentation}
-                    onClear={() => changePresentation('')}
-                  />
+                  <div className="p-5">
+                    <RadioFilter
+                      label="Presentacion"
+                      allLabel="Todas"
+                      active={presentFilter}
+                      options={presentations}
+                      onChange={changePresentation}
+                    />
+                  </div>
                 )}
                 {concentrations.length > 1 && (
-                  <FilterGroup
-                    label="Concentracion"
-                    allLabel="Todas"
-                    active={concFilter}
-                    options={concentrations}
-                    onSelect={changeConcentration}
-                    onClear={() => changeConcentration('')}
-                  />
+                  <div className="p-5">
+                    <RadioFilter
+                      label="Concentracion"
+                      allLabel="Todas"
+                      active={concFilter}
+                      options={concentrationsAsc}
+                      highlight={mostCommonConc}
+                      onChange={changeConcentration}
+                    />
+                  </div>
                 )}
                 {quantities.length > 1 && (
-                  <FilterGroup
-                    label={isLiquidFilter ? 'Volumen' : 'Unidades'}
-                    allLabel="Todos"
-                    active={qtyFilter !== null ? String(qtyFilter) : ''}
-                    options={quantities.map(String)}
-                    renderLabel={(v) => isLiquidFilter ? `${v}ml` : `× ${v}`}
-                    onSelect={(v) => setQtyFilter(qtyFilter === Number(v) ? null : Number(v))}
-                    onClear={() => setQtyFilter(null)}
-                  />
+                  <div className="p-5">
+                    <QuantitySlider
+                      title={isLiquidFilter ? 'Volumen' : 'Cantidad'}
+                      values={quantitiesAsc}
+                      active={qtyFilter}
+                      unitLabel={isLiquidFilter ? 'ml' : 'unidades'}
+                      onChange={setQtyFilter}
+                    />
+                  </div>
                 )}
               </div>
             )}
@@ -466,48 +473,5 @@ export default function BuscarClient() {
         )}
       </section>
     </>
-  )
-}
-
-interface FilterGroupProps {
-  label: string
-  allLabel: string
-  active: string
-  options: string[]
-  renderLabel?: (v: string) => string
-  onSelect: (v: string) => void
-  onClear: () => void
-}
-
-function FilterGroup({ label, allLabel, active, options, renderLabel, onSelect, onClear }: FilterGroupProps) {
-  return (
-    <div>
-      <p className="text-[10px] font-bold tracking-widest uppercase text-[#c1c6d7] mb-2">{label}</p>
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          onClick={onClear}
-          className={`text-[12px] font-semibold px-3 py-1.5 rounded-full border transition-all cursor-pointer whitespace-nowrap ${
-            active === ''
-              ? 'bg-primary text-white border-primary shadow-sm shadow-primary/20'
-              : 'bg-white/60 text-[#717786] border-[#e5e7eb] hover:border-primary/30 hover:text-primary'
-          }`}
-        >
-          {allLabel}
-        </button>
-        {options.map(v => (
-          <button
-            key={v}
-            onClick={() => onSelect(v)}
-            className={`text-[12px] font-semibold px-3 py-1.5 rounded-full border transition-all cursor-pointer whitespace-nowrap ${
-              active === v
-                ? 'bg-primary text-white border-primary shadow-sm shadow-primary/20'
-                : 'bg-white/60 text-[#414755] border-[#e5e7eb] hover:border-primary/30 hover:text-primary'
-            }`}
-          >
-            {renderLabel ? renderLabel(v) : v}
-          </button>
-        ))}
-      </div>
-    </div>
   )
 }
