@@ -34,6 +34,7 @@ export default function BuscarClient() {
 
   const [results,        setResults]        = useState<PharmacyResult[]>([])
   const [loading,        setLoading]        = useState(true)
+  const [fetchedAt,      setFetchedAt]      = useState<string | null>(null)
   const [sortKey,        setSortKey]        = useState<SortKey>('price-asc')
   const [typeFilter,     setTypeFilter]     = useState<TypeFilter>('all')
   const [concFilter,     setConcFilter]     = useState<string>('')
@@ -48,6 +49,7 @@ export default function BuscarClient() {
       return
     }
     setLoading(true)
+    setFetchedAt(null)
     setTypeFilter('all')
     setConcFilter('')
     setPresentFilter('')
@@ -58,6 +60,7 @@ export default function BuscarClient() {
       .then((r) => r.json())
       .then((data) => {
         setResults(data.results ?? [])
+        setFetchedAt(data.fetchedAt ?? null)
         setLoading(false)
       })
       .catch((err) => {
@@ -296,6 +299,11 @@ export default function BuscarClient() {
                     </span>
                   )}
                 </p>
+                {fetchedAt && (
+                  <span className="text-[11px] text-[#c1c6d7]" title="Hora en que se consultaron los precios">
+                    Actualizado {new Date(fetchedAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
                 <div className="flex bg-black/[0.05] rounded-lg p-0.5">
                   <button
                     onClick={() => setViewMode('grouped')}

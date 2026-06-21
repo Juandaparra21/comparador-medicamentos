@@ -8,5 +8,5 @@ export async function GET(req: NextRequest) {
   if (!q.trim()) return NextResponse.json({ results: [] })
 
   const results = await searchAllPharmacies(q.trim())
-  return NextResponse.json({ results, source: 'live' })
+  return NextResponse.json({ results, source: 'live', fetchedAt: new Date().toISOString() })
 }
