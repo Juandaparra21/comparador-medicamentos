@@ -15,16 +15,13 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
 
   const fullPrice  = Number(hit.fullPrice)  || 0
   const offerPrice = Number(hit.offerPrice) || 0
-  const offerText  = String(hit.offerText ?? '').trim()
-
-  // offerPrice with offer=false and no offerText is a "Farmatodo Club" member price,
-  // NOT a public promotional price. Only use offerPrice when there is explicit offer text.
-  const hasPublicOffer = offerText.length > 0 && offerPrice > 0 && offerPrice < fullPrice
-  const price    = hasPublicOffer ? Math.round(offerPrice) : Math.round(fullPrice)
-  const refPrice = hasPublicOffer ? Math.round(fullPrice)  : undefined
+  // offerPrice is the active sale price when set; fullPrice is the regular/list price
+  const price    = offerPrice > 0 && offerPrice < fullPrice ? Math.round(offerPrice) : Math.round(fullPrice)
+  const refPrice = offerPrice > 0 && offerPrice < fullPrice && fullPrice > 0 ? Math.round(fullPrice) : undefined
   if (price <= 0 || price > 5_000_000) return null
 
   let discount: number | undefined
+  const offerText = String(hit.offerText ?? '').trim()
   const dm = offerText.match(/(\d+)/)
   if (dm) discount = parseInt(dm[1])
   if (!discount && refPrice) discount = Math.round((1 - price / refPrice) * 100)
