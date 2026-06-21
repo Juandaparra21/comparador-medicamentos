@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Suggestion } from '@/app/api/suggestions/route'
+import { saveSearchHistory } from '@/app/components/QuickChips'
 
 interface Props {
   initialValue?: string
@@ -66,6 +67,7 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
   function navigate(q: string) {
     setOpen(false)
     setQuery(q)
+    if (q.trim()) saveSearchHistory(q.trim())
     router.push(`/buscar?q=${encodeURIComponent(q)}`)
   }
 
@@ -124,7 +126,12 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
         </div>
         <input
           ref={inputRef}
-          type="text"
+          id="search-input"
+          type="search"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={open}
+          aria-label="Buscar medicamento"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value)

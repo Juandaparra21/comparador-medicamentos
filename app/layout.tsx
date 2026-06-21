@@ -6,6 +6,7 @@ import { NavAuth } from '@/app/components/NavAuth'
 import { WishlistNav } from '@/app/components/WishlistNav'
 import { CartNav } from '@/app/components/CartNav'
 import { MedDisclaimer } from '@/app/components/MedDisclaimer'
+import { ChatAssistant } from '@/app/components/ChatAssistant'
 import './globals.css'
 
 const hanken = Hanken_Grotesk({
@@ -89,6 +90,8 @@ export default function RootLayout({
           <main className="flex-1" id="main-content">
             {children}
           </main>
+
+          <ChatAssistant />
 
           {/* Footer */}
           <footer className="border-t border-[#c1c6d7]/30 py-8 px-4" aria-label="Pie de pagina">
