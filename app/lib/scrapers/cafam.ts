@@ -13,12 +13,16 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   const name = String(p.name ?? '').trim()
   if (!name) return null
 
-  const price     = Number(p.price_amount)         || 0
-  const listPrice = Number(p.regular_price_amount)  || 0
-  if (price <= 0 || price > 5_000_000) return null
+  const catalogPrice = Number(p.price_amount) || 0
+  if (catalogPrice <= 0 || catalogPrice > 5_000_000) return null
 
-  const refPrice = listPrice > price ? Math.round(listPrice) : undefined
-  const discount = refPrice ? Math.round((1 - price / refPrice) * 100) : undefined
+  // Cafam's PrestaShop search API returns the catalog price without applying
+  // the visitor-group reduction (10% off). The product pages show the reduced
+  // price. Apply the factor so our price matches what users actually pay.
+  const CAFAM_GROUP_REDUCTION = 0.9
+  const price    = Math.round(catalogPrice * CAFAM_GROUP_REDUCTION)
+  const refPrice = Math.round(catalogPrice)
+  const discount = 10
 
   const presentation = extractPresentation(name)
   const quantity     = extractPackQuantity(name, presentation)
