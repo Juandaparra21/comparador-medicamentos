@@ -87,7 +87,7 @@ export async function searchOlimpica(query: string): Promise<ScrapedProduct[]> {
   try {
     for (let offset = 0; offset < 100; offset += 50) {
       const params = new URLSearchParams({ ft: query, _from: String(offset), _to: String(offset + 49) })
-      const res = await fetch(`${SEARCH_URL}?${params}`, { headers: BASE_HEADERS })
+      const res = await fetch(`${SEARCH_URL}?${params}`, { headers: BASE_HEADERS, signal: AbortSignal.timeout(7_000) })
       if (res.status !== 200 && res.status !== 206) break
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const products = (await res.json()) as Record<string, any>[]

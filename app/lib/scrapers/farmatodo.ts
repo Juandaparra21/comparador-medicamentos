@@ -85,6 +85,7 @@ export async function searchFarmatodo(query: string): Promise<ScrapedProduct[]> 
         hitsPerPage: 60,
         filters: "categorie:'Salud y medicamentos' OR subCategory:'Drogueria'",
       }),
+      signal: AbortSignal.timeout(7_000),
     })
     const data = await res.json()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

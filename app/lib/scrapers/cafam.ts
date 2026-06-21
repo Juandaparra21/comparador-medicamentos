@@ -52,33 +52,25 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
 export async function searchCafam(query: string): Promise<ScrapedProduct[]> {
   const results: ScrapedProduct[] = []
   try {
-    let page       = 1
-    let totalPages = 1
-    while (page <= totalPages && page <= 4) {
-      const params: Record<string, string> = {
-        controller:     'search',
-        s:              query,
-        ajax:           '1',
-        resultsPerPage: '48',
-      }
-      if (page > 1) params.page = String(page)
+    const params = new URLSearchParams({
+      controller:     'search',
+      s:              query,
+      ajax:           '1',
+      resultsPerPage: '48',
+    })
+    const res = await fetch(`${SEARCH_URL}?${params}`, {
+      headers: HEADERS,
+      signal: AbortSignal.timeout(7_000),
+    })
+    if (!res.ok) return []
 
-      const res = await fetch(`${SEARCH_URL}?${new URLSearchParams(params)}`, { headers: HEADERS })
-      if (!res.ok) break
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = (await res.json()) as Record<string, any>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const products = (data.products ?? []) as Record<string, any>[]
-      if (!products.length) break
-
-      for (const p of products) {
-        const product = mapProduct(p)
-        if (product) results.push(product)
-      }
-
-      totalPages = Number(data.pagination?.pages_count) || 1
-      page++
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (await res.json()) as Record<string, any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const products = (data.products ?? []) as Record<string, any>[]
+    for (const p of products) {
+      const product = mapProduct(p)
+      if (product) results.push(product)
     }
   } catch (e) {
     console.error('[cafam] Error:', e)

@@ -11,11 +11,18 @@ const BASE_HEADERS = {
   'Accept': 'application/json, text/plain, */*',
 }
 
+// Cookie cache — persists within a serverless instance (best-effort)
+let _cachedCookie = ''
+let _cookieExpiry = 0
+
 async function getSessionCookie(): Promise<string> {
+  if (_cachedCookie && Date.now() < _cookieExpiry) return _cachedCookie
+
   const res = await fetch(LOGIN_URL, {
     method: 'POST',
     headers: { ...BASE_HEADERS, 'Content-Type': 'application/json' },
     body: '{}',
+    signal: AbortSignal.timeout(7_000),
   })
   // Node 18+ with undici supports getSetCookie(); fallback to get()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +30,11 @@ async function getSessionCookie(): Promise<string> {
   const setCookies: string[] = typeof h.getSetCookie === 'function'
     ? h.getSetCookie()
     : [res.headers.get('set-cookie') ?? ''].filter(Boolean)
-  return setCookies.map(c => c.split(';')[0]).join('; ')
+  const cookie = setCookies.map(c => c.split(';')[0]).join('; ')
+
+  _cachedCookie = cookie
+  _cookieExpiry = Date.now() + 5 * 60 * 1000 // cache for 5 minutes
+  return cookie
 }
 
 function extractIngredient(name: string, brand: string): string {
@@ -59,19 +70,15 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   const rawSlug = String(hit.pageURL ?? '')
   const productId = String(hit.productId ?? '')
 
-  // Cruz Verde SFCC URL format: /{slug}/{productId}.html
   function buildCruzVerdeUrl(slug: string, id: string): string {
     if (slug && id) return `https://www.cruzverde.com.co/${slug}/${id}.html`
     if (slug) return `https://www.cruzverde.com.co/${slug}.html`
     return `https://www.cruzverde.com.co/buscar?q=${encodeURIComponent(String(hit.productName ?? ''))}`
   }
 
-  // Only mark unavailable when both fields are explicitly false.
-  // undefined means the API didn't tell us — product appeared in search, assume available.
   const availability: ScrapedProduct['availability'] =
     (hit.homeDelivery === false && hit.storePickup === false) ? 'unavailable' : 'available'
 
-  // Cruz Verde search API: hit.image = { disBaseLink, link, alt, title }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const imgObj = (hit.image ?? {}) as Record<string, any>
   const imageUrl: string = String(imgObj.disBaseLink ?? imgObj.link ?? '')
@@ -100,6 +107,7 @@ export async function searchCruzVerde(query: string): Promise<ScrapedProduct[]> 
     const params = new URLSearchParams({ limit: '60', offset: '0', sort: '', q: query })
     const res = await fetch(`${SEARCH_URL}?${params}`, {
       headers: { ...BASE_HEADERS, Cookie: cookie },
+      signal: AbortSignal.timeout(7_000),
     })
     if (!res.ok) return []
     const data = await res.json()
