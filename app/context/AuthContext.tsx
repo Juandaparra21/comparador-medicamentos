@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         emailRedirectTo: `${location.origin}/auth/callback`,
       },
     })
+    if (error) console.error('[signUp] Supabase error:', error.message, error)
     return error ? translateError(error.message) : null
   }, [])
 
@@ -94,6 +95,12 @@ function translateError(msg: string): string {
   if (msg.includes('Email not confirmed'))       return 'Confirma tu correo antes de ingresar.'
   if (msg.includes('User already registered'))   return 'Ya existe una cuenta con ese correo.'
   if (msg.includes('Password should be'))        return 'La contrasena debe tener al menos 6 caracteres.'
-  if (msg.includes('rate limit'))                return 'Demasiados intentos. Espera unos minutos.'
-  return 'Ocurrio un error. Intenta de nuevo.'
+  if (msg.includes('rate limit') || msg.includes('over_email_send_rate_limit'))
+    return 'Demasiados intentos. Espera unos minutos.'
+  if (msg.includes('signup_disabled'))           return 'El registro de nuevas cuentas esta desactivado temporalmente.'
+  if (msg.includes('Database error'))            return 'Error interno. Intenta de nuevo en unos minutos.'
+  if (msg.includes('invalid format'))            return 'El formato del correo no es valido.'
+  if (msg.includes('network') || msg.includes('fetch'))
+    return 'Error de conexion. Verifica tu internet.'
+  return `Ocurrio un error. Intenta de nuevo. (${msg})`
 }

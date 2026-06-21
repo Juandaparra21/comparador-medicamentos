@@ -20,15 +20,43 @@ function CallbackInner() {
   useEffect(() => {
     const code = params.get('code')
     const next = params.get('next') ?? '/'
+    const sb = getBrowserClient()
 
     async function exchange() {
       if (code) {
-        // exchangeCodeForSession using the browser client stores the session
-        // in localStorage so the AuthProvider picks it up immediately.
-        const { error } = await getBrowserClient().auth.exchangeCodeForSession(code)
-        if (error) console.error('[auth/callback]', error.message)
+        // PKCE flow: Supabase redirects with ?code=xxx
+        const { error } = await sb.auth.exchangeCodeForSession(code)
+        if (error) console.error('[auth/callback] exchangeCodeForSession:', error.message)
+        router.replace(next)
+        return
       }
-      router.replace(next)
+
+      // Implicit flow fallback: tokens are in the URL hash (#access_token=...).
+      // The Supabase client detects these automatically when getSession() is called.
+      const { data: { session } } = await sb.auth.getSession()
+      if (session) {
+        router.replace(next)
+        return
+      }
+
+      // Wait up to 3 s for onAuthStateChange to fire (hash tokens race with render)
+      let done = false
+      const { data: { subscription } } = sb.auth.onAuthStateChange((event, s) => {
+        if (done) return
+        if (event === 'SIGNED_IN' || s) {
+          done = true
+          subscription.unsubscribe()
+          router.replace(next)
+        }
+      })
+
+      setTimeout(() => {
+        if (!done) {
+          done = true
+          subscription.unsubscribe()
+          router.replace(next)
+        }
+      }, 3_000)
     }
 
     exchange()

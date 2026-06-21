@@ -4,7 +4,9 @@ import { SUPABASE_URL, SUPABASE_ANON } from './config'
 let client: SupabaseClient | null = null
 
 export function getBrowserClient(): SupabaseClient {
-  if (!client) client = createClient(SUPABASE_URL, SUPABASE_ANON)
+  if (!client) client = createClient(SUPABASE_URL, SUPABASE_ANON, {
+    auth: { flowType: 'pkce' },
+  })
   return client
 }
 
