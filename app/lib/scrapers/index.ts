@@ -5,6 +5,7 @@ import { searchCruzVerde }   from './cruz_verde'
 import { searchLaRebaja }    from './la_rebaja'
 import { searchOlimpica }    from './olimpica'
 import { searchColsubsidio } from './colsubsidio'
+import { searchCafam }       from './cafam'
 
 const PHARMACY_NAMES: Record<string, string> = {
   'farmatodo':   'Farmatodo',
@@ -12,6 +13,7 @@ const PHARMACY_NAMES: Record<string, string> = {
   'la-rebaja':   'Drogas La Rebaja',
   'olimpica':    'Olimpica Drogueria',
   'colsubsidio': 'Drogueria Colsubsidio',
+  'cafam':       'Cafam',
 }
 
 function hashId(pharmacyId: string, productName: string): string {
@@ -50,6 +52,7 @@ export async function searchAllPharmacies(query: string): Promise<PharmacyResult
     searchLaRebaja(query),
     searchOlimpica(query),
     searchColsubsidio(query),
+    searchCafam(query),
   ])
 
   const all: PharmacyResult[] = []
