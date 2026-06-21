@@ -73,7 +73,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     referencePrice: refPrice,
     discountPct:    discount,
     availability,
-    url:      linkText ? `https://tienda.colsubsidio.com/${linkText}/p` : '',
+    url:      linkText ? `https://www.drogueriascolsubsidio.com/${linkText}/p` : '',
     imageUrl: firstImage || undefined,
   }
 }
