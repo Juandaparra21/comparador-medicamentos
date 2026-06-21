@@ -76,6 +76,19 @@ export interface GroupedResults {
   singles: PharmacyResult[]
 }
 
+function deduplicateByPharmacy(items: PharmacyResult[]): PharmacyResult[] {
+  // When the same pharmacy has multiple products mapping to the same group key,
+  // keep the one that appears first in the input (higher Algolia relevance rank).
+  // Showing multiple entries from the same pharmacy is confusing and can include
+  // stale Algolia catalog entries.
+  const seen = new Set<string>()
+  return items.filter(r => {
+    if (seen.has(r.pharmacy)) return false
+    seen.add(r.pharmacy)
+    return true
+  })
+}
+
 export function groupResults(results: PharmacyResult[]): GroupedResults {
   const map = new Map<string, PharmacyResult[]>()
 
@@ -91,21 +104,23 @@ export function groupResults(results: PharmacyResult[]): GroupedResults {
   const singles: PharmacyResult[]   = []
 
   for (const [key, items] of map.entries()) {
-    const uniquePharmacies = new Set(items.map(r => r.pharmacy)).size
+    // Deduplicate: one result per pharmacy per group
+    const deduped = deduplicateByPharmacy(items)
+    const uniquePharmacies = deduped.length
 
     if (uniquePharmacies < 2) {
-      singles.push(...items)
+      singles.push(...deduped)
       continue
     }
 
-    const sorted = sortItems(items)
+    const sorted = sortItems(deduped)
     const avail  = sorted.filter(r => r.availability !== 'unavailable')
     const prices = avail.map(r => r.price)
     const min    = prices.length ? Math.min(...prices) : sorted[0].price
     const max    = prices.length ? Math.max(...prices) : sorted[0].price
 
     // Pick the richest representative for display fields
-    const rep = items.find(r => r.activeIngredient) ?? items[0]
+    const rep = deduped.find(r => r.activeIngredient) ?? deduped[0]
 
     comparisons.push({
       key,
@@ -113,7 +128,7 @@ export function groupResults(results: PharmacyResult[]): GroupedResults {
       concentration:    rep.concentration,
       presentation:     rep.presentation,
       quantity:         rep.quantity,
-      imageUrl:         items.find(r => r.imageUrl)?.imageUrl,
+      imageUrl:         deduped.find(r => r.imageUrl)?.imageUrl,
       results:          sorted,
       minPrice:         min,
       maxPrice:         max,

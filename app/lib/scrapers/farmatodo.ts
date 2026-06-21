@@ -1,5 +1,5 @@
 import type { ScrapedProduct } from './types'
-import { extractConcentration, extractPresentation, extractPackQuantity, classify, normalize } from './utils'
+import { extractConcentration, extractPresentation, extractPackQuantity, LIQUID_PRESENTATIONS, classify, normalize } from './utils'
 
 const ALGOLIA_URL = 'https://api-search.farmatodo.com/1/indexes/products/query'
 const ALGOLIA_HEADERS = {
@@ -41,10 +41,15 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   if (!ingredient) ingredient = name.split(/\s/)[0] ?? ''
 
   const presentation = extractPresentation(name)
-  // measurePum stores the pack unit count (ml for liquids, tablets for solids)
-  // It is more reliable than text extraction from the product name
-  const pumQty       = Number(hit.measurePum) || 0
-  const quantity     = pumQty >= 2 ? pumQty : extractPackQuantity(name, presentation)
+  // measurePum stores the pack unit count (ml for liquids, tablets for solids).
+  // Colombian law (Circular 04/2018) requires pharmacies to report PUM for all
+  // current products. Solid products missing measurePum are stale catalog entries
+  // that may have broken URLs — filter them out.
+  const pumQty = Number(hit.measurePum) || 0
+  if (hit.measurePum == null && !LIQUID_PRESENTATIONS.has(presentation) && presentation !== '') {
+    return null
+  }
+  const quantity = pumQty >= 2 ? pumQty : extractPackQuantity(name, presentation)
 
   const withoutStock = Boolean(hit.without_stock ?? false)
   const stock        = parseInt(String(hit.stock ?? 0)) || 0
