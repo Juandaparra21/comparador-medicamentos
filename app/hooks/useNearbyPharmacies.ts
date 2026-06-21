@@ -1,8 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 
 export type PharmacyDistances = Record<string, number> // pharmacy display name → km
+
+// Nearest branch of a chain: distance plus the coordinates needed for directions.
+export interface NearestStore {
+  lat: number
+  lng: number
+  km:  number
+}
+export type PharmacyStores = Record<string, NearestStore> // pharmacy display name → nearest branch
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371
@@ -24,7 +32,7 @@ const PHARMACY_PATTERNS: Array<[RegExp, string]> = [
   [/colsubsidio/i,          'Drogueria Colsubsidio'],
 ]
 
-async function fetchNearestStores(lat: number, lng: number): Promise<PharmacyDistances> {
+async function fetchNearestStores(lat: number, lng: number): Promise<PharmacyStores> {
   const overpassQuery = `[out:json][timeout:15];
 (
   node["amenity"="pharmacy"](around:20000,${lat},${lng});
@@ -40,7 +48,7 @@ out center;`
 
   if (!res.ok) throw new Error(`Overpass error ${res.status}`)
   const data = await res.json()
-  const distances: PharmacyDistances = {}
+  const stores: PharmacyStores = {}
 
   for (const el of (data.elements ?? [])) {
     const name = String(el.tags?.name ?? el.tags?.brand ?? '').trim()
@@ -51,21 +59,21 @@ out center;`
     for (const [pattern, pharmacyName] of PHARMACY_PATTERNS) {
       if (pattern.test(name)) {
         const d = haversineKm(lat, lng, eLat, eLng)
-        if (!(pharmacyName in distances) || d < distances[pharmacyName]) {
-          distances[pharmacyName] = d
+        if (!(pharmacyName in stores) || d < stores[pharmacyName].km) {
+          stores[pharmacyName] = { lat: eLat, lng: eLng, km: d }
         }
       }
     }
   }
 
-  return distances
+  return stores
 }
 
 export function useNearbyPharmacies() {
-  const [position,  setPosition]  = useState<{ lat: number; lng: number } | null>(null)
-  const [distances, setDistances] = useState<PharmacyDistances>({})
-  const [loading,   setLoading]   = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null)
+  const [stores,   setStores]   = useState<PharmacyStores>({})
+  const [loading,  setLoading]  = useState(false)
+  const [error,    setError]    = useState<string | null>(null)
 
   async function request() {
     if (!navigator?.geolocation) {
@@ -80,8 +88,11 @@ export function useNearbyPharmacies() {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         setPosition(coords)
         try {
-          const d = await fetchNearestStores(coords.lat, coords.lng)
-          setDistances(d)
+          const s = await fetchNearestStores(coords.lat, coords.lng)
+          if (Object.keys(s).length === 0) {
+            setError('No encontramos farmacias conocidas cerca de ti')
+          }
+          setStores(s)
         } catch {
           setError('No se pudo obtener distancias a farmacias')
         }
@@ -97,11 +108,17 @@ export function useNearbyPharmacies() {
 
   function clear() {
     setPosition(null)
-    setDistances({})
+    setStores({})
     setError(null)
   }
 
-  const hasDistances = Object.keys(distances).length > 0
+  // Derived map (pharmacy → km) kept for sorting and existing callers.
+  const distances = useMemo<PharmacyDistances>(
+    () => Object.fromEntries(Object.entries(stores).map(([k, v]) => [k, v.km])),
+    [stores],
+  )
 
-  return { position, distances, loading, error, hasDistances, request, clear }
+  const hasDistances = Object.keys(stores).length > 0
+
+  return { position, distances, stores, loading, error, hasDistances, request, clear }
 }

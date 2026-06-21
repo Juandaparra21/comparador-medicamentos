@@ -9,7 +9,8 @@ import { WishlistButton } from './WishlistButton'
 import { CartButton } from './CartButton'
 import { formatCOP } from '@/app/utils/format'
 import { normalize } from '@/app/utils/search'
-import type { PharmacyDistances } from '@/app/hooks/useNearbyPharmacies'
+import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
+import type { PharmacyDistances, PharmacyStores } from '@/app/hooks/useNearbyPharmacies'
 
 const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
 
@@ -19,11 +20,7 @@ function qtyDisplay(quantity: number, presentation: string): string {
   return `${quantity} ${presentation}${quantity !== 1 ? 's' : ''}`
 }
 
-function formatDist(km: number): string {
-  return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`
-}
-
-interface Props { group: ProductGroup; distances?: PharmacyDistances }
+interface Props { group: ProductGroup; distances?: PharmacyDistances; stores?: PharmacyStores }
 
 function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -37,7 +34,7 @@ function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredien
   return <MedicationImage ingredient={ingredient} height={80} />
 }
 
-export function ProductGroupCard({ group, distances }: Props) {
+export function ProductGroupCard({ group, distances, stores }: Props) {
   const { results, minPrice, maxPrice, savings } = group
   const avail    = results.filter(r => r.availability !== 'unavailable')
   const cheapest = avail[0] ?? null
@@ -121,9 +118,21 @@ export function ProductGroupCard({ group, distances }: Props) {
                 <span className="text-[11px] font-semibold text-[#414755] flex-1 truncate min-w-0 flex items-center gap-1">
                   {r.pharmacy}
                   {distances?.[r.pharmacy] !== undefined && (
-                    <span className="shrink-0 text-[9px] font-bold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full leading-none">
-                      {formatDist(distances[r.pharmacy])}
-                    </span>
+                    stores?.[r.pharmacy] ? (
+                      <a
+                        href={directionsUrl(stores[r.pharmacy].lat, stores[r.pharmacy].lng)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Cómo llegar · ${formatTrip(distances[r.pharmacy])}`}
+                        className="shrink-0 text-[9px] font-bold text-secondary bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 px-1.5 py-0.5 rounded-full leading-none transition-colors"
+                      >
+                        {formatDistance(distances[r.pharmacy])} · {formatTripShort(distances[r.pharmacy])}
+                      </a>
+                    ) : (
+                      <span className="shrink-0 text-[9px] font-bold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full leading-none">
+                        {formatDistance(distances[r.pharmacy])}
+                      </span>
+                    )
                   )}
                 </span>
                 <span className={`text-[12px] font-bold tabular-nums shrink-0 ${isBest ? 'text-secondary' : 'text-[#1a1b1f]'}`}>

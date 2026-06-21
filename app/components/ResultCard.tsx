@@ -9,6 +9,8 @@ import { WishlistButton } from './WishlistButton'
 import { CartButton } from './CartButton'
 import { formatCOP } from '@/app/utils/format'
 import { normalize } from '@/app/utils/search'
+import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
+import type { NearestStore } from '@/app/hooks/useNearbyPharmacies'
 
 const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
 
@@ -40,10 +42,7 @@ interface Props {
   result: PharmacyResult
   isCheapest: boolean
   distanceKm?: number
-}
-
-function formatDist(km: number): string {
-  return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`
+  store?: NearestStore
 }
 
 function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
@@ -65,7 +64,7 @@ function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredi
   return <MedicationImage ingredient={ingredient} height={80} />
 }
 
-export default function ResultCard({ result, isCheapest, distanceKm }: Props) {
+export default function ResultCard({ result, isCheapest, distanceKm, store }: Props) {
   const slug = normalize(result.activeIngredient)
 
   function goToPharmacy(e: React.MouseEvent) {
@@ -115,8 +114,11 @@ export default function ResultCard({ result, isCheapest, distanceKm }: Props) {
                 {result.pharmacy}
               </p>
               {distanceKm !== undefined && (
-                <span className="shrink-0 text-[10px] font-semibold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full leading-none">
-                  {formatDist(distanceKm)}
+                <span
+                  className="shrink-0 text-[10px] font-semibold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full leading-none"
+                  title={`A ${formatDistance(distanceKm)} · ${formatTrip(distanceKm)}`}
+                >
+                  {formatDistance(distanceKm)} · {formatTripShort(distanceKm)}
                 </span>
               )}
             </div>
@@ -168,6 +170,23 @@ export default function ResultCard({ result, isCheapest, distanceKm }: Props) {
             {formatCOP(result.pricePerUnit)}{LIQUID_PRESENTATIONS.has(result.presentation) ? '/ml' : '/und'}
           </span>
         </div>
+
+        {/* Cómo llegar — only when location is active and we have the branch coords */}
+        {store && (
+          <a
+            href={directionsUrl(store.lat, store.lng)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-[12px] font-semibold text-secondary bg-secondary/8 border border-secondary/20 hover:bg-secondary/15 transition-colors"
+            title={`Sede más cercana · ${formatTrip(store.km)}`}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+            </svg>
+            Cómo llegar
+          </a>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-auto">

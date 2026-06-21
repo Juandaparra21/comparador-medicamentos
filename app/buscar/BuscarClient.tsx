@@ -72,7 +72,7 @@ export default function BuscarClient() {
     return () => controller.abort()
   }, [q])
 
-  const { distances, loading: locLoading, error: locError, hasDistances, request: requestLoc, clear: clearLoc } = useNearbyPharmacies()
+  const { distances, stores, loading: locLoading, error: locError, hasDistances, request: requestLoc, clear: clearLoc } = useNearbyPharmacies()
 
   // Cascading filter options: each layer's options come from results that pass all *other* active filters.
   function topValues<T extends string | number>(arr: T[]): T[] {
@@ -352,6 +352,16 @@ export default function BuscarClient() {
               </div>
             </div>
 
+            {/* Aviso de geolocalizacion (permiso denegado / sin farmacias cercanas) */}
+            {locError && !locLoading && (
+              <div className="flex items-start gap-2 mb-4 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200" role="status">
+                <svg className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.515 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                <p className="text-[12px] text-amber-800 leading-snug">{locError}</p>
+              </div>
+            )}
+
             {/* Precios min / max */}
             {minPrice !== null && maxPrice !== null && (
               <div className="flex flex-wrap gap-2 mb-4">
@@ -384,7 +394,7 @@ export default function BuscarClient() {
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {comparisons.map((group) => (
-                          <ProductGroupCard key={group.key} group={group} distances={distances} />
+                          <ProductGroupCard key={group.key} group={group} distances={distances} stores={stores} />
                         ))}
                       </div>
                     </div>
@@ -404,6 +414,7 @@ export default function BuscarClient() {
                             result={result}
                             isCheapest={result.availability !== 'unavailable' && result.price === minPrice}
                             distanceKm={distances[result.pharmacy]}
+                            store={stores[result.pharmacy]}
                           />
                         ))}
                       </div>
@@ -418,6 +429,7 @@ export default function BuscarClient() {
                       result={result}
                       isCheapest={result.availability !== 'unavailable' && result.price === minPrice}
                       distanceKm={distances[result.pharmacy]}
+                      store={stores[result.pharmacy]}
                     />
                   ))}
                 </div>
