@@ -1,9 +1,9 @@
-import type { PharmacyResult, WishlistItem } from '@/app/types'
+﻿import type { PharmacyResult, WishlistItem } from '@/app/types'
 
 export type CartItem = WishlistItem
 
-const KEY   = 'medicompara_cart'
-const EVENT = 'medicompara:cart'
+const KEY   = 'farmi_cart'
+const EVENT = 'farmi:cart'
 
 export function getCart(): CartItem[] {
   if (typeof window === 'undefined') return []

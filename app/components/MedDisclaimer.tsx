@@ -1,8 +1,8 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
-const STORAGE_KEY = 'medicompara-disclaimer-v1'
+const STORAGE_KEY = 'farmi-disclaimer-v1'
 
 export function MedDisclaimer() {
   const [visible, setVisible] = useState(false)
@@ -34,7 +34,7 @@ export function MedDisclaimer() {
         </svg>
         <p className="text-[12px] text-amber-900 flex-1 leading-snug">
           <strong>Esta plataforma no sustituye la asesoria medica profesional.</strong>{' '}
-          Los precios son referenciales y pueden cambiar. MediCompara no vende medicamentos.
+          Los precios son referenciales y pueden cambiar. Farmi no vende medicamentos.
         </p>
         <button
           onClick={dismiss}

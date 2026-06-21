@@ -1,18 +1,18 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Politica de privacidad - MediCompara',
+  title: 'Politica de privacidad - Farmi',
   description:
-    'Conoce como MediCompara recopila, usa y protege tus datos personales conforme a la Ley 1581 de 2012 (Habeas Data) de Colombia.',
+    'Conoce como Farmi recopila, usa y protege tus datos personales conforme a la Ley 1581 de 2012 (Habeas Data) de Colombia.',
 }
 
 const SECTIONS = [
   {
     title: '1. Responsable del tratamiento',
-    body: `MediCompara (en adelante "la Plataforma") es responsable del tratamiento de los datos personales recolectados a traves de medicompara.co.
+    body: `Farmi (en adelante "la Plataforma") es responsable del tratamiento de los datos personales recolectados a traves de farmi.co.
 
-Para ejercer tus derechos o hacer consultas sobre privacidad, puedes contactarnos en: contacto@medicompara.co`,
+Para ejercer tus derechos o hacer consultas sobre privacidad, puedes contactarnos en: contacto@farmi.co`,
   },
   {
     title: '2. Marco legal',
@@ -58,7 +58,7 @@ Las farmacias listadas en la plataforma son negocios independientes. No comparti
 - Revocar la autorizacion de tratamiento.
 - Presentar quejas ante la Superintendencia de Industria y Comercio (SIC).
 
-Para ejercer cualquiera de estos derechos escribe a contacto@medicompara.co con el asunto "Habeas Data - [tu nombre]". Responderemos en un plazo maximo de 10 dias habiles.`,
+Para ejercer cualquiera de estos derechos escribe a contacto@farmi.co con el asunto "Habeas Data - [tu nombre]". Responderemos en un plazo maximo de 10 dias habiles.`,
   },
   {
     title: '7. Almacenamiento y seguridad',
@@ -76,7 +76,7 @@ No utilizamos cookies de seguimiento o publicidad de terceros.`,
   },
   {
     title: '9. Menores de edad',
-    body: `MediCompara no esta dirigida a menores de 14 anos. Si eres menor, requieres autorizacion de un adulto para registrarte. Si detectamos que un menor se ha registrado sin autorizacion, eliminaremos la cuenta.`,
+    body: `Farmi no esta dirigida a menores de 14 anos. Si eres menor, requieres autorizacion de un adulto para registrarte. Si detectamos que un menor se ha registrado sin autorizacion, eliminaremos la cuenta.`,
   },
   {
     title: '10. Cambios en esta politica',
@@ -168,14 +168,14 @@ export default function PrivacidadPage() {
           Para consultas, actualizaciones o solicitudes de eliminacion de datos personales (Habeas Data):
         </p>
         <a
-          href="mailto:contacto@medicompara.co?subject=Habeas%20Data"
+          href="mailto:contacto@farmi.co?subject=Habeas%20Data"
           className="inline-flex items-center gap-2 text-[13px] font-semibold text-secondary hover:opacity-75 transition-opacity"
         >
           <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
             <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
           </svg>
-          contacto@medicompara.co
+          contacto@farmi.co
         </a>
         <p className="text-[11px] text-[#717786] mt-2">
           Asunto del correo: "Habeas Data - [tu nombre]" · Plazo de respuesta: 10 dias habiles.

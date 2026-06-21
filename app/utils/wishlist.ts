@@ -1,8 +1,8 @@
-import type { PharmacyResult, WishlistItem } from '@/app/types'
+﻿import type { PharmacyResult, WishlistItem } from '@/app/types'
 import { getBrowserClient, isBrowserClientAvailable } from '@/app/lib/supabase/browser'
 
-const KEY   = 'medicompara_wishlist'
-const EVENT = 'medicompara:wishlist'
+const KEY   = 'farmi_wishlist'
+const EVENT = 'farmi:wishlist'
 
 // ---- localStorage (anonymous) ----
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -9,7 +9,7 @@ import {
 } from '@/app/utils/wishlist'
 
 function dispatchWishlistEvent() {
-  window.dispatchEvent(new Event('medicompara:wishlist'))
+  window.dispatchEvent(new Event('farmi:wishlist'))
 }
 
 interface Props { result: PharmacyResult }

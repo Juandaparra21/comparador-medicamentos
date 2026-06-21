@@ -1,8 +1,8 @@
-import { Suspense } from 'react'
+﻿import { Suspense } from 'react'
 import BuscarClient from './BuscarClient'
 
 export const metadata = {
-  title: 'Resultados - MediCompara',
+  title: 'Resultados - Farmi',
 }
 
 function LoadingSpinner() {

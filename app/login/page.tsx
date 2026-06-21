@@ -1,7 +1,7 @@
-import LoginClient from './LoginClient'
+﻿import LoginClient from './LoginClient'
 
 export const metadata = {
-  title: 'Iniciar sesion - MediCompara',
+  title: 'Iniciar sesion - Farmi',
 }
 
 export default function LoginPage() {
@@ -11,8 +11,8 @@ export default function LoginPage() {
         {/* Logo mark */}
         <div className="text-center mb-8">
           <p className="font-bold text-[22px] tracking-tight">
-            <span className="text-[#1a1b1f]">Medi</span>
-            <span className="text-primary">Compara</span>
+            <span className="text-[#1a1b1f]">Far</span>
+            <span className="text-primary">mi</span>
           </p>
           <h1 className="text-[20px] sm:text-[24px] font-bold text-[#1a1b1f] mt-2 tracking-tight">
             Bienvenido de nuevo

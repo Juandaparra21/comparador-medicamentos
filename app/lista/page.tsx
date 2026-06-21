@@ -1,8 +1,8 @@
-import { Suspense } from 'react'
+﻿import { Suspense } from 'react'
 import ListaClient from './ListaClient'
 
 export const metadata = {
-  title: 'Lista de deseos - MediCompara',
+  title: 'Lista de deseos - Farmi',
 }
 
 export default function ListaPage() {

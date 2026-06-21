@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { Hanken_Grotesk } from 'next/font/google'
 import Link from 'next/link'
 import { AuthProvider } from '@/app/context/AuthContext'
@@ -15,20 +15,20 @@ const hanken = Hanken_Grotesk({
   display: 'swap',
 })
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://medicompara.co'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://farmi.co'
 
 export const metadata: Metadata = {
   title: {
-    default: 'MediCompara - Comparador de medicamentos en Colombia',
-    template: '%s | MediCompara',
+    default: 'Farmi - Comparador de medicamentos en Colombia',
+    template: '%s | Farmi',
   },
   description:
     'Compara precios de medicamentos en las principales farmacias de Colombia: La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y mas. Genericos y marcas.',
   metadataBase: new URL(SITE_URL),
   openGraph: {
     type: 'website',
-    siteName: 'MediCompara',
-    title: 'MediCompara - Comparador de medicamentos en Colombia',
+    siteName: 'Farmi',
+    title: 'Farmi - Comparador de medicamentos en Colombia',
     description:
       'Encuentra el mejor precio en medicamentos en las farmacias de Colombia. Gratis, sin registro y en tiempo real.',
     url: SITE_URL,
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'MediCompara - Comparador de medicamentos en Colombia',
+    title: 'Farmi - Comparador de medicamentos en Colombia',
     description:
       'Compara precios de medicamentos en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo y mas.',
   },
@@ -69,10 +69,10 @@ export default function RootLayout({
               <Link
                 href="/"
                 className="font-bold text-[17px] tracking-tight select-none hover:opacity-75 transition-opacity shrink-0"
-                aria-label="MediCompara - Inicio"
+                aria-label="Farmi - Inicio"
               >
-                <span className="text-[#1a1b1f]">Medi</span>
-                <span className="text-primary">Compara</span>
+                <span className="text-[#1a1b1f]">Far</span>
+                <span className="text-primary">mi</span>
               </Link>
 
               <nav aria-label="Navegacion principal" className="flex items-center gap-3">
@@ -97,8 +97,8 @@ export default function RootLayout({
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-6">
                 <div>
                   <p className="font-bold text-[16px] tracking-tight">
-                    <span className="text-[#1a1b1f]">Medi</span>
-                    <span className="text-primary">Compara</span>
+                    <span className="text-[#1a1b1f]">Far</span>
+                    <span className="text-primary">mi</span>
                   </p>
                   <p className="text-[12px] text-[#717786] mt-1">
                     Comparador gratuito de precios de medicamentos en Colombia.
@@ -124,10 +124,10 @@ export default function RootLayout({
               {/* Disclaimer */}
               <div className="border-t border-[#c1c6d7]/30 pt-5">
                 <p className="text-[11px] text-[#717786] leading-relaxed">
-                  <strong className="text-[#414755]">Aviso legal:</strong> MediCompara es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. MediCompara no vende medicamentos ni interviene en ningun proceso de compra. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a contacto@medicompara.co.
+                  <strong className="text-[#414755]">Aviso legal:</strong> Farmi es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. Farmi no vende medicamentos ni interviene en ningun proceso de compra. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a contacto@farmi.co.
                 </p>
                 <p className="text-[11px] text-[#c1c6d7] mt-3">
-                  &copy; {new Date().getFullYear()} MediCompara. Colombia.
+                  &copy; {new Date().getFullYear()} Farmi. Colombia.
                 </p>
               </div>
             </div>
