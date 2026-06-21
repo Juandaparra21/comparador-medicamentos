@@ -47,7 +47,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await getBrowserClient().auth.signUp({
       email,
       password,
-      options: { data: { full_name: name } },
+      options: {
+        data: { full_name: name },
+        emailRedirectTo: `${location.origin}/auth/callback`,
+      },
     })
     return error ? translateError(error.message) : null
   }, [])
