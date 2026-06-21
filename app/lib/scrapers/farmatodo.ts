@@ -1,21 +1,40 @@
 import type { ScrapedProduct } from './types'
-import { extractConcentration, extractPresentation, extractPackQuantity, LIQUID_PRESENTATIONS, classify, normalize } from './utils'
+import {
+  extractConcentration,
+  extractPresentation,
+  extractPackQuantity,
+  LIQUID_PRESENTATIONS,
+  classify,
+  normalize,
+} from './utils'
 
 const ALGOLIA_URL = 'https://api-search.farmatodo.com/1/indexes/products/query'
 const ALGOLIA_HEADERS = {
-  'x-algolia-api-key': 'eb9544fe7bfe7ec4c1aa5e5bf7740feb',
+  'x-algolia-api-key':        'eb9544fe7bfe7ec4c1aa5e5bf7740feb',
   'x-algolia-application-id': 'VCOJEYD2PO',
-  'content-type': 'application/json',
+  'content-type':             'application/json',
+  'accept':                   'application/json',
+}
+
+// Fallback host if the custom proxy is down
+const ALGOLIA_FALLBACK = 'https://VCOJEYD2PO-dsn.algolia.net/1/indexes/products/query'
+
+function toSlug(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapHit(hit: Record<string, any>): ScrapedProduct | null {
-  const name = (String(hit.description ?? hit.mediaDescription ?? '')).trim()
+  const name = String(hit.description ?? hit.mediaDescription ?? '').trim()
   if (!name) return null
 
   const fullPrice  = Number(hit.fullPrice)  || 0
   const offerPrice = Number(hit.offerPrice) || 0
-  // offerPrice is the active sale price when set; fullPrice is the regular/list price
   const price    = offerPrice > 0 && offerPrice < fullPrice ? Math.round(offerPrice) : Math.round(fullPrice)
   const refPrice = offerPrice > 0 && offerPrice < fullPrice && fullPrice > 0 ? Math.round(fullPrice) : undefined
   if (price <= 0 || price > 5_000_000) return null
@@ -38,10 +57,6 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   if (!ingredient) ingredient = name.split(/\s/)[0] ?? ''
 
   const presentation = extractPresentation(name)
-  // measurePum stores the pack unit count (ml for liquids, tablets for solids).
-  // Colombian law (Circular 04/2018) requires pharmacies to report PUM for all
-  // current products. Solid products missing measurePum are stale catalog entries
-  // that may have broken URLs — filter them out.
   const pumQty = Number(hit.measurePum) || 0
   if (hit.measurePum == null && !LIQUID_PRESENTATIONS.has(presentation) && presentation !== '') {
     return null
@@ -57,42 +72,64 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   const productId = String(hit.id ?? '')
   const imageUrl  = String(hit.mediaImageUrl ?? hit.imageURL ?? '')
 
+  // hit.url contains the pre-built slug: "{id}-{slug}" (e.g. "1004009-ibuprofeno-genfar-800mg-...").
+  // Fall back to generating it from the product name when the field is absent.
+  const urlSlug = hit.url
+    ? String(hit.url)
+    : productId
+    ? `${productId}-${toSlug(name)}`
+    : ''
+
   return {
-    pharmacyId:     'farmatodo',
-    productName:    name,
-    type:           classify(Boolean(hit.isGeneric || hit.generic), name),
+    pharmacyId:       'farmatodo',
+    productName:      name,
+    type:             classify(Boolean(hit.isGeneric || hit.generic), name),
     activeIngredient: ingredient,
-    concentration:  extractConcentration(name),
+    concentration:    extractConcentration(name),
     presentation,
-    quantity:       Math.max(quantity, 1),
+    quantity:         Math.max(quantity, 1),
     price,
-    pricePerUnit:   Math.round(price / Math.max(quantity, 1)),
-    referencePrice: refPrice,
-    discountPct:    discount,
+    pricePerUnit:     Math.round(price / Math.max(quantity, 1)),
+    referencePrice:   refPrice,
+    discountPct:      discount,
     availability,
-    url:       productId ? `https://www.farmatodo.com.co/product/${productId}` : '',
-    imageUrl:  imageUrl || undefined,
+    url:      urlSlug ? `https://www.farmatodo.com.co/producto/${urlSlug}` : '',
+    imageUrl: imageUrl || undefined,
   }
+}
+
+async function queryAlgolia(url: string, query: string): Promise<ScrapedProduct[] | null> {
+  const res = await fetch(url, {
+    method:  'POST',
+    headers: ALGOLIA_HEADERS,
+    body: JSON.stringify({
+      query,
+      hitsPerPage: 60,
+      filters: "categorie:'Salud y medicamentos' OR subCategory:'Drogueria'",
+    }),
+    signal: AbortSignal.timeout(7_000),
+  })
+  if (!res.ok) return null
+  const data = await res.json() as { hits?: Record<string, unknown>[] }
+  if (!Array.isArray(data.hits)) return null
+  return data.hits.flatMap(h => {
+    const p = mapHit(h as Record<string, unknown>)
+    return p ? [p] : []
+  })
 }
 
 export async function searchFarmatodo(query: string): Promise<ScrapedProduct[]> {
   try {
-    const res = await fetch(ALGOLIA_URL, {
-      method: 'POST',
-      headers: ALGOLIA_HEADERS,
-      body: JSON.stringify({
-        query,
-        hitsPerPage: 60,
-        filters: "categorie:'Salud y medicamentos' OR subCategory:'Drogueria'",
-      }),
-      signal: AbortSignal.timeout(7_000),
-    })
-    const data = await res.json()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hits    = (data.hits ?? []) as Record<string, any>[]
-    const all     = hits.flatMap(h => { const p = mapHit(h); return p ? [p] : [] })
+    // Try primary host first, fall back to standard Algolia DSN
+    let hits = await queryAlgolia(ALGOLIA_URL, query)
+    if (!hits) hits = await queryAlgolia(ALGOLIA_FALLBACK, query)
+    if (!hits) {
+      console.error('[farmatodo] Both Algolia hosts failed')
+      return []
+    }
+
     const q       = normalize(query)
-    const results = all.filter(r =>
+    const results = hits.filter(r =>
       normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
     )
     console.log(`[farmatodo] '${query}' -> ${results.length} productos`)
