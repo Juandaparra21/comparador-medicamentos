@@ -3,11 +3,21 @@ import { extractConcentration, extractPresentation, extractPackQuantity, classif
 
 const BASE = 'https://www.drogueriascafam.com.co'
 
+// Full Chrome-like headers: Cafam is behind Cloudflare, which is stricter with
+// datacenter IPs (e.g. Vercel). A complete, consistent browser fingerprint gives
+// the best chance of getting JSON instead of a bot challenge.
 const SEARCH_HEADERS = {
-  'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
-  'Accept':          'application/json, text/javascript, */*',
-  'Accept-Language': 'es-CO,es;q=0.9',
-  'Referer':         `${BASE}/`,
+  'User-Agent':         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Accept':             'application/json, text/javascript, */*; q=0.01',
+  'Accept-Language':    'es-CO,es;q=0.9,en;q=0.8',
+  'X-Requested-With':   'XMLHttpRequest',
+  'sec-ch-ua':          '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+  'sec-ch-ua-mobile':   '?0',
+  'sec-ch-ua-platform': '"Windows"',
+  'sec-fetch-dest':     'empty',
+  'sec-fetch-mode':     'cors',
+  'sec-fetch-site':     'same-origin',
+  'Referer':            `${BASE}/`,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,7 +78,7 @@ async function fetchSearchJSON(query: string, attempt = 0): Promise<Record<strin
     })
     const res = await fetch(`${BASE}/index.php?${params}`, {
       headers: SEARCH_HEADERS,
-      signal:  AbortSignal.timeout(9_000),
+      signal:  AbortSignal.timeout(12_000),
     })
     if (!res.ok) throw new Error(`status ${res.status}`)
 
@@ -77,7 +87,7 @@ async function fetchSearchJSON(query: string, attempt = 0): Promise<Record<strin
     return JSON.parse(text)
   } catch (e) {
     if (attempt < 1) {
-      await new Promise((r) => setTimeout(r, 600))
+      await new Promise((r) => setTimeout(r, 700))
       return fetchSearchJSON(query, attempt + 1)
     }
     console.error('[cafam] search failed:', (e as Error).message)
