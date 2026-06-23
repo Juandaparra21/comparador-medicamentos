@@ -1,5 +1,6 @@
 import type { ScrapedProduct } from './types'
 import { extractConcentration, extractPresentation, extractPackQuantity, classify, normalize } from './utils'
+import { getCache, setCache } from './cache'
 
 const BASE = 'https://www.drogueriascafam.com.co'
 
@@ -93,8 +94,25 @@ async function fetchSearchJSON(query: string): Promise<Record<string, any> | nul
 }
 
 export async function searchCafam(query: string): Promise<ScrapedProduct[]> {
+  const cacheKey = normalize(query)
+
+  // Fast path: recent cache avoids hitting Cafam/Cloudflare at all.
+  const cached = await getCache('cafam', cacheKey)
+  if (cached?.fresh) {
+    console.log(`[cafam] '${query}' -> ${cached.results.length} (cache)`)
+    return cached.results
+  }
+
   const data = await fetchSearchJSON(query)
-  if (!data) return []
+  if (!data) {
+    // Live request failed (Cloudflare/timeout). Serve stale cache so Cafam does
+    // not vanish from results just because one request got blocked.
+    if (cached) {
+      console.log(`[cafam] '${query}' -> ${cached.results.length} (stale cache; live failed)`)
+      return cached.results
+    }
+    return []
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const raw = (data.products ?? []) as Record<string, any>[]
@@ -109,6 +127,7 @@ export async function searchCafam(query: string): Promise<ScrapedProduct[]> {
     normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q),
   )
 
+  await setCache('cafam', cacheKey, matched)
   console.log(`[cafam] '${query}' -> ${matched.length} productos`)
   return matched
 }
