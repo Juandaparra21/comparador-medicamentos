@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { SearchBar } from '@/app/components/SearchBar'
 import { QuickChips } from '@/app/components/QuickChips'
 import { DiscountsSection } from '@/app/components/DiscountsSection'
-import { LocationPicker } from '@/app/components/LocationPicker'
+import { NearbyMapSection } from '@/app/components/NearbyMapSection'
 
 export default function Home() {
   return (
@@ -33,8 +33,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Location */}
-      <LocationPicker />
+      {/* Mapa de farmacias cercanas */}
+      <NearbyMapSection />
 
       {/* Discounts */}
       <Suspense fallback={null}>
