@@ -21,30 +21,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isBrowserClientAvailable()) {
-      setLoading(false)
-      return
-    }
-    const sb = getBrowserClient()
-    sb.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null)
-      setLoading(false)
+    let active = true
+    let unsub: (() => void) | undefined
+    getBrowserClient().then((sb) => {
+      if (!active) return
+      sb.auth.getSession().then(({ data }) => {
+        if (!active) return
+        setUser(data.session?.user ?? null)
+        setLoading(false)
+      })
+      const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null)
+      })
+      unsub = () => subscription.unsubscribe()
     })
-    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-    return () => subscription.unsubscribe()
+    return () => { active = false; unsub?.() }
   }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
     if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
-    const { error } = await getBrowserClient().auth.signInWithPassword({ email, password })
+    const sb = await getBrowserClient()
+    const { error } = await sb.auth.signInWithPassword({ email, password })
     return error ? translateError(error.message) : null
   }, [])
 
   const signUp = useCallback(async (email: string, password: string, name: string) => {
     if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
-    const { error } = await getBrowserClient().auth.signUp({
+    const sb = await getBrowserClient()
+    const { error } = await sb.auth.signUp({
       email,
       password,
       options: {
@@ -58,12 +62,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     if (!isBrowserClientAvailable()) return
-    await getBrowserClient().auth.signOut()
+    const sb = await getBrowserClient()
+    await sb.auth.signOut()
   }, [])
 
   const signInWithGoogle = useCallback(async () => {
     if (!isBrowserClientAvailable()) return
-    await getBrowserClient().auth.signInWithOAuth({
+    const sb = await getBrowserClient()
+    await sb.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${location.origin}/auth/callback` },
     })
@@ -71,7 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = useCallback(async (email: string) => {
     if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
-    const { error } = await getBrowserClient().auth.resetPasswordForEmail(email, {
+    const sb = await getBrowserClient()
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: `${location.origin}/auth/callback?next=/login`,
     })
     return error ? translateError(error.message) : null

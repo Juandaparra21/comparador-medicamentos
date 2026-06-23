@@ -48,7 +48,7 @@ export function WISHLIST_EVENT() { return EVENT }
 
 export async function getWishlistDB(): Promise<WishlistItem[]> {
   if (!isBrowserClientAvailable()) return []
-  const sb = getBrowserClient()
+  const sb = await getBrowserClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (sb.from('wishlists') as any).select('*').order('added_at', { ascending: false }) as { data: Record<string, any>[] | null }
   if (!data) return []
@@ -69,7 +69,7 @@ export async function getWishlistDB(): Promise<WishlistItem[]> {
 
 export async function addToWishlistDB(result: PharmacyResult): Promise<void> {
   if (!isBrowserClientAvailable()) return
-  const sb = getBrowserClient()
+  const sb = await getBrowserClient()
   const { data: { user } } = await sb.auth.getUser()
   if (!user) return
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,14 +90,14 @@ export async function addToWishlistDB(result: PharmacyResult): Promise<void> {
 
 export async function removeFromWishlistDB(productId: string): Promise<void> {
   if (!isBrowserClientAvailable()) return
-  const sb = getBrowserClient()
+  const sb = await getBrowserClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (sb.from('wishlists') as any).delete().eq('product_id', productId)
 }
 
 export async function isInWishlistDB(productId: string): Promise<boolean> {
   if (!isBrowserClientAvailable()) return false
-  const sb = getBrowserClient()
+  const sb = await getBrowserClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { count } = await (sb.from('wishlists') as any)
     .select('id', { count: 'exact', head: true })

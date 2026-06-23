@@ -20,9 +20,9 @@ function CallbackInner() {
   useEffect(() => {
     const code = params.get('code')
     const next = params.get('next') ?? '/'
-    const sb = getBrowserClient()
 
     async function exchange() {
+      const sb = await getBrowserClient()
       if (code) {
         // PKCE flow: Supabase redirects with ?code=xxx
         const { error } = await sb.auth.exchangeCodeForSession(code)
