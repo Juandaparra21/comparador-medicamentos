@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 
 interface Message {
-  id:     number
-  from:   'bot' | 'user'
-  text:   string
-  ts:     number
+  id:   number
+  from: 'bot' | 'user'
+  text: string
+  ts:   number
 }
 
 interface QuickReply {
@@ -15,18 +15,18 @@ interface QuickReply {
 }
 
 const INITIAL_REPLIES: QuickReply[] = [
-  { label: 'Que es un generico?',      value: 'generico'    },
-  { label: 'Como funciona Farmi?',     value: 'como'        },
-  { label: 'Que farmacias comparan?',  value: 'farmacias'   },
-  { label: 'El precio es exacto?',     value: 'precio'      },
+  { label: 'Que es un generico?',      value: 'generico'  },
+  { label: 'Como funciona Farmi?',     value: 'como'      },
+  { label: 'Que farmacias comparan?',  value: 'farmacias' },
+  { label: 'El precio es exacto?',     value: 'precio'    },
 ]
 
 const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
   generico: {
     text: 'Un medicamento generico tiene exactamente el mismo principio activo, dosis y forma farmaceutica que el de marca. Son equivalentes terapeuticamente y en Colombia estan regulados por el INVIMA. La unica diferencia es el precio: los genericos suelen costar entre 30% y 80% menos.',
     replies: [
-      { label: 'Como funciona Farmi?',    value: 'como'      },
-      { label: 'Ver medicamentos baratos', value: 'buscar'   },
+      { label: 'Como funciona Farmi?',     value: 'como'   },
+      { label: 'Ver medicamentos baratos', value: 'buscar' },
     ],
   },
   como: {
@@ -39,8 +39,8 @@ const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
   farmacias: {
     text: 'Comparamos precios en tiempo real en 6 farmacias colombianas:\n\n• Drogas La Rebaja\n• Cruz Verde\n• Cafam\n• Colsubsidio\n• Olimpica Drogueria\n• Farmatodo\n\nLos precios se consultan directamente desde cada farmacia cuando buscas.',
     replies: [
-      { label: 'El precio es exacto?',    value: 'precio'  },
-      { label: 'Como funciona Farmi?',    value: 'como'    },
+      { label: 'El precio es exacto?', value: 'precio' },
+      { label: 'Como funciona Farmi?', value: 'como'   },
     ],
   },
   precio: {
@@ -53,23 +53,35 @@ const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
   buscar: {
     text: 'Usa el buscador arriba e intenta con el nombre del principio activo (ej: metformina, losartan, atorvastatina). Si no encuentras resultados, prueba con el nombre de marca o verifica la ortografia.',
     replies: [
-      { label: 'El precio es exacto?',    value: 'precio'  },
-      { label: 'Como funciona Farmi?',    value: 'como'    },
+      { label: 'El precio es exacto?', value: 'precio' },
+      { label: 'Como funciona Farmi?', value: 'como'   },
     ],
   },
   ubicacion: {
-    text: 'Puedes activar tu ubicacion con el boton "Mas cercano" en la pagina de resultados. Farmi calcula la distancia a cada farmacia y te muestra primero las mas cercanas. Tu ubicacion nunca se guarda en nuestros servidores.',
+    text: 'Puedes activar tu ubicacion con el boton "Mas cercano" en la pagina de resultados, o ver el mapa de farmacias cercanas en la pagina principal. Tu ubicacion nunca se guarda en nuestros servidores.',
     replies: [
       { label: 'Que farmacias comparan?', value: 'farmacias' },
     ],
   },
 }
 
+// Keyword fallback used in FAQ mode and when an AI call fails.
+function faqAnswer(text: string): string {
+  const t = text.toLowerCase()
+  if (t.includes('generic'))                          return RESPONSES.generico.text
+  if (t.includes('farmacia') || t.includes('compar')) return RESPONSES.farmacias.text
+  if (t.includes('precio')   || t.includes('exact'))  return RESPONSES.precio.text
+  if (t.includes('ubicac')   || t.includes('cerca'))  return RESPONSES.ubicacion.text
+  if (t.includes('buscar')   || t.includes('busqued'))return RESPONSES.buscar.text
+  if (t.includes('funciona') || t.includes('usar') || t.includes('como')) return RESPONSES.como.text
+  return 'Puedo ayudarte a buscar medicamentos, comparar precios entre farmacias y encontrar las mas cercanas. Usa el buscador o preguntame algo concreto.'
+}
+
 function nl2br(text: string) {
-  return text.split('\n').map((line, i) => (
+  return text.split('\n').map((line, i, arr) => (
     <span key={i}>
       {line}
-      {i < text.split('\n').length - 1 && <br />}
+      {i < arr.length - 1 && <br />}
     </span>
   ))
 }
@@ -80,37 +92,83 @@ function mkMsg(from: Message['from'], text: string): Message {
 }
 
 export function ChatAssistant() {
-  const [open,     setOpen]     = useState(false)
-  const [messages, setMessages] = useState<Message[]>([
+  const [open,      setOpen]      = useState(false)
+  const [messages,  setMessages]  = useState<Message[]>([
     mkMsg('bot', 'Hola, soy Farmi. Te ayudo a encontrar el medicamento mas barato en Colombia.'),
   ])
-  const [replies,  setReplies]  = useState<QuickReply[]>(INITIAL_REPLIES)
-  const [bubble,   setBubble]   = useState(true)
+  const [replies,   setReplies]   = useState<QuickReply[]>(INITIAL_REPLIES)
+  const [bubble,    setBubble]    = useState(true)
+  const [aiEnabled, setAiEnabled] = useState<boolean | null>(null)
+  const [input,     setInput]     = useState('')
+  const [sending,   setSending]   = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // Hide the "new message" bubble after 8s
   useEffect(() => {
     const t = setTimeout(() => setBubble(false), 8_000)
     return () => clearTimeout(t)
   }, [])
 
+  // Check whether the AI backend is configured, on first open.
   useEffect(() => {
-    if (open) {
-      setBubble(false)
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!open || aiEnabled !== null) return
+    fetch('/api/chat')
+      .then((r) => r.json())
+      .then((d) => setAiEnabled(Boolean(d.enabled)))
+      .catch(() => setAiEnabled(false))
+  }, [open, aiEnabled])
+
+  useEffect(() => {
+    if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [open, messages, sending])
+
+  async function sendToAI(history: Message[]) {
+    setSending(true)
+    try {
+      const res = await fetch('/api/chat', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: history.map((m) => ({
+            role:    (m.from === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+            content: m.text,
+          })),
+        }),
+      })
+      const data = (await res.json()) as { reply?: string }
+      const last = history[history.length - 1]
+      setMessages((prev) => [...prev, mkMsg('bot', data.reply ?? faqAnswer(last?.text ?? ''))])
+    } catch {
+      const last = history[history.length - 1]
+      setMessages((prev) => [...prev, mkMsg('bot', faqAnswer(last?.text ?? ''))])
+    } finally {
+      setSending(false)
     }
-  }, [open, messages])
+  }
+
+  function handleUserText(text: string) {
+    const clean = text.trim()
+    if (!clean || sending) return
+    const userMsg = mkMsg('user', clean)
+    const next = [...messages, userMsg]
+    setMessages(next)
+    setReplies([])
+    setInput('')
+
+    if (aiEnabled) {
+      sendToAI(next)
+    } else {
+      setTimeout(() => setMessages((prev) => [...prev, mkMsg('bot', faqAnswer(clean))]), 500)
+    }
+  }
 
   function handleReply(reply: QuickReply) {
-    const userMsg = mkMsg('user', reply.label)
+    if (aiEnabled) { handleUserText(reply.label); return }
     const response = RESPONSES[reply.value]
     if (!response) return
-
-    setMessages(prev => [...prev, userMsg])
+    setMessages((prev) => [...prev, mkMsg('user', reply.label)])
     setReplies([])
-
     setTimeout(() => {
-      setMessages(prev => [...prev, mkMsg('bot', response.text)])
+      setMessages((prev) => [...prev, mkMsg('bot', response.text)])
       setReplies(response.replies ?? [])
     }, 600)
   }
@@ -120,7 +178,7 @@ export function ChatAssistant() {
       {/* Chat window */}
       {open && (
         <div
-          className="fixed bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[360px] max-h-[520px] flex flex-col bg-white rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.18)] border border-[#e5e7eb] overflow-hidden"
+          className="fixed bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[360px] max-h-[560px] flex flex-col bg-white rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.18)] border border-[#e5e7eb] overflow-hidden"
           role="dialog"
           aria-label="Asistente Farmi"
         >
@@ -134,7 +192,7 @@ export function ChatAssistant() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-bold leading-tight">Farmi Asistente</p>
-              <p className="text-[11px] text-white/75 leading-tight">En linea ahora</p>
+              <p className="text-[11px] text-white/75 leading-tight">{aiEnabled ? 'Asistente con IA' : 'En linea ahora'}</p>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -150,10 +208,7 @@ export function ChatAssistant() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 bg-[#f8f9fb]" role="log" aria-live="polite">
             {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-2 ${msg.from === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-              >
+              <div key={msg.id} className={`flex gap-2 ${msg.from === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                 {msg.from === 'bot' && (
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-tertiary flex items-center justify-center shrink-0 mt-1">
                     <span className="text-white text-[9px] font-bold">F</span>
@@ -170,6 +225,19 @@ export function ChatAssistant() {
                 </div>
               </div>
             ))}
+
+            {sending && (
+              <div className="flex gap-2">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-tertiary flex items-center justify-center shrink-0 mt-1">
+                  <span className="text-white text-[9px] font-bold">F</span>
+                </div>
+                <div className="bg-white border border-[#e5e7eb] shadow-sm rounded-2xl rounded-tl-sm px-3 py-2.5 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-[#c1c6d7] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                  <span className="w-1.5 h-1.5 bg-[#c1c6d7] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                  <span className="w-1.5 h-1.5 bg-[#c1c6d7] rounded-full animate-bounce" />
+                </div>
+              </div>
+            )}
             <div ref={bottomRef} />
           </div>
 
@@ -188,6 +256,34 @@ export function ChatAssistant() {
             </div>
           )}
 
+          {/* Text input — only when the AI backend is enabled */}
+          {aiEnabled && (
+            <form
+              onSubmit={(e) => { e.preventDefault(); handleUserText(input) }}
+              className="px-3 py-2.5 border-t border-[#f0f1f5] bg-white flex items-center gap-2 shrink-0"
+            >
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Escribe tu pregunta..."
+                aria-label="Escribe tu pregunta"
+                disabled={sending}
+                className="flex-1 px-3 py-2 bg-[#f5f6fa] border border-[#e5e7eb] rounded-full text-[13px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 min-w-0"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || sending}
+                aria-label="Enviar"
+                className="w-9 h-9 shrink-0 rounded-full bg-primary text-white flex items-center justify-center hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.926A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.085l-1.414 4.926a.75.75 0 00.826.95 28.897 28.897 0 0015.293-7.155.75.75 0 000-1.114A28.897 28.897 0 003.105 2.289z" />
+                </svg>
+              </button>
+            </form>
+          )}
+
           {/* Disclaimer */}
           <div className="px-4 py-2 border-t border-[#f0f1f5] bg-white shrink-0">
             <p className="text-[10px] text-[#c1c6d7] text-center">
@@ -199,7 +295,6 @@ export function ChatAssistant() {
 
       {/* Floating button */}
       <div className="fixed bottom-4 right-4 sm:right-6 z-50 flex flex-col items-end gap-2">
-        {/* Bubble hint */}
         {bubble && !open && (
           <div className="bg-white text-[#1a1b1f] text-[13px] font-semibold px-4 py-2.5 rounded-2xl rounded-br-sm shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-[#e5e7eb] max-w-[220px] leading-snug animate-[fadeInUp_0.4s_ease]">
             Encuentra el medicamento mas barato
@@ -208,7 +303,7 @@ export function ChatAssistant() {
         )}
 
         <button
-          onClick={() => setOpen(v => !v)}
+          onClick={() => { setBubble(false); setOpen((v) => !v) }}
           className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-tertiary text-white shadow-[0_8px_24px_rgba(0,88,188,0.35)] hover:shadow-[0_12px_32px_rgba(0,88,188,0.45)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
           aria-label={open ? 'Cerrar asistente' : 'Abrir asistente Farmi'}
           aria-expanded={open}
