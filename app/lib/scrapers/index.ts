@@ -45,22 +45,35 @@ function toPharmacyResult(p: ScrapedProduct, index: number): PharmacyResult {
   }
 }
 
+// Per-scraper budget: a source that exceeds it contributes nothing rather than
+// holding up the whole response. Keeps total search time bounded (~10s worst
+// case) instead of being dragged by the slowest source.
+const SCRAPER_BUDGET_MS = 10_000
+
+function withBudget(p: Promise<ScrapedProduct[]>, ms: number): Promise<ScrapedProduct[]> {
+  return new Promise((resolve) => {
+    const t = setTimeout(() => resolve([]), ms)
+    p.then(
+      (v)  => { clearTimeout(t); resolve(v) },
+      ()   => { clearTimeout(t); resolve([]) },
+    )
+  })
+}
+
 export async function searchAllPharmacies(query: string): Promise<PharmacyResult[]> {
-  const settled = await Promise.allSettled([
-    searchFarmatodo(query),
-    searchCruzVerde(query),
-    searchLaRebaja(query),
-    searchOlimpica(query),
-    searchColsubsidio(query),
-    searchCafam(query),
+  const lists = await Promise.all([
+    withBudget(searchFarmatodo(query),   SCRAPER_BUDGET_MS),
+    withBudget(searchCruzVerde(query),   SCRAPER_BUDGET_MS),
+    withBudget(searchLaRebaja(query),    SCRAPER_BUDGET_MS),
+    withBudget(searchOlimpica(query),    SCRAPER_BUDGET_MS),
+    withBudget(searchColsubsidio(query), SCRAPER_BUDGET_MS),
+    withBudget(searchCafam(query),       SCRAPER_BUDGET_MS),
   ])
 
   const all: PharmacyResult[] = []
   let idx = 0
-  for (const result of settled) {
-    if (result.status === 'fulfilled') {
-      all.push(...result.value.map(p => toPharmacyResult(p, idx++)))
-    }
+  for (const list of lists) {
+    all.push(...list.map((p) => toPharmacyResult(p, idx++)))
   }
 
   return all.sort((a, b) => a.price - b.price)

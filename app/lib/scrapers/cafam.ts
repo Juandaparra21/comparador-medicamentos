@@ -65,10 +65,11 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   }
 }
 
-// Single search request, hardened: Cloudflare occasionally serves an HTML
-// challenge instead of JSON, so detect non-JSON and retry once before giving up.
+// Single search request (no retry): Cafam is the slowest source, so keep it
+// within the per-scraper budget instead of retrying and dragging the whole
+// search. Cloudflare challenges are detected (non-JSON) and just skip Cafam.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function fetchSearchJSON(query: string, attempt = 0): Promise<Record<string, any> | null> {
+async function fetchSearchJSON(query: string): Promise<Record<string, any> | null> {
   try {
     const params = new URLSearchParams({
       controller:     'search',
@@ -78,7 +79,7 @@ async function fetchSearchJSON(query: string, attempt = 0): Promise<Record<strin
     })
     const res = await fetch(`${BASE}/index.php?${params}`, {
       headers: SEARCH_HEADERS,
-      signal:  AbortSignal.timeout(12_000),
+      signal:  AbortSignal.timeout(9_000),
     })
     if (!res.ok) throw new Error(`status ${res.status}`)
 
@@ -86,10 +87,6 @@ async function fetchSearchJSON(query: string, attempt = 0): Promise<Record<strin
     if (!text.trimStart().startsWith('{')) throw new Error('non-JSON response (Cloudflare?)')
     return JSON.parse(text)
   } catch (e) {
-    if (attempt < 1) {
-      await new Promise((r) => setTimeout(r, 700))
-      return fetchSearchJSON(query, attempt + 1)
-    }
     console.error('[cafam] search failed:', (e as Error).message)
     return null
   }

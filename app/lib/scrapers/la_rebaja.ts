@@ -26,6 +26,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sellers = ((items[0] as any).sellers ?? []) as Record<string, unknown>[]
   if (!sellers.length) return null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const offer = ((sellers[0] as any).commertialOffer ?? {}) as Record<string, number>
 
   const salePrice = Number(offer.Price) || 0
@@ -39,8 +40,16 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   const availability: ScrapedProduct['availability'] =
     rawQty === undefined ? 'available' : Number(rawQty) === 0 ? 'unavailable' : Number(rawQty) < 5 ? 'limited' : 'available'
 
-  const ingredient   = spec(p, 'Principio activo') || spec(p, 'Principio Activo') || name.split(/\s/)[0]
-  const presentation = spec(p, 'Presentacion') || extractPresentation(name)
+  const ingredient = spec(p, 'Principio activo') || spec(p, 'Principio Activo') || name.split(/\s/)[0]
+
+  // The "Presentacion" spec is frequently the packaging ("CAJA"), not the dosage
+  // form. Prefer the form parsed from the name; only use the spec if it is itself
+  // a real dosage form (running it through extractPresentation drops "caja" etc.).
+  const presentation = extractPresentation(name) || extractPresentation(spec(p, 'Presentacion'))
+
+  // Numeric part of the concentration (e.g. 500 from "500mg") so we can detect
+  // when a spec wrongly reports the dose as the unit count.
+  const concNum = parseInt(extractConcentration(name)) || 0
 
   // For liquids, Cantidadunidadesmedida often holds the ml volume (not unit count).
   // Use name-based extraction for liquids; the spec field for solids.
@@ -50,8 +59,8 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   } else {
     const qtyStr = spec(p, 'Cantidadunidadesmedida')
     const specQty = qtyStr ? parseInt(qtyStr) : 0
-    // Only trust spec quantity for solid forms and reasonable values
-    if (specQty >= 2 && specQty <= 1000) {
+    // Trust the spec only for sane pack sizes that are not just the dose number.
+    if (specQty >= 2 && specQty <= 1000 && specQty !== concNum) {
       quantity = specQty
     } else {
       quantity = extractPackQuantity(name, presentation)
@@ -83,7 +92,9 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
 export async function searchLaRebaja(query: string): Promise<ScrapedProduct[]> {
   const results: ScrapedProduct[] = []
   try {
-    for (let offset = 0; offset < 100; offset += 50) {
+    // Single page of 50 is plenty for relevance and avoids a second sequential
+    // round-trip (each request can take several seconds).
+    for (let offset = 0; offset < 50; offset += 50) {
       const params = new URLSearchParams({ ft: query, _from: String(offset), _to: String(offset + 49) })
       const res = await fetch(`${SEARCH_URL}?${params}`, { headers: BASE_HEADERS, signal: AbortSignal.timeout(7_000) })
       if (res.status !== 200 && res.status !== 206) break

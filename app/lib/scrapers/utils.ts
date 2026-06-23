@@ -71,8 +71,10 @@ export function extractPackQuantity(name: string, presentation: string): number 
     if (n > 1 && n <= 1000) return n
   }
 
-  // Generic "X N" — guard: N must NOT be immediately followed by a concentration unit
-  const xN = s.match(/[x×]\s*(\d+)\s*(?!(?:mg|g|ml|mcg|ui|ug|%|mm|cm)\b)/)
+  // Generic "X N" — guard: N must NOT be followed by a concentration unit.
+  // (?!\d) forbids matching a partial number (so "500" can't backtrack to "50"),
+  // and \s* lives inside the unit lookahead so "x 500 mg" is rejected entirely.
+  const xN = s.match(/[x×]\s*(\d+)(?!\d)(?!\s*(?:mg|g|ml|mcg|ui|ug|%|mm|cm)\b)/)
   if (xN) {
     const n = parseInt(xN[1])
     if (n >= 2 && n <= 500) return n
@@ -91,7 +93,7 @@ export function extractPresentation(name: string): string {
     [['jarabe', 'suspension', 'suspencion'],            'Jarabe'],
     [['solucion', 'solucion oral'],                    'Solucion'],
     [['capsula', 'capsulas', 'encapsulado'],            'Capsula'],
-    [['tableta', 'tabletas', 'comprimido', 'tab '],    'Tableta'],
+    [['tableta', 'tabletas', 'comprimido', 'tab ', 'pastilla', 'pastillas', 'gragea', 'grageas'], 'Tableta'],
     [['crema'],                                         'Crema'],
     [['pomada', 'unguento'],                            'Pomada'],
     [['gel'],                                           'Gel'],
