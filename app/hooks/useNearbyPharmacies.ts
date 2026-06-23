@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import type { NearbyPharmacy } from '@/app/utils/nearbyPharmacies'
 
 export type PharmacyDistances = Record<string, number> // pharmacy display name → km
 
@@ -12,60 +13,15 @@ export interface NearestStore {
 }
 export type PharmacyStores = Record<string, NearestStore> // pharmacy display name → nearest branch
 
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371
-  const toRad = (x: number) => (x * Math.PI) / 180
-  const dLat = toRad(lat2 - lat1)
-  const dLng = toRad(lng2 - lng1)
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
-
-// Maps OSM "name" / "brand" tag → our pharmacy display name
-const PHARMACY_PATTERNS: Array<[RegExp, string]> = [
-  [/farmatodo/i,            'Farmatodo'],
-  [/cruz\s*verde/i,         'Cruz Verde'],
-  [/rebaja|la\s*rebaja/i,  'Drogas La Rebaja'],
-  [/olimpica/i,             'Olimpica Drogueria'],
-  [/colsubsidio/i,          'Drogueria Colsubsidio'],
-]
-
-async function fetchNearestStores(lat: number, lng: number): Promise<PharmacyStores> {
-  const overpassQuery = `[out:json][timeout:15];
-(
-  node["amenity"="pharmacy"](around:20000,${lat},${lng});
-  way["amenity"="pharmacy"](around:20000,${lat},${lng});
-);
-out center;`
-
-  const res = await fetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `data=${encodeURIComponent(overpassQuery)}`,
-  })
-
-  if (!res.ok) throw new Error(`Overpass error ${res.status}`)
-  const data = await res.json()
+// Reduce all nearby pharmacies to the nearest branch of each chain we price.
+function nearestByChain(pharmacies: NearbyPharmacy[]): PharmacyStores {
   const stores: PharmacyStores = {}
-
-  for (const el of (data.elements ?? [])) {
-    const name = String(el.tags?.name ?? el.tags?.brand ?? '').trim()
-    const eLat = el.lat ?? el.center?.lat
-    const eLng = el.lon ?? el.center?.lon
-    if (!eLat || !eLng || !name) continue
-
-    for (const [pattern, pharmacyName] of PHARMACY_PATTERNS) {
-      if (pattern.test(name)) {
-        const d = haversineKm(lat, lng, eLat, eLng)
-        if (!(pharmacyName in stores) || d < stores[pharmacyName].km) {
-          stores[pharmacyName] = { lat: eLat, lng: eLng, km: d }
-        }
-      }
+  for (const p of pharmacies) {
+    if (!p.chainName) continue
+    if (!(p.chainName in stores) || p.distanceKm < stores[p.chainName].km) {
+      stores[p.chainName] = { lat: p.lat, lng: p.lng, km: p.distanceKm }
     }
   }
-
   return stores
 }
 
@@ -75,34 +31,40 @@ export function useNearbyPharmacies() {
   const [loading,  setLoading]  = useState(false)
   const [error,    setError]    = useState<string | null>(null)
 
-  async function request() {
+  // Uses /api/nearby (server-side: proper User-Agent + mirror fallback), then
+  // keeps only the nearest branch per priced chain for the result-card pills.
+  async function loadFrom(lat: number, lng: number) {
+    try {
+      const res = await fetch(`/api/nearby?lat=${lat}&lng=${lng}`)
+      if (!res.ok) throw new Error(`http ${res.status}`)
+      const data = (await res.json()) as { pharmacies: NearbyPharmacy[] }
+      const s = nearestByChain(data.pharmacies ?? [])
+      if (Object.keys(s).length === 0) setError('No encontramos farmacias conocidas cerca de ti')
+      setStores(s)
+    } catch {
+      setError('No se pudo obtener distancias a farmacias')
+    }
+    setLoading(false)
+  }
+
+  function request() {
     if (!navigator?.geolocation) {
       setError('Geolocalización no disponible en este dispositivo')
       return
     }
     setLoading(true)
     setError(null)
-
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
+      (pos) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         setPosition(coords)
-        try {
-          const s = await fetchNearestStores(coords.lat, coords.lng)
-          if (Object.keys(s).length === 0) {
-            setError('No encontramos farmacias conocidas cerca de ti')
-          }
-          setStores(s)
-        } catch {
-          setError('No se pudo obtener distancias a farmacias')
-        }
-        setLoading(false)
+        loadFrom(coords.lat, coords.lng)
       },
       () => {
         setError('Permiso de ubicación denegado — actívalo en tu navegador')
         setLoading(false)
       },
-      { timeout: 10_000, maximumAge: 300_000 }
+      { timeout: 10_000, maximumAge: 300_000 },
     )
   }
 

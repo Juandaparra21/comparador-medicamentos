@@ -2,29 +2,39 @@
 
 import { useState, useCallback } from 'react'
 import {
-  fetchNearbyPharmacies,
-  geocodePlace,
   computeOpenState,
   orderPharmacies,
+  type NearbyPharmacy,
   type NearbyPharmacyView,
 } from '@/app/utils/nearbyPharmacies'
 
 type Status = 'idle' | 'locating' | 'loading' | 'ready' | 'error'
 
-export function useNearbyList() {
-  const [status,      setStatus]      = useState<Status>('idle')
-  const [pharmacies,  setPharmacies]  = useState<NearbyPharmacyView[]>([])
-  const [error,       setError]       = useState<string | null>(null)
-  const [origin,      setOrigin]      = useState<{ lat: number; lng: number } | null>(null)
+interface NearbyResponse {
+  origin:     { lat: number; lng: number }
+  pharmacies: NearbyPharmacy[]
+}
 
-  const loadFrom = useCallback(async (lat: number, lng: number) => {
+export function useNearbyList() {
+  const [status,     setStatus]     = useState<Status>('idle')
+  const [pharmacies, setPharmacies] = useState<NearbyPharmacyView[]>([])
+  const [error,      setError]      = useState<string | null>(null)
+  const [origin,     setOrigin]     = useState<{ lat: number; lng: number } | null>(null)
+
+  // All OSM access goes through /api/nearby (server-side: proper User-Agent,
+  // mirror fallback). The browser cannot call Overpass/Nominatim reliably.
+  const loadFromUrl = useCallback(async (url: string, notFoundMsg: string) => {
     setStatus('loading')
     setError(null)
-    setOrigin({ lat, lng })
     try {
-      const raw = await fetchNearbyPharmacies(lat, lng)
+      const res = await fetch(url)
+      if (res.status === 404) { setError(notFoundMsg); setStatus('error'); return }
+      if (!res.ok) throw new Error(`http ${res.status}`)
+
+      const data = (await res.json()) as NearbyResponse
+      setOrigin(data.origin)
       const now = new Date()
-      const view = raw.map<NearbyPharmacyView>((p) => ({
+      const view = data.pharmacies.map<NearbyPharmacyView>((p) => ({
         ...p,
         openState: computeOpenState(p.openingHours, now),
         hasPrices: Boolean(p.chainId),
@@ -47,33 +57,26 @@ export function useNearbyList() {
     setStatus('locating')
     setError(null)
     navigator.geolocation.getCurrentPosition(
-      (pos) => { loadFrom(pos.coords.latitude, pos.coords.longitude) },
+      (pos) => { loadFromUrl(`/api/nearby?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`, '') },
       () => {
         setError('Permiso de ubicacion denegado. Escribe tu ciudad o barrio para continuar.')
         setStatus('error')
       },
       { timeout: 10_000, maximumAge: 300_000 },
     )
-  }, [loadFrom])
+  }, [loadFromUrl])
 
-  // Fallback path: geocode a typed city/neighbourhood.
+  // Fallback path: geocode a typed city/neighbourhood (server-side).
   const searchByPlace = useCallback(async (place: string) => {
-    if (!place.trim()) return
+    const q = place.trim()
+    if (!q) return
     setStatus('locating')
     setError(null)
-    try {
-      const coords = await geocodePlace(place.trim())
-      if (!coords) {
-        setError(`No encontramos "${place.trim()}". Prueba con otra ciudad o barrio.`)
-        setStatus('error')
-        return
-      }
-      await loadFrom(coords.lat, coords.lng)
-    } catch {
-      setError('No se pudo ubicar ese lugar. Intenta de nuevo.')
-      setStatus('error')
-    }
-  }, [loadFrom])
+    await loadFromUrl(
+      `/api/nearby?place=${encodeURIComponent(q)}`,
+      `No encontramos "${q}". Prueba con otra ciudad o barrio.`,
+    )
+  }, [loadFromUrl])
 
   return { status, pharmacies, error, origin, requestLocation, searchByPlace }
 }

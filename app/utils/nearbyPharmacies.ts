@@ -4,8 +4,15 @@
 
 import { haversineKm } from './geo'
 
-const OVERPASS_URL  = 'https://overpass-api.de/api/interpreter'
+// Overpass mirrors, tried in order. They require a meaningful User-Agent or they
+// return 406/429, and browsers cannot set User-Agent on fetch — which is why
+// these run server-side behind /api/nearby, not from the client.
+const OVERPASS_MIRRORS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+]
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
+const USER_AGENT = 'Farmi/1.0 (comparador de medicamentos; https://farmi.co)'
 
 export type OpenState = 'open' | 'closed' | 'unknown'
 
@@ -95,27 +102,49 @@ function parseElements(elements: OverpassElement[], userLat: number, userLng: nu
   return out
 }
 
+// Server-side only. Tries each mirror in turn with a proper User-Agent.
+async function queryOverpass(body: string): Promise<OverpassElement[]> {
+  let lastErr: unknown
+  for (const url of OVERPASS_MIRRORS) {
+    try {
+      const res = await fetch(url, {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent':   USER_AGENT,
+          'Accept':       'application/json',
+        },
+        body:   `data=${encodeURIComponent(body)}`,
+        signal: AbortSignal.timeout(12_000),
+      })
+      if (!res.ok) throw new Error(`Overpass ${res.status} @ ${url}`)
+      const data = (await res.json()) as { elements?: OverpassElement[] }
+      return data.elements ?? []
+    } catch (e) {
+      lastErr = e
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error('All Overpass mirrors failed')
+}
+
 // Progressive radius: start at 5 km, expand to 10 km only if nothing is found.
 export async function fetchNearbyPharmacies(lat: number, lng: number): Promise<NearbyPharmacy[]> {
   for (const radius of [5000, 10000]) {
-    const res = await fetch(OVERPASS_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    `data=${encodeURIComponent(buildQuery(lat, lng, radius))}`,
-      signal:  AbortSignal.timeout(25_000),
-    })
-    if (!res.ok) throw new Error(`Overpass ${res.status}`)
-    const data = (await res.json()) as { elements?: OverpassElement[] }
-    const list = parseElements(data.elements ?? [], lat, lng).sort((a, b) => a.distanceKm - b.distanceKm)
+    const elements = await queryOverpass(buildQuery(lat, lng, radius))
+    const list = parseElements(elements, lat, lng).sort((a, b) => a.distanceKm - b.distanceKm)
     if (list.length > 0) return list
   }
   return []
 }
 
-// Geocode a typed city/neighbourhood to coordinates (fallback when geolocation is denied).
+// Geocode a typed city/neighbourhood to coordinates (fallback when geolocation
+// is denied). Server-side only — Nominatim also requires a User-Agent.
 export async function geocodePlace(query: string): Promise<{ lat: number; lng: number } | null> {
   const url = `${NOMINATIM_URL}?q=${encodeURIComponent(`${query}, Colombia`)}&format=json&limit=1`
-  const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(10_000) })
+  const res = await fetch(url, {
+    headers: { 'User-Agent': USER_AGENT, 'Accept': 'application/json' },
+    signal:  AbortSignal.timeout(10_000),
+  })
   if (!res.ok) return null
   const data = (await res.json()) as Array<{ lat: string; lon: string }>
   if (!data.length) return null
