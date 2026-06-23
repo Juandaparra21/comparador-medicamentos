@@ -4,55 +4,10 @@ import { extractConcentration, extractPresentation, extractPackQuantity, classif
 const BASE = 'https://www.drogueriascafam.com.co'
 
 const SEARCH_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
-  'Accept':     'application/json, text/javascript, */*',
-  'Referer':    `${BASE}/`,
-}
-
-const PAGE_HEADERS = {
-  'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-  'Accept':          'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
+  'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
+  'Accept':          'application/json, text/javascript, */*',
   'Accept-Language': 'es-CO,es;q=0.9',
   'Referer':         `${BASE}/`,
-}
-
-interface PagePrice {
-  price:     number
-  available: boolean
-  refPrice?: number
-  discount?: number
-}
-
-async function fetchPagePrice(url: string): Promise<PagePrice | null> {
-  try {
-    const res = await fetch(url, {
-      headers: PAGE_HEADERS,
-      signal:  AbortSignal.timeout(5_000),
-    })
-    if (!res.ok) return null
-    const html = await res.text()
-
-    // <span itemprop="price" content="25550">$ 22.995</span>
-    // The displayed text is the real price (includes group/promo reductions).
-    const m = html.match(/itemprop="price"\s+content="(\d+)"[^>]*>\s*\$\s*([\d. ]+)/)
-    if (!m) return null
-
-    const catalogPrice  = parseInt(m[1])
-    const displayedText = m[2].replace(/\s/g, '').replace(/\./g, '')
-    const displayedPrice = parseInt(displayedText)
-    if (!displayedPrice || displayedPrice <= 0) return null
-
-    const avail = html.match(/itemprop="availability"\s+href="https:\/\/schema\.org\/(InStock|OutOfStock)"/)
-    const available = avail?.[1] !== 'OutOfStock'
-
-    const hasDiscount  = html.includes('has-discount') && displayedPrice < catalogPrice
-    const refPrice     = hasDiscount ? catalogPrice : undefined
-    const discountPct  = hasDiscount ? Math.round((1 - displayedPrice / catalogPrice) * 100) : undefined
-
-    return { price: displayedPrice, available, refPrice, discount: discountPct }
-  } catch {
-    return null
-  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,11 +15,19 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   const name = String(p.name ?? '').trim()
   if (!name) return null
 
-  const catalogPrice = Number(p.price_amount) || 0
-  if (catalogPrice <= 0 || catalogPrice > 5_000_000) return null
+  // price_amount is the final price Cafam shows (verified to match the product
+  // page). regular_price_amount is the pre-discount price. Both come straight
+  // from Cafam's own search API — no fabricated discounts.
+  const price = Number(p.price_amount) || 0
+  if (price <= 0 || price > 5_000_000) return null
+
+  const regular     = Number(p.regular_price_amount) || 0
+  const hasDiscount = Boolean(p.has_discount) && regular > price
+  const referencePrice = hasDiscount ? regular : undefined
+  const discountPct    = hasDiscount ? Math.round((1 - price / regular) * 100) : undefined
 
   const presentation = extractPresentation(name)
-  const quantity     = extractPackQuantity(name, presentation)
+  const quantity     = Math.max(extractPackQuantity(name, presentation), 1)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const imgSizes = (p.cover?.bySize ?? {}) as Record<string, any>
@@ -81,71 +44,64 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     activeIngredient: name.split(/\s/)[0] ?? '',
     concentration:    extractConcentration(name),
     presentation,
-    quantity:         Math.max(quantity, 1),
-    price:            Math.round(catalogPrice),
-    pricePerUnit:     Math.round(catalogPrice / Math.max(quantity, 1)),
-    referencePrice:   undefined,
-    discountPct:      undefined,
+    quantity,
+    price:            Math.round(price),
+    pricePerUnit:     Math.round(price / quantity),
+    referencePrice,
+    discountPct,
     availability:     'available',
     url:              String(p.canonical_url ?? p.url ?? ''),
     imageUrl:         imageUrl ?? undefined,
   }
 }
 
-export async function searchCafam(query: string): Promise<ScrapedProduct[]> {
-  let products: ScrapedProduct[] = []
+// Single search request, hardened: Cloudflare occasionally serves an HTML
+// challenge instead of JSON, so detect non-JSON and retry once before giving up.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchSearchJSON(query: string, attempt = 0): Promise<Record<string, any> | null> {
   try {
     const params = new URLSearchParams({
       controller:     'search',
       s:              query,
       ajax:           '1',
-      resultsPerPage: '20',
+      resultsPerPage: '24',
     })
     const res = await fetch(`${BASE}/index.php?${params}`, {
       headers: SEARCH_HEADERS,
-      signal:  AbortSignal.timeout(7_000),
+      signal:  AbortSignal.timeout(9_000),
     })
-    if (!res.ok) return []
+    if (!res.ok) throw new Error(`status ${res.status}`)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = (await res.json()) as Record<string, any>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const raw  = (data.products ?? []) as Record<string, any>[]
-    for (const p of raw) {
-      const product = mapProduct(p)
-      if (product) products.push(product)
-    }
+    const text = await res.text()
+    if (!text.trimStart().startsWith('{')) throw new Error('non-JSON response (Cloudflare?)')
+    return JSON.parse(text)
   } catch (e) {
-    console.error('[cafam] search error:', e)
-    return []
+    if (attempt < 1) {
+      await new Promise((r) => setTimeout(r, 600))
+      return fetchSearchJSON(query, attempt + 1)
+    }
+    console.error('[cafam] search failed:', (e as Error).message)
+    return null
+  }
+}
+
+export async function searchCafam(query: string): Promise<ScrapedProduct[]> {
+  const data = await fetchSearchJSON(query)
+  if (!data) return []
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = (data.products ?? []) as Record<string, any>[]
+  const products: ScrapedProduct[] = []
+  for (const p of raw) {
+    const product = mapProduct(p)
+    if (product) products.push(product)
   }
 
-  // Filter by query relevance before fetching pages
-  const q       = normalize(query)
-  const matched = products.filter(r =>
-    normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
+  const q = normalize(query)
+  const matched = products.filter((r) =>
+    normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q),
   )
 
-  // Fetch real prices from product pages in parallel (max 10 to limit latency)
-  const batch = matched.slice(0, 10)
-  const pageResults = await Promise.all(
-    batch.map(p => p.url ? fetchPagePrice(p.url) : Promise.resolve(null))
-  )
-
-  const final = batch.map((p, i) => {
-    const real = pageResults[i]
-    if (!real) return p
-    const qty = Math.max(p.quantity, 1)
-    return {
-      ...p,
-      price:          real.price,
-      pricePerUnit:   Math.round(real.price / qty),
-      referencePrice: real.refPrice,
-      discountPct:    real.discount,
-      availability:   real.available ? p.availability : ('unavailable' as const),
-    }
-  })
-
-  console.log(`[cafam] '${query}' -> ${final.length} productos (${pageResults.filter(Boolean).length} con precio real)`)
-  return final
+  console.log(`[cafam] '${query}' -> ${matched.length} productos`)
+  return matched
 }
