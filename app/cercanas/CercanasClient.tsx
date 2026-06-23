@@ -1,0 +1,243 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import type { PharmacyResult } from '@/app/types'
+import { useNearbyList } from '@/app/hooks/useNearbyList'
+import type { NearbyPharmacyView, OpenState } from '@/app/utils/nearbyPharmacies'
+import { formatDistance, formatTripShort, directionsUrl } from '@/app/utils/geo'
+import { formatCOP } from '@/app/utils/format'
+
+interface ChainPrice { price: number; url: string }
+
+const OPEN_BADGE: Record<OpenState, { label: string; cls: string }> = {
+  open:    { label: 'Abierta ahora',        cls: 'bg-secondary/10 text-secondary border-secondary/20' },
+  closed:  { label: 'Cerrada ahora',        cls: 'bg-[#fdecec] text-[#c0392b] border-[#f5c6c6]' },
+  unknown: { label: 'Horario no verificado', cls: 'bg-black/[0.04] text-[#717786] border-[#e5e7eb]' },
+}
+
+export default function CercanasClient() {
+  const { status, pharmacies, error, requestLocation, searchByPlace } = useNearbyList()
+  const [place, setPlace] = useState('')
+
+  // Optional medication cross-reference (chain-level prices from the scrapers).
+  const [medQuery,     setMedQuery]     = useState('')
+  const [medSubmitted, setMedSubmitted] = useState('')
+  const [medLoading,   setMedLoading]   = useState(false)
+  const [chainPrices,  setChainPrices]  = useState<Record<string, ChainPrice>>({})
+
+  async function lookupPrices(e: React.FormEvent) {
+    e.preventDefault()
+    const q = medQuery.trim()
+    if (!q) return
+    setMedLoading(true)
+    try {
+      const res  = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
+      const data = (await res.json()) as { results?: PharmacyResult[] }
+      const map: Record<string, ChainPrice> = {}
+      for (const r of data.results ?? []) {
+        if (r.availability === 'unavailable') continue
+        const cur = map[r.pharmacy]
+        if (!cur || r.price < cur.price) map[r.pharmacy] = { price: r.price, url: r.url }
+      }
+      setChainPrices(map)
+      setMedSubmitted(q)
+    } catch {
+      setChainPrices({})
+      setMedSubmitted(q)
+    } finally {
+      setMedLoading(false)
+    }
+  }
+
+  return (
+    <section className="mx-auto px-4 sm:px-5 max-w-3xl py-8 sm:py-12 w-full">
+      <header className="mb-6">
+        <h1 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[#1a1b1f]">
+          Farmacias cercanas
+        </h1>
+        <p className="text-[14px] text-[#717786] mt-1.5 leading-relaxed">
+          Resultados en tiempo real desde OpenStreetMap. Los precios, cuando existen, vienen de las
+          farmacias en linea que comparamos.
+        </p>
+      </header>
+
+      {/* Location controls */}
+      <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm p-5 mb-5">
+        <button
+          onClick={requestLocation}
+          disabled={status === 'locating' || status === 'loading'}
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-60 transition-opacity cursor-pointer"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+          </svg>
+          {status === 'locating' ? 'Ubicando...' : status === 'loading' ? 'Buscando farmacias...' : 'Usar mi ubicacion'}
+        </button>
+
+        {/* City fallback */}
+        <form
+          onSubmit={(e) => { e.preventDefault(); searchByPlace(place) }}
+          className="mt-3 flex items-stretch gap-2"
+        >
+          <input
+            type="text"
+            value={place}
+            onChange={(e) => setPlace(e.target.value)}
+            placeholder="O escribe tu ciudad o barrio (ej: Chapinero, Bogota)"
+            aria-label="Ciudad o barrio"
+            className="flex-1 px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
+          />
+          <button
+            type="submit"
+            disabled={!place.trim() || status === 'locating' || status === 'loading'}
+            className="px-4 py-2.5 bg-white border border-[#e5e7eb] text-[#414755] text-[14px] font-semibold rounded-lg hover:border-primary/40 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
+          >
+            Buscar
+          </button>
+        </form>
+
+        {error && (
+          <p className="mt-3 text-[13px] text-[#c0392b] bg-[#fdecec] border border-[#f5c6c6] rounded-lg px-3 py-2" role="status">
+            {error}
+          </p>
+        )}
+      </div>
+
+      {/* Medication price cross-reference */}
+      {status === 'ready' && pharmacies.length > 0 && (
+        <form onSubmit={lookupPrices} className="flex items-stretch gap-2 mb-5">
+          <input
+            type="text"
+            value={medQuery}
+            onChange={(e) => setMedQuery(e.target.value)}
+            placeholder="Ver precio de un medicamento en estas farmacias"
+            aria-label="Medicamento"
+            className="flex-1 px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
+          />
+          <button
+            type="submit"
+            disabled={!medQuery.trim() || medLoading}
+            className="px-4 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer whitespace-nowrap"
+          >
+            {medLoading ? 'Buscando...' : 'Ver precios'}
+          </button>
+        </form>
+      )}
+
+      {/* Results */}
+      {status === 'loading' && (
+        <div className="flex flex-col items-center justify-center py-20 gap-4 text-[#717786]">
+          <div className="w-9 h-9 border-4 border-white/50 border-t-primary rounded-full animate-spin" />
+          <p className="text-[14px]">Consultando farmacias cercanas...</p>
+        </div>
+      )}
+
+      {status === 'ready' && pharmacies.length === 0 && (
+        <div className="text-center py-20">
+          <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">Sin resultados confiables</p>
+          <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 10 km.</p>
+        </div>
+      )}
+
+      {status === 'ready' && pharmacies.length > 0 && (
+        <>
+          <p className="text-[13px] text-[#717786] mb-3">
+            <span className="font-semibold text-[#1a1b1f]">{pharmacies.length}</span> farmacias cerca de ti
+          </p>
+          <ul className="flex flex-col gap-3">
+            {pharmacies.map((p) => (
+              <PharmacyRow
+                key={p.id}
+                p={p}
+                medSubmitted={medSubmitted}
+                chainPrice={p.chainName ? chainPrices[p.chainName] : undefined}
+              />
+            ))}
+          </ul>
+          <p className="text-[11px] text-[#c1c6d7] mt-5 leading-relaxed">
+            Datos de ubicacion: OpenStreetMap (colaboradores de OSM). La disponibilidad real de cada
+            medicamento puede variar; confirma en la farmacia.
+          </p>
+        </>
+      )}
+    </section>
+  )
+}
+
+function PharmacyRow({
+  p, medSubmitted, chainPrice,
+}: {
+  p: NearbyPharmacyView
+  medSubmitted: string
+  chainPrice?: ChainPrice
+}) {
+  const badge = OPEN_BADGE[p.openState]
+
+  return (
+    <li className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-xl shadow-sm p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-[15px] font-bold text-[#1a1b1f] leading-tight">{p.name}</h2>
+            {p.chainName && (
+              <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-full">
+                {p.chainName}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className="text-[12px] font-semibold text-secondary">
+              a {formatDistance(p.distanceKm)} &middot; {formatTripShort(p.distanceKm)}
+            </span>
+            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${badge.cls}`}>
+              {badge.label}
+            </span>
+          </div>
+          {p.address && <p className="text-[12px] text-[#717786] mt-1">{p.address}</p>}
+          {p.openingHours && (
+            <p className="text-[11px] text-[#9ca3af] mt-0.5 tabular-nums">{p.openingHours}</p>
+          )}
+        </div>
+
+        <a
+          href={directionsUrl(p.lat, p.lng)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 flex items-center gap-1 text-[12px] font-semibold text-secondary bg-secondary/8 border border-secondary/20 hover:bg-secondary/15 px-2.5 py-1.5 rounded-lg transition-colors"
+        >
+          Como llegar
+        </a>
+      </div>
+
+      {/* Price section */}
+      <div className="mt-3 pt-3 border-t border-[#f0f1f5]">
+        {medSubmitted ? (
+          chainPrice ? (
+            <Link
+              href={`/buscar?q=${encodeURIComponent(medSubmitted)}`}
+              className="flex items-center justify-between gap-2 group"
+            >
+              <span className="text-[13px] text-[#414755]">
+                <span className="capitalize">{medSubmitted}</span> desde{' '}
+                <span className="font-bold text-[#1a1b1f]">{formatCOP(chainPrice.price)}</span>
+                <span className="text-[#9ca3af]"> en {p.chainName}</span>
+              </span>
+              <span className="text-[12px] font-semibold text-primary group-hover:opacity-75 whitespace-nowrap">Ver precios</span>
+            </Link>
+          ) : p.chainName ? (
+            <p className="text-[12px] text-[#717786]">Sin resultados para &ldquo;{medSubmitted}&rdquo; en {p.chainName}</p>
+          ) : (
+            <p className="text-[12px] text-[#9ca3af]">Sin datos de precios para esta farmacia</p>
+          )
+        ) : p.chainName ? (
+          <p className="text-[12px] text-[#717786]">
+            Comparamos precios en linea de {p.chainName}. Escribe un medicamento arriba para verlos.
+          </p>
+        ) : (
+          <p className="text-[12px] text-[#9ca3af]">Sin datos de precios para esta farmacia</p>
+        )}
+      </div>
+    </li>
+  )
+}
