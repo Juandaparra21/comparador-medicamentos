@@ -20,6 +20,11 @@ export default function CercanasClient() {
   const { status, pharmacies, error, requestLocation, searchByPlace } = useNearbyList()
   const [place, setPlace] = useState('')
 
+  // Two location types: all pharmacies (OSM) vs affiliates (our priced chains).
+  const [view, setView] = useState<'all' | 'affiliate'>('all')
+  const affiliateCount = pharmacies.filter((p) => p.chainName).length
+  const shown = view === 'affiliate' ? pharmacies.filter((p) => p.chainName) : pharmacies
+
   // Optional medication cross-reference (chain-level prices from the scrapers).
   const [medQuery,     setMedQuery]     = useState('')
   const [medSubmitted, setMedSubmitted] = useState('')
@@ -142,22 +147,42 @@ export default function CercanasClient() {
 
       {status === 'ready' && pharmacies.length > 0 && (
         <>
-          <p className="text-[13px] text-[#717786] mb-3">
-            <span className="font-semibold text-[#1a1b1f]">{pharmacies.length}</span> farmacias cerca de ti
-          </p>
-          <ul className="flex flex-col gap-3">
-            {pharmacies.map((p) => (
-              <PharmacyRow
-                key={p.id}
-                p={p}
-                medSubmitted={medSubmitted}
-                chainPrice={p.chainName ? chainPrices[p.chainName] : undefined}
-              />
-            ))}
-          </ul>
+          {/* Type filter: all vs affiliates */}
+          <div className="flex bg-black/[0.05] rounded-xl p-1 mb-4 max-w-xs">
+            <button
+              onClick={() => setView('all')}
+              className={`flex-1 text-[13px] font-semibold py-1.5 rounded-lg transition-all cursor-pointer ${view === 'all' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'}`}
+            >
+              Todas ({pharmacies.length})
+            </button>
+            <button
+              onClick={() => setView('affiliate')}
+              className={`flex-1 text-[13px] font-semibold py-1.5 rounded-lg transition-all cursor-pointer ${view === 'affiliate' ? 'bg-white text-primary shadow-sm' : 'text-[#717786]'}`}
+            >
+              En Farmi ({affiliateCount})
+            </button>
+          </div>
+
+          {shown.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1">No hay farmacias afiliadas cerca</p>
+              <p className="text-[13px] text-[#717786]">No encontramos sedes de las cadenas que comparamos en este radio. Prueba con &ldquo;Todas&rdquo;.</p>
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {shown.map((p) => (
+                <PharmacyRow
+                  key={p.id}
+                  p={p}
+                  medSubmitted={medSubmitted}
+                  chainPrice={p.chainName ? chainPrices[p.chainName] : undefined}
+                />
+              ))}
+            </ul>
+          )}
           <p className="text-[11px] text-[#c1c6d7] mt-5 leading-relaxed">
-            Datos de ubicacion: OpenStreetMap (colaboradores de OSM). La disponibilidad real de cada
-            medicamento puede variar; confirma en la farmacia.
+            Datos de ubicacion: OpenStreetMap (colaboradores de OSM). &ldquo;En Farmi&rdquo; son sedes de las
+            cadenas cuyos precios comparamos. La disponibilidad real de cada medicamento puede variar; confirma en la farmacia.
           </p>
         </>
       )}
@@ -180,9 +205,13 @@ function PharmacyRow({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-[15px] font-bold text-[#1a1b1f] leading-tight">{p.name}</h2>
-            {p.chainName && (
-              <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-full">
-                {p.chainName}
+            {p.chainName ? (
+              <span className="text-[10px] font-bold text-white bg-primary px-2 py-0.5 rounded-full">
+                En Farmi &middot; {p.chainName}
+              </span>
+            ) : (
+              <span className="text-[10px] font-semibold text-[#717786] bg-black/[0.04] border border-[#e5e7eb] px-2 py-0.5 rounded-full">
+                Otra farmacia
               </span>
             )}
           </div>

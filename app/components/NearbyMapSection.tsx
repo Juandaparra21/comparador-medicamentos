@@ -18,6 +18,11 @@ export function NearbyMapSection() {
   const { status, pharmacies, error, origin, requestLocation, searchByPlace } = useNearbyList()
   const [place, setPlace] = useState('')
 
+  // Two location types: all pharmacies vs affiliates (our priced chains).
+  const [view, setView] = useState<'all' | 'affiliate'>('all')
+  const affiliateCount = pharmacies.filter((p) => p.chainName).length
+  const shown = view === 'affiliate' ? pharmacies.filter((p) => p.chainName) : pharmacies
+
   const busy   = status === 'locating' || status === 'loading'
   const showMap = status === 'ready' && origin !== null && pharmacies.length > 0
 
@@ -123,12 +128,37 @@ export function NearbyMapSection() {
 
         {showMap && origin && (
           <>
-            <div className="h-[340px] sm:h-[440px] w-full">
-              <PharmacyMap origin={origin} pharmacies={pharmacies} />
+            {/* Type filter */}
+            <div className="flex items-center gap-2 px-5 pt-4 flex-wrap">
+              <div className="flex bg-black/[0.05] rounded-lg p-0.5">
+                <button
+                  onClick={() => setView('all')}
+                  className={`text-[12px] font-semibold px-3 py-1 rounded-md transition-all cursor-pointer ${view === 'all' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'}`}
+                >
+                  Todas ({pharmacies.length})
+                </button>
+                <button
+                  onClick={() => setView('affiliate')}
+                  className={`text-[12px] font-semibold px-3 py-1 rounded-md transition-all cursor-pointer ${view === 'affiliate' ? 'bg-white text-primary shadow-sm' : 'text-[#717786]'}`}
+                >
+                  En Farmi ({affiliateCount})
+                </button>
+              </div>
+              {/* Legend */}
+              <div className="flex items-center gap-3 ml-auto text-[11px] text-[#717786]">
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Afiliada</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#9ca3af] inline-block" /> Otra</span>
+              </div>
+            </div>
+
+            <div className="h-[340px] sm:h-[440px] w-full mt-3">
+              <PharmacyMap origin={origin} pharmacies={shown} />
             </div>
             <p className="text-[12px] text-[#717786] px-5 py-3 border-t border-[#f0f1f5]">
-              <span className="font-semibold text-[#1a1b1f]">{pharmacies.length}</span> farmacias cerca de ti.
-              Toca un marcador para ver detalles y como llegar.
+              {view === 'affiliate'
+                ? <><span className="font-semibold text-primary">{affiliateCount}</span> farmacias afiliadas (con precios en Farmi) cerca de ti.</>
+                : <><span className="font-semibold text-[#1a1b1f]">{pharmacies.length}</span> farmacias cerca de ti, <span className="font-semibold text-primary">{affiliateCount}</span> afiliadas.</>}
+              {' '}Toca un marcador para ver detalles.
             </p>
           </>
         )}
