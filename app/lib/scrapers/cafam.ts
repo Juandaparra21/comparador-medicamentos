@@ -1,5 +1,5 @@
 import type { ScrapedProduct } from './types'
-import { extractConcentration, extractPresentation, extractPackQuantity, classify, normalize } from './utils'
+import { extractConcentration, extractPresentation, extractPackQuantity, classify } from './utils'
 import { withCache } from './cache'
 
 const BASE = 'https://www.drogueriascafam.com.co'
@@ -72,6 +72,8 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchSearchJSON(query: string): Promise<Record<string, any> | null> {
   try {
+    // 24 keeps the response under ~6s (48 pushes it to ~9s and times out). The
+    // real win is not re-filtering Cafam's results below, not the page size.
     const params = new URLSearchParams({
       controller:     'search',
       s:              query,
@@ -98,6 +100,9 @@ export async function searchCafam(query: string): Promise<ScrapedProduct[]> {
     const data = await fetchSearchJSON(query)
     if (!data) return null // failure -> serve stale cache
 
+    // Trust Cafam's own search relevance: it returns brands (Advil, Ibuflash) and
+    // combos for the searched term, which a literal substring filter would wrongly
+    // drop. Keep everything Cafam returns for the query.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const raw = (data.products ?? []) as Record<string, any>[]
     const products: ScrapedProduct[] = []
@@ -105,10 +110,6 @@ export async function searchCafam(query: string): Promise<ScrapedProduct[]> {
       const product = mapProduct(p)
       if (product) products.push(product)
     }
-
-    const q = normalize(query)
-    return products.filter((r) =>
-      normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q),
-    )
+    return products
   })
 }
