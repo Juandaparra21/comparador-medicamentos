@@ -141,12 +141,12 @@ export function NearbyMapSection() {
                   onClick={() => setView('affiliate')}
                   className={`text-[12px] font-semibold px-3 py-1 rounded-md transition-all cursor-pointer ${view === 'affiliate' ? 'bg-white text-primary shadow-sm' : 'text-[#717786]'}`}
                 >
-                  En Farmi ({affiliateCount})
+                  Con precios ({affiliateCount})
                 </button>
               </div>
               {/* Legend */}
               <div className="flex items-center gap-3 ml-auto text-[11px] text-[#717786]">
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Afiliada</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Con precios</span>
                 <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#9ca3af] inline-block" /> Otra</span>
               </div>
             </div>
@@ -156,8 +156,8 @@ export function NearbyMapSection() {
             </div>
             <p className="text-[12px] text-[#717786] px-5 py-3 border-t border-[#f0f1f5]">
               {view === 'affiliate'
-                ? <><span className="font-semibold text-primary">{affiliateCount}</span> farmacias afiliadas (con precios en Farmi) cerca de ti.</>
-                : <><span className="font-semibold text-[#1a1b1f]">{pharmacies.length}</span> farmacias cerca de ti, <span className="font-semibold text-primary">{affiliateCount}</span> afiliadas.</>}
+                ? <><span className="font-semibold text-primary">{affiliateCount}</span> farmacias cuyos precios comparamos, cerca de ti.</>
+                : <><span className="font-semibold text-[#1a1b1f]">{pharmacies.length}</span> farmacias cerca de ti, <span className="font-semibold text-primary">{affiliateCount}</span> con precios en Farmi.</>}
               {' '}Toca un marcador para ver detalles.
             </p>
           </>

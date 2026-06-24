@@ -93,6 +93,10 @@ export function PharmacyStrip() {
           </div>
         ))}
       </div>
+      <p className="text-[11px] text-[#c1c6d7] mt-3 text-center">
+        Logos y marcas pertenecen a sus respectivos titulares. Farmi es un comparador independiente,
+        no afiliado ni patrocinado por estas farmacias.
+      </p>
     </section>
   )
 }

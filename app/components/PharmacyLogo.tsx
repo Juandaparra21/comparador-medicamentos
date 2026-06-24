@@ -33,12 +33,42 @@ function PillSvg({ s }: { s: number }) {
   )
 }
 
+// Real brand logos (in /public/pharmacy-logos). Only pharmacies with a usable
+// logo file are listed; the rest fall back to the stylized tile below.
+// Logos are property of each pharmacy; shown only to identify whose price it is.
+const LOGO_FILES: Record<string, string> = {
+  'Drogas La Rebaja':      'la-rebaja.png',
+  'Drogueria Colsubsidio': 'colsubsidio.png',
+  'Cafam':                 'cafam.png',
+  'Farmatodo':             'farmatodo.png',
+  'Olimpica Drogueria':    'olimpica.png',
+}
+
 interface Props {
   name: string
   size?: number
 }
 
 export function PharmacyLogo({ name, size = 36 }: Props) {
+  const logoFile = LOGO_FILES[name]
+  if (logoFile) {
+    return (
+      <div
+        style={{ width: size, height: size }}
+        className="rounded-xl bg-white border border-[#eef0f4] shadow-sm shrink-0 overflow-hidden flex items-center justify-center"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/pharmacy-logos/${logoFile}`}
+          alt={name}
+          width={size}
+          height={size}
+          className="w-full h-full object-contain p-1"
+        />
+      </div>
+    )
+  }
+
   const config: Config = PHARMACY_CONFIG[name] ?? {
     bg: '#6b7280',
     abbr: name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),

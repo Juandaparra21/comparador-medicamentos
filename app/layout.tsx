@@ -139,7 +139,7 @@ export default function RootLayout({
               {/* Disclaimer */}
               <div className="border-t border-[#c1c6d7]/30 pt-5">
                 <p className="text-[11px] text-[#717786] leading-relaxed">
-                  <strong className="text-[#414755]">Aviso legal:</strong> Farmi es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. Farmi no vende medicamentos ni interviene en ningun proceso de compra. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a contacto@farmi.co.
+                  <strong className="text-[#414755]">Aviso legal:</strong> Farmi es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. Farmi no vende medicamentos ni interviene en ningun proceso de compra. Las marcas y logos de las farmacias pertenecen a sus respectivos titulares; Farmi es un comparador independiente y no esta afiliado ni patrocinado por ellas. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a contacto@farmi.co.
                 </p>
                 <p className="text-[11px] text-[#c1c6d7] mt-3">
                   &copy; {new Date().getFullYear()} Farmi. Colombia.

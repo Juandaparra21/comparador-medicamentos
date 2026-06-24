@@ -41,7 +41,7 @@ function popupHtml(p: NearbyPharmacyView): string {
     : p.openState === 'closed' ? 'Cerrada ahora'
     : 'Horario no verificado'
   const badge = p.chainName
-    ? `<span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#0058bc;padding:1px 7px;border-radius:9999px;margin-bottom:5px">En Farmi &middot; ${escapeHtml(p.chainName)}</span>`
+    ? `<span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#0058bc;padding:1px 7px;border-radius:9999px;margin-bottom:5px">${escapeHtml(p.chainName)} &middot; con precios</span>`
     : `<span style="display:inline-block;font-size:10px;font-weight:600;color:#717786;background:#f0f1f5;padding:1px 7px;border-radius:9999px;margin-bottom:5px">Otra farmacia</span>`
   return `<div style="font-family:inherit;min-width:160px">
     ${badge}

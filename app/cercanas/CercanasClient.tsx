@@ -159,13 +159,13 @@ export default function CercanasClient() {
               onClick={() => setView('affiliate')}
               className={`flex-1 text-[13px] font-semibold py-1.5 rounded-lg transition-all cursor-pointer ${view === 'affiliate' ? 'bg-white text-primary shadow-sm' : 'text-[#717786]'}`}
             >
-              En Farmi ({affiliateCount})
+              Con precios ({affiliateCount})
             </button>
           </div>
 
           {shown.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1">No hay farmacias afiliadas cerca</p>
+              <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1">No hay farmacias con precios cerca</p>
               <p className="text-[13px] text-[#717786]">No encontramos sedes de las cadenas que comparamos en este radio. Prueba con &ldquo;Todas&rdquo;.</p>
             </div>
           ) : (
@@ -181,8 +181,9 @@ export default function CercanasClient() {
             </ul>
           )}
           <p className="text-[11px] text-[#c1c6d7] mt-5 leading-relaxed">
-            Datos de ubicacion: OpenStreetMap (colaboradores de OSM). &ldquo;En Farmi&rdquo; son sedes de las
-            cadenas cuyos precios comparamos. La disponibilidad real de cada medicamento puede variar; confirma en la farmacia.
+            Datos de ubicacion: OpenStreetMap (colaboradores de OSM). &ldquo;Con precios&rdquo; son sedes de las
+            cadenas cuyos precios comparamos. Farmi es independiente y no esta afiliado a estas farmacias; sus marcas
+            pertenecen a sus titulares. La disponibilidad real de cada medicamento puede variar; confirma en la farmacia.
           </p>
         </>
       )}
@@ -207,7 +208,7 @@ function PharmacyRow({
             <h2 className="text-[15px] font-bold text-[#1a1b1f] leading-tight">{p.name}</h2>
             {p.chainName ? (
               <span className="text-[10px] font-bold text-white bg-primary px-2 py-0.5 rounded-full">
-                En Farmi &middot; {p.chainName}
+                {p.chainName}
               </span>
             ) : (
               <span className="text-[10px] font-semibold text-[#717786] bg-black/[0.04] border border-[#e5e7eb] px-2 py-0.5 rounded-full">
