@@ -3,12 +3,20 @@ import { SearchBar } from '@/app/components/SearchBar'
 import { QuickChips } from '@/app/components/QuickChips'
 import { DiscountsSection } from '@/app/components/DiscountsSection'
 import { NearbyMapSection } from '@/app/components/NearbyMapSection'
+import {
+  ValueProps,
+  HowItWorks,
+  PharmacyStrip,
+  GenericVsBrand,
+  HomeFaq,
+  HomeCta,
+} from '@/app/components/HomeSections'
 
 export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="py-16 sm:py-28">
+      <section className="pt-14 sm:pt-24 pb-10 sm:pb-14">
         <div className="mx-auto px-4 sm:px-5 max-w-2xl">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-secondary/10 border border-secondary/20 text-secondary text-[12px] font-bold px-3 py-1.5 rounded-full mb-5 tracking-wide">
@@ -33,6 +41,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Por que Farmi */}
+      <ValueProps />
+
       {/* Mapa de farmacias cercanas */}
       <NearbyMapSection />
 
@@ -40,6 +51,13 @@ export default function Home() {
       <Suspense fallback={null}>
         <DiscountsSection />
       </Suspense>
+
+      {/* Contenido informativo */}
+      <HowItWorks />
+      <PharmacyStrip />
+      <GenericVsBrand />
+      <HomeFaq />
+      <HomeCta />
     </>
   )
 }
