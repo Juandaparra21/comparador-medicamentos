@@ -34,7 +34,7 @@ export function MedDisclaimer() {
         </svg>
         <p className="text-[12px] text-amber-900 flex-1 leading-snug">
           <strong>Esta plataforma no sustituye la asesoria medica profesional.</strong>{' '}
-          Los precios son referenciales y pueden cambiar. Farmi no vende medicamentos.
+          Los precios son referenciales y pueden cambiar. FarmiYa no vende medicamentos.
         </p>
         <button
           onClick={dismiss}

@@ -2,7 +2,7 @@
 import BuscarClient from './BuscarClient'
 
 export const metadata = {
-  title: 'Resultados - Farmi',
+  title: 'Resultados - FarmiYa',
 }
 
 function LoadingSpinner() {

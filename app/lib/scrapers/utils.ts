@@ -2,6 +2,24 @@ export function normalize(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, '')
 }
 
+/**
+ * Recall-friendly relevance check. Keeps a product when the main word of the
+ * query (the longest token, usually the drug/brand name) appears in the given
+ * fields. Multi-word queries no longer require the exact phrase, and qualifier
+ * words (mg, 400, jarabe) no longer wrongly exclude otherwise-relevant results.
+ */
+export function matchesQuery(query: string, ...fields: string[]): boolean {
+  const tokens = normalize(query).split(/\s+/).filter((t) => t.length >= 3)
+  if (tokens.length === 0) return true
+  const hay  = normalize(fields.join(' '))
+  const main = tokens.reduce((a, b) => (b.length > a.length ? b : a))
+  // Match the main token, and also require any other long tokens (>=5) that exist
+  // so "losartan hidroclorotiazida" stays specific, but "ibuprofeno 400" does not.
+  const strong = tokens.filter((t) => t.length >= 5)
+  if (strong.length >= 2) return strong.every((t) => hay.includes(t))
+  return hay.includes(main)
+}
+
 export function extractConcentration(name: string): string {
   const m = name.match(/(\d+(?:[.,]\d+)?)\s*(mg|g|ml|mcg|ui|%|ug)/i)
   if (!m) return ''

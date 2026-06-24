@@ -1,7 +1,7 @@
 ﻿import RegisterClient from './RegisterClient'
 
 export const metadata = {
-  title: 'Crear cuenta - Farmi',
+  title: 'Crear cuenta - FarmiYa',
 }
 
 export default function RegisterPage() {

@@ -13,8 +13,8 @@ export async function generateMetadata({ params }: Props) {
   const history = getMedicationHistory(ingredient)
   return {
     title: history
-      ? `Historial de ${history.ingredient} - Farmi`
-      : 'Historial - Farmi',
+      ? `Historial de ${history.ingredient} - FarmiYa`
+      : 'Historial - FarmiYa',
   }
 }
 

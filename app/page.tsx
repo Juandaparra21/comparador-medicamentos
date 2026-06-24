@@ -41,7 +41,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Por que Farmi */}
+      {/* Por que FarmiYa */}
       <ValueProps />
 
       {/* Mapa de farmacias cercanas */}

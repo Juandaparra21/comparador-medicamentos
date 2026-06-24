@@ -2,9 +2,9 @@
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Contacto - Farmi',
+  title: 'Contacto - FarmiYa',
   description:
-    'Contacta al equipo de Farmi para reportar precios incorrectos, sugerir farmacias o resolver dudas sobre la plataforma.',
+    'Contacta al equipo de FarmiYa para reportar precios incorrectos, sugerir farmacias o resolver dudas sobre la plataforma.',
 }
 
 const TOPICS = [
@@ -70,14 +70,14 @@ export default function ContactoPage() {
         </p>
 
         <a
-          href="mailto:contacto@farmi.co?subject=Consulta%20Farmi"
+          href="mailto:farmiya001@gmail.com?subject=Consulta%20Farmi"
           className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"
         >
           <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
             <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
           </svg>
-          contacto@farmi.co
+          farmiya001@gmail.com
         </a>
 
         <p className="text-[11px] text-[#717786] mt-4 leading-relaxed">
@@ -91,13 +91,13 @@ export default function ContactoPage() {
       <section className="bg-primary/5 border border-primary/15 rounded-2xl p-5 sm:p-6 mb-8">
         <h2 className="text-[14px] font-bold text-primary mb-2">Reportar un precio incorrecto</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-3">
-          Si el precio que ves en Farmi no coincide con el que muestra la farmacia, escribenos con:
+          Si el precio que ves en FarmiYa no coincide con el que muestra la farmacia, escribenos con:
         </p>
         <ul className="space-y-1.5">
           {[
             'Nombre del medicamento',
             'Nombre de la farmacia',
-            'Precio que muestra Farmi',
+            'Precio que muestra FarmiYa',
             'Precio real en la farmacia (con captura de pantalla si es posible)',
           ].map((item) => (
             <li key={item} className="flex items-start gap-2 text-[12px] text-[#414755]">

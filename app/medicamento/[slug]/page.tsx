@@ -16,9 +16,9 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const info = getMedicineInfo(slug)
-  if (!info) return { title: 'Medicamento - Farmi' }
+  if (!info) return { title: 'Medicamento - FarmiYa' }
   return {
-    title: `${info.activeIngredient} - Informacion y precios - Farmi`,
+    title: `${info.activeIngredient} - Informacion y precios - FarmiYa`,
     description: `Informacion sobre ${info.activeIngredient}: usos, dosis, advertencias y comparacion de precios en farmacias de Colombia.`,
   }
 }
@@ -84,7 +84,7 @@ export default async function MedicamentoPage({ params }: Props) {
         </div>
         <div>
           <p className="text-[13px] font-bold text-amber-800 mb-1">
-            Farmi es un comparador de precios, no una farmacia
+            FarmiYa es un comparador de precios, no una farmacia
           </p>
           <p className="text-[12px] text-amber-700 leading-relaxed">
             No vendemos medicamentos. Toda la informacion medica es de caracter educativo y no reemplaza la consulta con un profesional de salud. Para comprar, seras redirigido al sitio oficial de cada farmacia.{' '}
@@ -265,7 +265,7 @@ export default async function MedicamentoPage({ params }: Props) {
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
             </svg>
             <p className="text-[11px] text-[#717786] leading-relaxed">
-              Farmi no vende medicamentos, no procesa pagos y no es responsable de las transacciones realizadas en sitios de terceros. Cada farmacia es un negocio independiente.{' '}
+              FarmiYa no vende medicamentos, no procesa pagos y no es responsable de las transacciones realizadas en sitios de terceros. Cada farmacia es un negocio independiente.{' '}
               <Link href="/terminos" className="text-primary font-semibold hover:underline">
                 Condiciones del sitio
               </Link>

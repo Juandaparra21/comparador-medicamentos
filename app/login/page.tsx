@@ -1,7 +1,7 @@
 ﻿import LoginClient from './LoginClient'
 
 export const metadata = {
-  title: 'Iniciar sesion - Farmi',
+  title: 'Iniciar sesion - FarmiYa',
 }
 
 export default function LoginPage() {
