@@ -1,5 +1,5 @@
 import type { ScrapedProduct } from './types'
-import { extractConcentration, extractPresentation, extractPackQuantity, classify, normalize } from './utils'
+import { extractConcentration, extractPresentation, extractPackQuantity, classify, matchesQuery } from './utils'
 import { withCache } from './cache'
 
 const LOGIN_URL = 'https://api.cruzverde.com.co/customer-service/login'
@@ -118,11 +118,10 @@ export async function searchCruzVerde(query: string): Promise<ScrapedProduct[]> 
       const data = await res.json()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const hits = (data.hits ?? []) as Record<string, any>[]
-      const q = normalize(query)
       // Cruz Verde search can return loosely-related items; keep relevant ones.
       return hits
         .flatMap(h => { const p = mapHit(h); return p ? [p] : [] })
-        .filter(r => normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q))
+        .filter(r => matchesQuery(query, r.productName, r.activeIngredient))
     } catch (e) {
       console.error('[cruz-verde] Error:', e)
       return null

@@ -5,7 +5,7 @@ import {
   extractPackQuantity,
   LIQUID_PRESENTATIONS,
   classify,
-  normalize,
+  matchesQuery,
 } from './utils'
 import { withCache } from './cache'
 
@@ -129,10 +129,7 @@ export async function searchFarmatodo(query: string): Promise<ScrapedProduct[]> 
         return null // failure -> serve stale cache
       }
 
-      const q = normalize(query)
-      return hits.filter(r =>
-        normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
-      )
+      return hits.filter(r => matchesQuery(query, r.productName, r.activeIngredient))
     } catch (e) {
       console.error('[farmatodo] Error:', e)
       return null

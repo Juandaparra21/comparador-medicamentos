@@ -1,11 +1,41 @@
 ﻿import type { PharmacyResult } from '@/app/types'
 import type { ScrapedProduct } from './types'
+import { normalize } from './utils'
 import { searchFarmatodo }   from './farmatodo'
 import { searchCruzVerde }   from './cruz_verde'
 import { searchLaRebaja }    from './la_rebaja'
 import { searchOlimpica }    from './olimpica'
 import { searchColsubsidio } from './colsubsidio'
 import { searchCafam }       from './cafam'
+
+const SCRAPERS = [
+  searchFarmatodo, searchCruzVerde, searchLaRebaja,
+  searchOlimpica, searchColsubsidio, searchCafam,
+] as const
+
+// Well-known Colombian brand -> active ingredient. Searching a brand also searches
+// its generic, so "advil" returns generic ibuprofeno too. One direction only
+// (ingredient searches already surface brands from the sources) to keep it cheap.
+const BRAND_TO_INGREDIENT: Record<string, string> = {
+  dolex:     'acetaminofen',
+  winadol:   'acetaminofen',
+  advil:     'ibuprofeno',
+  motrin:    'ibuprofeno',
+  apronax:   'naproxeno',
+  flanax:    'naproxeno',
+  voltaren:  'diclofenaco',
+  cataflam:  'diclofenaco',
+  aspirina:  'acido acetilsalicilico',
+  clarityne: 'loratadina',
+}
+
+function expandQueries(query: string): string[] {
+  const norm   = normalize(query)
+  const tokens = norm.split(/\s+/).filter((t) => t.length >= 3)
+  const main   = tokens.length ? tokens.reduce((a, b) => (b.length > a.length ? b : a)) : norm
+  const ingredient = BRAND_TO_INGREDIENT[norm] ?? BRAND_TO_INGREDIENT[main]
+  return ingredient ? [query, ingredient] : [query]
+}
 
 const PHARMACY_NAMES: Record<string, string> = {
   'farmatodo':   'Farmatodo',
@@ -61,20 +91,25 @@ function withBudget(p: Promise<ScrapedProduct[]>, ms: number): Promise<ScrapedPr
 }
 
 export async function searchAllPharmacies(query: string): Promise<PharmacyResult[]> {
-  const lists = await Promise.all([
-    withBudget(searchFarmatodo(query),   SCRAPER_BUDGET_MS),
-    withBudget(searchCruzVerde(query),   SCRAPER_BUDGET_MS),
-    withBudget(searchLaRebaja(query),    SCRAPER_BUDGET_MS),
-    withBudget(searchOlimpica(query),    SCRAPER_BUDGET_MS),
-    withBudget(searchColsubsidio(query), SCRAPER_BUDGET_MS),
-    withBudget(searchCafam(query),       SCRAPER_BUDGET_MS),
-  ])
+  const queries = expandQueries(query)
 
-  const all: PharmacyResult[] = []
-  let idx = 0
+  // Every scraper for every query term, in parallel, each within its budget.
+  const tasks = queries.flatMap((q) => SCRAPERS.map((s) => withBudget(s(q), SCRAPER_BUDGET_MS)))
+  const lists = await Promise.all(tasks)
+
+  // Dedup by pharmacy + product name (the same item can arrive from two terms).
+  const seen = new Set<string>()
+  const deduped: ScrapedProduct[] = []
   for (const list of lists) {
-    all.push(...list.map((p) => toPharmacyResult(p, idx++)))
+    for (const p of list) {
+      const key = `${p.pharmacyId}::${normalize(p.productName)}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      deduped.push(p)
+    }
   }
 
-  return all.sort((a, b) => a.price - b.price)
+  return deduped
+    .map((p, i) => toPharmacyResult(p, i))
+    .sort((a, b) => a.price - b.price)
 }

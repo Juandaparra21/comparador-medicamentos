@@ -1,5 +1,5 @@
 import type { ScrapedProduct } from './types'
-import { extractConcentration, extractPresentation, extractPackQuantity, LIQUID_PRESENTATIONS, classify, normalize } from './utils'
+import { extractConcentration, extractPresentation, extractPackQuantity, LIQUID_PRESENTATIONS, classify, matchesQuery } from './utils'
 import { withCache } from './cache'
 
 const SEARCH_URL = 'https://colsubsidio.myvtex.com/api/catalog_system/pub/products/search/'
@@ -106,9 +106,6 @@ export async function searchColsubsidio(query: string): Promise<ScrapedProduct[]
     }
     if (failed) return null // failure -> serve stale cache
 
-    const q = normalize(query)
-    return results.filter(r =>
-      normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
-    )
+    return results.filter(r => matchesQuery(query, r.productName, r.activeIngredient))
   })
 }
