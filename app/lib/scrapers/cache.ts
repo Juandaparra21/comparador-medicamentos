@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { ScrapedProduct } from './types'
+import { normalize } from './utils'
 
 // Server-side cache for scraper results, used to smooth over intermittent source
 // failures (e.g. Cloudflare blocking Vercel's IP for a given request). Accessed
@@ -50,4 +51,37 @@ export async function setCache(pharmacy: string, query: string, results: Scraped
   } catch {
     // best-effort; a cache write failure must never break search
   }
+}
+
+/**
+ * Wraps a scraper so its results survive intermittent source failures.
+ *  - Fresh cache (<10 min): returned immediately, no network call.
+ *  - Otherwise run `fetcher`:
+ *      • returns an array  → live success: cache it (if non-empty) and return it.
+ *      • returns null      → live FAILED: serve the last cached results, else [].
+ * The fetcher MUST return null only on failure, and [] for a genuine "no results".
+ */
+export async function withCache(
+  pharmacy: string,
+  query: string,
+  fetcher: () => Promise<ScrapedProduct[] | null>,
+): Promise<ScrapedProduct[]> {
+  const key = normalize(query)
+  const cached = await getCache(pharmacy, key)
+  if (cached?.fresh) {
+    console.log(`[${pharmacy}] '${query}' -> ${cached.results.length} (cache)`)
+    return cached.results
+  }
+
+  const live = await fetcher()
+  if (live === null) {
+    if (cached) {
+      console.log(`[${pharmacy}] '${query}' -> ${cached.results.length} (stale cache; live failed)`)
+      return cached.results
+    }
+    return []
+  }
+
+  await setCache(pharmacy, key, live)
+  return live
 }

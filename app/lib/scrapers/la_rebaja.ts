@@ -1,5 +1,6 @@
 import type { ScrapedProduct } from './types'
 import { extractConcentration, extractPresentation, extractPackQuantity, LIQUID_PRESENTATIONS, classify, normalize } from './utils'
+import { withCache } from './cache'
 
 const SEARCH_URL = 'https://www.larebajavirtual.com/api/catalog_system/pub/products/search/'
 const BASE_HEADERS = {
@@ -90,31 +91,35 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
 }
 
 export async function searchLaRebaja(query: string): Promise<ScrapedProduct[]> {
-  const results: ScrapedProduct[] = []
-  try {
-    // Single page of 50 is plenty for relevance and avoids a second sequential
-    // round-trip (each request can take several seconds).
-    for (let offset = 0; offset < 50; offset += 50) {
-      const params = new URLSearchParams({ ft: query, _from: String(offset), _to: String(offset + 49) })
+  return withCache('la-rebaja', query, async () => {
+    const results: ScrapedProduct[] = []
+    let failed = false
+    try {
+      // Single page of 50 is plenty for relevance and avoids a second sequential
+      // round-trip (each request can take several seconds).
+      const params = new URLSearchParams({ ft: query, _from: '0', _to: '49' })
       const res = await fetch(`${SEARCH_URL}?${params}`, { headers: BASE_HEADERS, signal: AbortSignal.timeout(7_000) })
-      if (res.status !== 200 && res.status !== 206) break
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const products = (await res.json()) as Record<string, any>[]
-      if (!Array.isArray(products) || !products.length) break
-      for (const p of products) {
-        const product = mapProduct(p)
-        if (product) results.push(product)
+      if (res.status !== 200 && res.status !== 206) {
+        failed = true
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const products = (await res.json()) as Record<string, any>[]
+        if (Array.isArray(products)) {
+          for (const p of products) {
+            const product = mapProduct(p)
+            if (product) results.push(product)
+          }
+        }
       }
-      if (products.length < 50) break
+    } catch (e) {
+      console.error('[la-rebaja] Error:', e)
+      if (results.length === 0) failed = true
     }
-  } catch (e) {
-    console.error('[la-rebaja] Error:', e)
-  }
+    if (failed) return null // failure -> serve stale cache
 
-  const q        = normalize(query)
-  const filtered = results.filter(r =>
-    normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
-  )
-  console.log(`[la-rebaja] '${query}' -> ${filtered.length} productos`)
-  return filtered
+    const q = normalize(query)
+    return results.filter(r =>
+      normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
+    )
+  })
 }

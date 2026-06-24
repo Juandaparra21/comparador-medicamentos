@@ -1,5 +1,6 @@
 import type { ScrapedProduct } from './types'
 import { extractConcentration, extractPresentation, extractPackQuantity, LIQUID_PRESENTATIONS, classify, normalize } from './utils'
+import { withCache } from './cache'
 
 const SEARCH_URL = 'https://colsubsidio.myvtex.com/api/catalog_system/pub/products/search/'
 const BASE_HEADERS = {
@@ -26,6 +27,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sellers = ((items[0] as any).sellers ?? []) as Record<string, unknown>[]
   if (!sellers.length) return null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const offer = ((sellers[0] as any).commertialOffer ?? {}) as Record<string, number>
 
   const salePrice = Number(offer.Price) || 0
@@ -79,29 +81,34 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
 }
 
 export async function searchColsubsidio(query: string): Promise<ScrapedProduct[]> {
-  const results: ScrapedProduct[] = []
-  try {
-    for (let offset = 0; offset < 100; offset += 50) {
-      const params = new URLSearchParams({ ft: query, _from: String(offset), _to: String(offset + 49) })
+  return withCache('colsubsidio', query, async () => {
+    const results: ScrapedProduct[] = []
+    let failed = false
+    try {
+      // Single page of 50 — enough for relevance and keeps the request fast.
+      const params = new URLSearchParams({ ft: query, _from: '0', _to: '49' })
       const res = await fetch(`${SEARCH_URL}?${params}`, { headers: BASE_HEADERS, signal: AbortSignal.timeout(7_000) })
-      if (res.status !== 200 && res.status !== 206) break
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const products = (await res.json()) as Record<string, any>[]
-      if (!Array.isArray(products) || !products.length) break
-      for (const p of products) {
-        const product = mapProduct(p)
-        if (product) results.push(product)
+      if (res.status !== 200 && res.status !== 206) {
+        failed = true
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const products = (await res.json()) as Record<string, any>[]
+        if (Array.isArray(products)) {
+          for (const p of products) {
+            const product = mapProduct(p)
+            if (product) results.push(product)
+          }
+        }
       }
-      if (products.length < 50) break
+    } catch (e) {
+      console.error('[colsubsidio] Error:', e)
+      if (results.length === 0) failed = true
     }
-  } catch (e) {
-    console.error('[colsubsidio] Error:', e)
-  }
+    if (failed) return null // failure -> serve stale cache
 
-  const q        = normalize(query)
-  const filtered = results.filter(r =>
-    normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
-  )
-  console.log(`[colsubsidio] '${query}' -> ${filtered.length} productos`)
-  return filtered
+    const q = normalize(query)
+    return results.filter(r =>
+      normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
+    )
+  })
 }

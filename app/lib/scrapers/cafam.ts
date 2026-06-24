@@ -1,6 +1,6 @@
 import type { ScrapedProduct } from './types'
 import { extractConcentration, extractPresentation, extractPackQuantity, classify, normalize } from './utils'
-import { getCache, setCache } from './cache'
+import { withCache } from './cache'
 
 const BASE = 'https://www.drogueriascafam.com.co'
 
@@ -94,40 +94,21 @@ async function fetchSearchJSON(query: string): Promise<Record<string, any> | nul
 }
 
 export async function searchCafam(query: string): Promise<ScrapedProduct[]> {
-  const cacheKey = normalize(query)
+  return withCache('cafam', query, async () => {
+    const data = await fetchSearchJSON(query)
+    if (!data) return null // failure -> serve stale cache
 
-  // Fast path: recent cache avoids hitting Cafam/Cloudflare at all.
-  const cached = await getCache('cafam', cacheKey)
-  if (cached?.fresh) {
-    console.log(`[cafam] '${query}' -> ${cached.results.length} (cache)`)
-    return cached.results
-  }
-
-  const data = await fetchSearchJSON(query)
-  if (!data) {
-    // Live request failed (Cloudflare/timeout). Serve stale cache so Cafam does
-    // not vanish from results just because one request got blocked.
-    if (cached) {
-      console.log(`[cafam] '${query}' -> ${cached.results.length} (stale cache; live failed)`)
-      return cached.results
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = (data.products ?? []) as Record<string, any>[]
+    const products: ScrapedProduct[] = []
+    for (const p of raw) {
+      const product = mapProduct(p)
+      if (product) products.push(product)
     }
-    return []
-  }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const raw = (data.products ?? []) as Record<string, any>[]
-  const products: ScrapedProduct[] = []
-  for (const p of raw) {
-    const product = mapProduct(p)
-    if (product) products.push(product)
-  }
-
-  const q = normalize(query)
-  const matched = products.filter((r) =>
-    normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q),
-  )
-
-  await setCache('cafam', cacheKey, matched)
-  console.log(`[cafam] '${query}' -> ${matched.length} productos`)
-  return matched
+    const q = normalize(query)
+    return products.filter((r) =>
+      normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q),
+    )
+  })
 }

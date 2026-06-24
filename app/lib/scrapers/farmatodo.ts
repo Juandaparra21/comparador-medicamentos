@@ -7,6 +7,7 @@ import {
   classify,
   normalize,
 } from './utils'
+import { withCache } from './cache'
 
 const ALGOLIA_URL = 'https://api-search.farmatodo.com/1/indexes/products/query'
 const ALGOLIA_HEADERS = {
@@ -118,23 +119,23 @@ async function queryAlgolia(url: string, query: string): Promise<ScrapedProduct[
 }
 
 export async function searchFarmatodo(query: string): Promise<ScrapedProduct[]> {
-  try {
-    // Try primary host first, fall back to standard Algolia DSN
-    let hits = await queryAlgolia(ALGOLIA_URL, query)
-    if (!hits) hits = await queryAlgolia(ALGOLIA_FALLBACK, query)
-    if (!hits) {
-      console.error('[farmatodo] Both Algolia hosts failed')
-      return []
-    }
+  return withCache('farmatodo', query, async () => {
+    try {
+      // Try primary host first, fall back to standard Algolia DSN
+      let hits = await queryAlgolia(ALGOLIA_URL, query)
+      if (!hits) hits = await queryAlgolia(ALGOLIA_FALLBACK, query)
+      if (!hits) {
+        console.error('[farmatodo] Both Algolia hosts failed')
+        return null // failure -> serve stale cache
+      }
 
-    const q       = normalize(query)
-    const results = hits.filter(r =>
-      normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
-    )
-    console.log(`[farmatodo] '${query}' -> ${results.length} productos`)
-    return results
-  } catch (e) {
-    console.error('[farmatodo] Error:', e)
-    return []
-  }
+      const q = normalize(query)
+      return hits.filter(r =>
+        normalize(r.productName).includes(q) || normalize(r.activeIngredient).includes(q)
+      )
+    } catch (e) {
+      console.error('[farmatodo] Error:', e)
+      return null
+    }
+  })
 }
