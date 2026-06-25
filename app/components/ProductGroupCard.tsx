@@ -20,7 +20,7 @@ function qtyDisplay(quantity: number, presentation: string): string {
   return `${quantity} ${presentation}${quantity !== 1 ? 's' : ''}`
 }
 
-interface Props { group: ProductGroup; distances?: PharmacyDistances; stores?: PharmacyStores }
+interface Props { group: ProductGroup; priceBasis?: 'total' | 'unit'; distances?: PharmacyDistances; stores?: PharmacyStores }
 
 function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -34,12 +34,13 @@ function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredien
   return <MedicationImage ingredient={ingredient} height={80} />
 }
 
-export function ProductGroupCard({ group, distances, stores }: Props) {
+export function ProductGroupCard({ group, priceBasis = 'total', distances, stores }: Props) {
   const { results, minPrice, maxPrice, savings } = group
   const avail    = results.filter(r => r.availability !== 'unavailable')
   const cheapest = avail[0] ?? null
   const slug     = normalize(group.activeIngredient)
   const hasMany  = avail.length > 1
+  const unitSuffix = LIQUID_PRESENTATIONS.has(group.presentation) ? '/ml' : '/und'
 
   return (
     <article className="group relative flex flex-col bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl shadow-sm hover:bg-white/85 hover:shadow-[0_8px_32px_rgba(0,88,188,0.10)] transition-all duration-300 overflow-hidden">
@@ -95,6 +96,9 @@ export function ProductGroupCard({ group, distances, stores }: Props) {
             )}
             <span className="text-[22px] font-bold leading-[28px] text-[#1a1b1f] tabular-nums">
               {formatCOP(minPrice)}
+            </span>
+            <span className={`block text-[11px] tabular-nums mt-0.5 ${priceBasis === 'unit' ? 'font-bold text-secondary' : 'font-semibold text-[#717786]'}`}>
+              {formatCOP(group.minPricePerUnit)}{unitSuffix}
             </span>
           </div>
           {hasMany && (

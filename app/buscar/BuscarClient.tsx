@@ -35,6 +35,7 @@ export default function BuscarClient() {
   const [loading,        setLoading]        = useState(true)
   const [fetchedAt,      setFetchedAt]      = useState<string | null>(null)
   const [sortKey,        setSortKey]        = useState<SortKey>('price-asc')
+  const [priceBasis,     setPriceBasis]     = useState<'total' | 'unit'>('total')
   const [typeFilter,     setTypeFilter]     = useState<TypeFilter>('all')
   const [concFilter,     setConcFilter]     = useState<string>('')
   const [presentFilter,  setPresentFilter]  = useState<string>('')
@@ -49,6 +50,8 @@ export default function BuscarClient() {
     }
     setLoading(true)
     setFetchedAt(null)
+    setSortKey('price-asc')
+    setPriceBasis('total')
     setTypeFilter('all')
     setConcFilter('')
     setPresentFilter('')
@@ -111,15 +114,35 @@ export default function BuscarClient() {
     setQtyFilter(null)
   }
 
+  // "Best price" basis: absolute total vs price per unit. Drives the cheapest
+  // highlight, the min/max summary, and the ordering of results and groups.
+  const basisVal = (r: PharmacyResult) => (priceBasis === 'unit' ? r.pricePerUnit : r.price)
+
   const availableFiltered = filtered.filter((r) => r.availability !== 'unavailable')
   const minPrice = availableFiltered.length > 0
-    ? Math.min(...availableFiltered.map((r) => r.price))
+    ? Math.min(...availableFiltered.map(basisVal))
     : null
   const maxPrice = availableFiltered.length > 0
-    ? Math.max(...availableFiltered.map((r) => r.price))
+    ? Math.max(...availableFiltered.map(basisVal))
     : null
   const sorted = sortResults(filtered, sortKey, distances)
   const { comparisons, singles } = groupResults(filtered)
+
+  // Re-rank comparison groups by the chosen basis (groupResults orders by
+  // absolute minPrice). Most-available first, then cheapest by basis.
+  const groupMin = (g: typeof comparisons[number]) =>
+    priceBasis === 'unit' ? g.minPricePerUnit : g.minPrice
+  const orderedComparisons = [...comparisons].sort((a, b) =>
+    b.availableCount !== a.availableCount
+      ? b.availableCount - a.availableCount
+      : groupMin(a) - groupMin(b),
+  )
+
+  // Switching basis also sets a matching default sort for the flat list.
+  function changeBasis(b: 'total' | 'unit') {
+    setPriceBasis(b)
+    setSortKey(b === 'unit' ? 'unit-asc' : 'price-asc')
+  }
 
   const genericCount = results.filter((r) => r.type === 'generic').length
   const brandCount   = results.filter((r) => r.type === 'brand').length
@@ -322,6 +345,27 @@ export default function BuscarClient() {
                     Todos
                   </button>
                 </div>
+
+                {/* Best-price basis: total vs per unit */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-semibold text-[#717786] whitespace-nowrap">Mejor precio:</span>
+                  <div className="flex bg-black/[0.05] rounded-lg p-0.5">
+                    <button
+                      onClick={() => changeBasis('total')}
+                      className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all cursor-pointer ${priceBasis === 'total' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'}`}
+                      title="El más barato por el precio total del empaque"
+                    >
+                      Total
+                    </button>
+                    <button
+                      onClick={() => changeBasis('unit')}
+                      className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all cursor-pointer ${priceBasis === 'unit' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'}`}
+                      title="El más barato por unidad (tableta, ml, etc.)"
+                    >
+                      Por unidad
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Location button */}
@@ -366,18 +410,18 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Precios min / max */}
+            {/* Precios min / max — segun la base (total o por unidad) */}
             {minPrice !== null && maxPrice !== null && (
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
-                  Min: {formatCOP(minPrice)}
+                  {priceBasis === 'unit' ? 'Min/und' : 'Min'}: {formatCOP(minPrice)}
                 </span>
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 text-[#414755] border border-white/40">
-                  Max: {formatCOP(maxPrice)}
+                  {priceBasis === 'unit' ? 'Max/und' : 'Max'}: {formatCOP(maxPrice)}
                 </span>
-                {maxPrice - minPrice > 1000 && (
+                {maxPrice - minPrice > (priceBasis === 'unit' ? 50 : 1000) && (
                   <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    Ahorra hasta {formatCOP(maxPrice - minPrice)}
+                    Ahorra hasta {formatCOP(maxPrice - minPrice)}{priceBasis === 'unit' ? ' por unidad' : ''}
                   </span>
                 )}
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 text-[#414755] border border-white/40">
@@ -397,8 +441,8 @@ export default function BuscarClient() {
                         Mismo producto, distintas farmacias
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {comparisons.map((group) => (
-                          <ProductGroupCard key={group.key} group={group} distances={distances} stores={stores} />
+                        {orderedComparisons.map((group) => (
+                          <ProductGroupCard key={group.key} group={group} priceBasis={priceBasis} distances={distances} stores={stores} />
                         ))}
                       </div>
                     </div>
@@ -416,7 +460,8 @@ export default function BuscarClient() {
                           <ResultCard
                             key={result.id}
                             result={result}
-                            isCheapest={result.availability !== 'unavailable' && result.price === minPrice}
+                            isCheapest={result.availability !== 'unavailable' && basisVal(result) === minPrice}
+                            cheapestLabel={priceBasis === 'unit' ? 'Mejor x unidad' : 'Mejor precio'}
                             distanceKm={distances[result.pharmacy]}
                             store={stores[result.pharmacy]}
                           />
@@ -431,7 +476,8 @@ export default function BuscarClient() {
                     <ResultCard
                       key={result.id}
                       result={result}
-                      isCheapest={result.availability !== 'unavailable' && result.price === minPrice}
+                      isCheapest={result.availability !== 'unavailable' && basisVal(result) === minPrice}
+                      cheapestLabel={priceBasis === 'unit' ? 'Mejor x unidad' : 'Mejor precio'}
                       distanceKm={distances[result.pharmacy]}
                       store={stores[result.pharmacy]}
                     />

@@ -10,6 +10,8 @@ export interface ProductGroup {
   results: PharmacyResult[]   // sorted: cheapest available first, unavailable last
   minPrice: number
   maxPrice: number
+  minPricePerUnit: number
+  maxPricePerUnit: number
   savings: number
   availableCount: number
 }
@@ -118,6 +120,9 @@ export function groupResults(results: PharmacyResult[]): GroupedResults {
     const prices = avail.map(r => r.price)
     const min    = prices.length ? Math.min(...prices) : sorted[0].price
     const max    = prices.length ? Math.max(...prices) : sorted[0].price
+    const unitPrices = avail.map(r => r.pricePerUnit)
+    const minUnit    = unitPrices.length ? Math.min(...unitPrices) : sorted[0].pricePerUnit
+    const maxUnit    = unitPrices.length ? Math.max(...unitPrices) : sorted[0].pricePerUnit
 
     // Pick the richest representative for display fields
     const rep = deduped.find(r => r.activeIngredient) ?? deduped[0]
@@ -132,6 +137,8 @@ export function groupResults(results: PharmacyResult[]): GroupedResults {
       results:          sorted,
       minPrice:         min,
       maxPrice:         max,
+      minPricePerUnit:  minUnit,
+      maxPricePerUnit:  maxUnit,
       savings:          avail.length > 1 ? max - min : 0,
       availableCount:   avail.length,
     })

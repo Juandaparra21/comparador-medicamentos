@@ -41,6 +41,8 @@ const AVAILABILITY_TEXT: Record<PharmacyResult['availability'], string> = {
 interface Props {
   result: PharmacyResult
   isCheapest: boolean
+  /** Badge text for the cheapest item (varies with the total vs per-unit basis) */
+  cheapestLabel?: string
   distanceKm?: number
   store?: NearestStore
 }
@@ -64,8 +66,9 @@ function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredi
   return <MedicationImage ingredient={ingredient} height={80} />
 }
 
-export default function ResultCard({ result, isCheapest, distanceKm, store }: Props) {
+export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor precio', distanceKm, store }: Props) {
   const slug = normalize(result.activeIngredient)
+  const perUnitHighlight = isCheapest && cheapestLabel !== 'Mejor precio'
 
   function goToPharmacy(e: React.MouseEvent) {
     // Only follow the card click if not clicking an interactive child
@@ -100,7 +103,7 @@ export default function ResultCard({ result, isCheapest, distanceKm, store }: Pr
       {/* Cheapest badge */}
       {isCheapest && (
         <span className="absolute top-2 right-2 text-[9px] sm:text-[10px] font-bold tracking-wide bg-secondary text-white px-2 py-0.5 rounded-full whitespace-nowrap z-10">
-          Mejor precio
+          {cheapestLabel}
         </span>
       )}
 
@@ -166,7 +169,7 @@ export default function ResultCard({ result, isCheapest, distanceKm, store }: Pr
               {formatCOP(result.price)}
             </span>
           </div>
-          <span className="text-[11px] font-semibold text-[#717786] tabular-nums">
+          <span className={`text-[11px] tabular-nums ${perUnitHighlight ? 'font-bold text-secondary' : 'font-semibold text-[#717786]'}`}>
             {formatCOP(result.pricePerUnit)}{LIQUID_PRESENTATIONS.has(result.presentation) ? '/ml' : '/und'}
           </span>
         </div>
