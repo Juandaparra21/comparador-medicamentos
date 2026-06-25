@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
 import type { PharmacyHistory } from '@/app/utils/priceHistoryTypes'
 import { PriceHistoryChart } from './PriceHistoryChart'
 import { formatCOP } from '@/app/utils/format'
+import { useAuth } from '@/app/context/AuthContext'
+import { getBrowserClient } from '@/app/lib/supabase/browser'
 
 interface HistoryResponse {
   tracked: boolean
@@ -21,12 +24,14 @@ interface Props {
 }
 
 export function PriceTracker({ query, label }: Props) {
+  const { user } = useAuth()
   const [data, setData]         = useState<HistoryResponse | null>(null)
   const [loading, setLoading]   = useState(true)
   const [tracking, setTracking] = useState(false)
   const [error, setError]       = useState<string | null>(null)
 
   const load = useCallback(async () => {
+    setLoading(true)
     try {
       const res = await fetch(`/api/history?q=${encodeURIComponent(query)}`)
       setData(await res.json())
@@ -37,18 +42,26 @@ export function PriceTracker({ query, label }: Props) {
     }
   }, [query])
 
-  useEffect(() => { setLoading(true); load() }, [load])
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: show loading on (re)fetch
+  useEffect(() => { load() }, [load])
 
   async function startTracking() {
-    if (tracking) return
+    if (tracking || !user) return
     setTracking(true)
     setError(null)
     try {
+      // Attach the user's access token so the server can verify the session.
+      const sb = await getBrowserClient()
+      const { data: { session } } = await sb.auth.getSession()
+      const token = session?.access_token
+      if (!token) { setError('Inicia sesion para rastrear precios.'); return }
+
       const res = await fetch('/api/track', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ query, label }),
       })
+      if (res.status === 401) { setError('Inicia sesion para rastrear precios.'); return }
       const json = await res.json()
       if (!json.ok) throw new Error(json.error ?? 'error')
       await load()
@@ -141,7 +154,9 @@ export function PriceTracker({ query, label }: Props) {
 
       <div className="mt-4 pt-4 border-t border-white/40 flex items-center justify-between gap-3 flex-wrap">
         <p className="text-[12px] text-[#717786] flex items-center gap-1.5 max-w-[60%] min-w-[180px]">
-          {isTracked ? (
+          {!user ? (
+            'Inicia sesion para rastrear este medicamento y guardar su precio cada dia.'
+          ) : isTracked ? (
             <>
               <svg className="w-4 h-4 text-secondary shrink-0" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
@@ -152,17 +167,26 @@ export function PriceTracker({ query, label }: Props) {
             'Guardaremos el precio cada dia para construir el historial.'
           )}
         </p>
-        <button
-          onClick={startTracking}
-          disabled={tracking}
-          className={`text-[12px] font-bold px-4 py-2 rounded-lg transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap ${
-            isTracked
-              ? 'bg-white/70 border border-[#c1c6d7]/50 text-[#414755] hover:bg-white/90'
-              : 'bg-gradient-to-r from-primary to-tertiary text-white hover:opacity-90'
-          }`}
-        >
-          {tracking ? 'Guardando...' : isTracked ? 'Actualizar ahora' : 'Rastrear precio'}
-        </button>
+        {!user ? (
+          <Link
+            href="/login"
+            className="text-[12px] font-bold px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white hover:opacity-90 transition-opacity whitespace-nowrap"
+          >
+            Inicia sesion para rastrear
+          </Link>
+        ) : (
+          <button
+            onClick={startTracking}
+            disabled={tracking}
+            className={`text-[12px] font-bold px-4 py-2 rounded-lg transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap ${
+              isTracked
+                ? 'bg-white/70 border border-[#c1c6d7]/50 text-[#414755] hover:bg-white/90'
+                : 'bg-gradient-to-r from-primary to-tertiary text-white hover:opacity-90'
+            }`}
+          >
+            {tracking ? 'Guardando...' : isTracked ? 'Actualizar ahora' : 'Rastrear precio'}
+          </button>
+        )}
       </div>
 
       {error && <p className="text-[12px] text-red-500 mt-2">{error}</p>}
