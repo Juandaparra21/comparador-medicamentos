@@ -5,7 +5,6 @@ import { AuthProvider } from '@/app/context/AuthContext'
 import { NavAuth } from '@/app/components/NavAuth'
 import { WishlistNav } from '@/app/components/WishlistNav'
 import { CartNav } from '@/app/components/CartNav'
-import { MedDisclaimer } from '@/app/components/MedDisclaimer'
 import { ChatAssistant } from '@/app/components/ChatAssistant'
 import { SITE_URL } from '@/app/lib/siteUrl'
 import './globals.css'
@@ -53,9 +52,6 @@ export default function RootLayout({
     <html lang="es" className={`${hanken.variable} h-full`}>
       <body className="min-h-full flex flex-col relative bg-[#fbfbfd]">
         <AuthProvider>
-          {/* Medical disclaimer — dismissible, shown once per browser */}
-          <MedDisclaimer />
-
           {/* Header */}
           <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
             <div className="mx-auto px-4 sm:px-5 max-w-5xl h-14 flex items-center justify-between gap-4">
