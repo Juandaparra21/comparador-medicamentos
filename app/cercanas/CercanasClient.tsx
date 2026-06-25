@@ -2,11 +2,21 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import type { PharmacyResult } from '@/app/types'
 import { useNearbyList } from '@/app/hooks/useNearbyList'
 import type { NearbyPharmacyView, OpenState } from '@/app/utils/nearbyPharmacies'
 import { formatDistance, formatTripShort, directionsUrl } from '@/app/utils/geo'
 import { formatCOP } from '@/app/utils/format'
+
+const PharmacyMap = dynamic(() => import('@/app/components/PharmacyMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center text-[13px] text-[#717786]">
+      Cargando mapa...
+    </div>
+  ),
+})
 
 interface ChainPrice { price: number; url: string }
 
@@ -17,7 +27,7 @@ const OPEN_BADGE: Record<OpenState, { label: string; cls: string }> = {
 }
 
 export default function CercanasClient() {
-  const { status, pharmacies, error, requestLocation, searchByPlace } = useNearbyList()
+  const { status, pharmacies, error, origin, requestLocation, searchByPlace } = useNearbyList()
   const [place, setPlace] = useState('')
 
   // Two location types: all pharmacies (OSM) vs affiliates (our priced chains).
@@ -162,6 +172,19 @@ export default function CercanasClient() {
               Con precios ({affiliateCount})
             </button>
           </div>
+
+          {/* Map — always visible while browsing nearby pharmacies */}
+          {origin && shown.length > 0 && (
+            <div className="rounded-2xl overflow-hidden border border-white/60 shadow-sm mb-4">
+              <div className="flex items-center justify-end gap-3 px-4 py-2 bg-white/70 border-b border-[#f0f1f5] text-[11px] text-[#717786]">
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Con precios</span>
+                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#9ca3af] inline-block" /> Otra</span>
+              </div>
+              <div className="h-[320px] sm:h-[420px] w-full">
+                <PharmacyMap origin={origin} pharmacies={shown} />
+              </div>
+            </div>
+          )}
 
           {shown.length === 0 ? (
             <div className="text-center py-12">
