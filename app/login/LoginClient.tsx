@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/app/context/AuthContext'
+import { GoogleButton } from '@/app/components/GoogleButton'
 
 type View = 'login' | 'forgot' | 'forgot-sent'
 
@@ -103,7 +104,17 @@ export default function LoginClient() {
   }
 
   return (
-    <form onSubmit={handleLogin} noValidate className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
+      <GoogleButton />
+
+      {/* Divider */}
+      <div className="flex items-center gap-3" aria-hidden="true">
+        <div className="flex-1 h-px bg-[#c1c6d7]/50" />
+        <span className="text-[11px] text-[#c1c6d7] font-medium">o</span>
+        <div className="flex-1 h-px bg-[#c1c6d7]/50" />
+      </div>
+
+      <form onSubmit={handleLogin} noValidate className="flex flex-col gap-4">
       {/* Email */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-[12px] font-semibold text-[#414755] tracking-wide">
@@ -165,6 +176,7 @@ export default function LoginClient() {
           Registrate gratis
         </Link>
       </p>
-    </form>
+      </form>
+    </div>
   )
 }

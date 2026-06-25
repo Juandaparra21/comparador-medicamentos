@@ -1,7 +1,7 @@
 ﻿import RegisterClient from './RegisterClient'
 
 export const metadata = {
-  title: 'Crear cuenta - Farmi',
+  title: 'Crear cuenta - FarmiYa',
   robots: { index: false, follow: true },
 }
 
@@ -12,8 +12,8 @@ export default function RegisterPage() {
         {/* Logo mark */}
         <div className="text-center mb-8">
           <p className="font-bold text-[22px] tracking-tight">
-            <span className="text-[#1a1b1f]">Far</span>
-            <span className="text-primary">mi</span>
+            <span className="text-[#1a1b1f]">Farmi</span>
+            <span className="text-primary">Ya</span>
           </p>
           <h1 className="text-[20px] sm:text-[24px] font-bold text-[#1a1b1f] mt-2 tracking-tight">
             Crea tu cuenta gratis
