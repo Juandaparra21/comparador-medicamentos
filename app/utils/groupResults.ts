@@ -29,12 +29,15 @@ function norm(s: string): string {
  *  1. Lowercase + remove accents
  *  2. Join split number+unit → "400 mg" → "400mg"
  *  3. Normalize decimal: "400,5" → "400.5"
- *  4. Collapse "x 10" / "× 10" quantity prefixes → just the number
+ *  4. REMOVE pack-quantity expressions ("x 10", "100 tabletas") so different pack
+ *     sizes of the same product share a base key. The real pack size is added by
+ *     the caller via the authoritative parsed quantity, not the (often absent or
+ *     inconsistent) number in the name.
  *  5. Remove presentation noise words
  *  6. Split into tokens, sort alphabetically, rejoin
  *
- * Result: "IBUPROFENO COASPHARMA 400MG X 10 TABLETAS" →  "10|400mg|coaspharma|ibuprofeno"
- *         "IBUPROFENO MEMPHIS 400MG X 10 TABLETAS"    →  "10|400mg|ibuprofeno|memphis"
+ * Result: "IBUPROFENO COASPHARMA 400MG X 10 TABLETAS" →  "400mg|coaspharma|ibuprofeno"
+ *         "IBUPROFENO MEMPHIS 400MG X 10 TABLETAS"    →  "400mg|ibuprofeno|memphis"
  */
 function makeKey(productName: string): string {
   let s = norm(productName)
@@ -44,8 +47,13 @@ function makeKey(productName: string): string {
     n.replace(',', '.') + u
   )
 
-  // Normalize quantity prefix: x10, x 10, ×10 → just the number
-  s = s.replace(/[x×]\s*(\d+)/g, ' $1 ')
+  // Drop pack-quantity expressions so a 10-pack and a 100-pack of the SAME product
+  // (often named identically, e.g. "ACETAMINOFEN 500 MG (GENFAR)") get the same
+  // base key instead of being merged on name alone. Order matters: multipliers
+  // first, then "x N" (but never "x 500mg"), then "N tabletas".
+  s = s.replace(/(\d+)\s*blisters?\s*(?:[x×]|de)\s*\d+/g, ' ')
+  s = s.replace(/[x×]\s*\d+(?![a-z0-9])/g, ' ')
+  s = s.replace(/\b\d+\s*(?:tabletas?|capsulas?|comprimidos?|pastillas?|grageas?|sobres?|unidades?|und)\b/g, ' ')
 
   // Strip packaging/presentation noise words
   s = s.replace(
@@ -79,24 +87,37 @@ export interface GroupedResults {
 }
 
 function deduplicateByPharmacy(items: PharmacyResult[]): PharmacyResult[] {
-  // When the same pharmacy has multiple products mapping to the same group key,
-  // keep the one that appears first in the input (higher Algolia relevance rank).
-  // Showing multiple entries from the same pharmacy is confusing and can include
-  // stale Algolia catalog entries.
-  const seen = new Set<string>()
-  return items.filter(r => {
-    if (seen.has(r.pharmacy)) return false
-    seen.add(r.pharmacy)
-    return true
-  })
+  // When the same pharmacy lists the same product (same group key) more than once,
+  // keep the best offer: available over out-of-stock, then cheapest per unit, then
+  // cheapest total. Keeping the first-seen entry could surface a pricier or
+  // out-of-stock duplicate and hide the real best price.
+  const availRank = (r: PharmacyResult) =>
+    r.availability === 'unavailable' ? 2 : r.availability === 'limited' ? 1 : 0
+  const best = new Map<string, PharmacyResult>()
+  for (const r of items) {
+    const cur = best.get(r.pharmacy)
+    if (
+      !cur ||
+      availRank(r) < availRank(cur) ||
+      (availRank(r) === availRank(cur) && r.pricePerUnit < cur.pricePerUnit) ||
+      (availRank(r) === availRank(cur) && r.pricePerUnit === cur.pricePerUnit && r.price < cur.price)
+    ) {
+      best.set(r.pharmacy, r)
+    }
+  }
+  return [...best.values()]
 }
 
 export function groupResults(results: PharmacyResult[]): GroupedResults {
   const map = new Map<string, PharmacyResult[]>()
 
   for (const r of results) {
-    const key = makeKey(r.productName)
-    if (!key) continue
+    const base = makeKey(r.productName)
+    if (!base) continue
+    // Pack size is authoritative and kept out of the text key, so append it here.
+    // This separates a 10-pack from a 100-pack of the same product while still
+    // grouping equal-size packs across pharmacies.
+    const key = `${base}|q${r.quantity}`
     const arr = map.get(key) ?? []
     arr.push(r)
     map.set(key, arr)
