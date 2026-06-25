@@ -1,25 +1,43 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { getMedicineInfo } from '@/app/utils/medicineInfo'
-import { getMedicationHistory } from '@/app/utils/priceHistory'
-import { MOCK_DATA, normalize } from '@/app/utils/search'
-import { formatCOP } from '@/app/utils/format'
+import { getMedicineInfo, getAllMedicineSlugs } from '@/app/utils/medicineInfo'
+import { normalize } from '@/app/utils/search'
 import { MedicationImage } from '@/app/components/MedicationImage'
-import { PharmacyLogo } from '@/app/components/PharmacyLogo'
-import { PriceHistoryChart } from '@/app/components/PriceHistoryChart'
+import { PriceTracker } from '@/app/components/PriceTracker'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://farmi.co'
 
 interface Props {
   params: Promise<{ slug: string }>
+}
+
+// Pre-render every medication page at build time: faster for users and gives
+// crawlers static HTML to index.
+export function generateStaticParams() {
+  return getAllMedicineSlugs().map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const info = getMedicineInfo(slug)
   if (!info) return { title: 'Medicamento - FarmiYa' }
+
+  const title = `Precio de ${info.activeIngredient} en Colombia`
+  const description = `Compara el precio de ${info.activeIngredient} en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo y mas. Usos, dosis y advertencias de ${info.activeIngredient} (${info.therapeuticClass}).`
+  const canonical = `/medicamento/${slug}`
+
   return {
-    title: `${info.activeIngredient} - Informacion y precios - FarmiYa`,
-    description: `Informacion sobre ${info.activeIngredient}: usos, dosis, advertencias y comparacion de precios en farmacias de Colombia.`,
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      title: `${title} | FarmiYa`,
+      description,
+      url: `${SITE_URL}${canonical}`,
+      locale: 'es_CO',
+    },
   }
 }
 
@@ -28,19 +46,38 @@ export default async function MedicamentoPage({ params }: Props) {
   const info = getMedicineInfo(slug)
   if (!info) notFound()
 
-  const results = MOCK_DATA.filter(
-    (r) => normalize(r.activeIngredient) === normalize(info.activeIngredient)
-  ).sort((a, b) => a.price - b.price)
-
-  const history = getMedicationHistory(slug)
-  const allHistoryPrices = history
-    ? history.histories.flatMap((h) => h.data.map((p) => p.price))
-    : []
-  const allLow = allHistoryPrices.length ? Math.min(...allHistoryPrices) : null
-  const allHigh = allHistoryPrices.length ? Math.max(...allHistoryPrices) : null
+  // Structured data: the Drug entity (medical info, accurate) plus breadcrumbs.
+  // Offer/price structured data is intentionally omitted until prices are served
+  // live on this page — emitting stale prices to Google harms ranking.
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Drug',
+        name: info.activeIngredient,
+        nonProprietaryName: info.activeIngredient,
+        drugClass: info.therapeuticClass,
+        prescriptionStatus: info.requiresPrescription ? 'PrescriptionOnly' : 'OTC',
+        mechanismOfAction: info.mechanism,
+        warning: info.warnings.join(' '),
+        url: `${SITE_URL}/medicamento/${slug}`,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: info.activeIngredient, item: `${SITE_URL}/medicamento/${slug}` },
+        ],
+      },
+    ],
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-5 py-8 sm:py-12 space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-[12px] text-[#717786]">
@@ -194,85 +231,8 @@ export default async function MedicamentoPage({ params }: Props) {
         </section>
       </div>
 
-      {/* Price history chart */}
-      {history && allLow !== null && allHigh !== null && (
-        <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6">
-          <div className="flex items-start justify-between gap-3 mb-1">
-            <div>
-              <h2 className="text-[16px] font-bold text-[#1a1b1f]">Historial de precios</h2>
-              <p className="text-[12px] text-[#717786] mt-0.5">{history.label} — ultimos 12 meses</p>
-            </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
-              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/20 whitespace-nowrap">
-                Min: {formatCOP(allLow)}
-              </span>
-              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/60 text-[#414755] border border-white/40 whitespace-nowrap">
-                Max: {formatCOP(allHigh)}
-              </span>
-            </div>
-          </div>
-          <p className="text-[11px] text-[#c1c6d7] mb-4">Pasa el cursor sobre el grafico para ver el detalle</p>
-          <PriceHistoryChart histories={history.histories} unit={history.unit} />
-        </section>
-      )}
-
-      {/* Current prices */}
-      {results.length > 0 && (
-        <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-5 sm:px-6 pt-5 pb-2">
-            <h2 className="text-[16px] font-bold text-[#1a1b1f]">Precios actuales en farmacias</h2>
-            <p className="text-[11px] text-[#717786] mt-1">
-              Precios orientativos. Pueden variar. Al hacer clic en "Comprar" seras redirigido al sitio de la farmacia.
-            </p>
-          </div>
-
-          <div className="divide-y divide-[#f0f1f5] mt-3">
-            {results.map((r, idx) => (
-              <div key={r.id} className="flex items-center gap-3 px-5 sm:px-6 py-3.5">
-                <PharmacyLogo name={r.pharmacy} size={32} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold text-[#1a1b1f] truncate">{r.pharmacy}</p>
-                  <p className="text-[11px] text-[#717786] truncate">
-                    {r.productName} &bull; {r.quantity} {r.presentation}s
-                  </p>
-                </div>
-                <div className="text-right shrink-0 mr-2">
-                  <p className="text-[17px] font-bold text-[#1a1b1f] tabular-nums">{formatCOP(r.price)}</p>
-                  <p className="text-[10px] text-[#717786] tabular-nums">{formatCOP(r.pricePerUnit)}/und</p>
-                </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  {idx === 0 && (
-                    <span className="text-[9px] font-bold px-2 py-0.5 bg-secondary text-white rounded-full whitespace-nowrap">
-                      Mas barato
-                    </span>
-                  )}
-                  <a
-                    href={r.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[12px] font-bold px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white hover:opacity-90 transition-opacity whitespace-nowrap"
-                  >
-                    Comprar
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Third-party reminder inside the card */}
-          <div className="mx-5 sm:mx-6 my-4 flex items-start gap-2 bg-[#f5f6fa] rounded-xl p-3">
-            <svg className="w-4 h-4 text-[#717786] shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-            </svg>
-            <p className="text-[11px] text-[#717786] leading-relaxed">
-              FarmiYa no vende medicamentos, no procesa pagos y no es responsable de las transacciones realizadas en sitios de terceros. Cada farmacia es un negocio independiente.{' '}
-              <Link href="/terminos" className="text-primary font-semibold hover:underline">
-                Condiciones del sitio
-              </Link>
-            </p>
-          </div>
-        </section>
-      )}
+      {/* Real price history + tracking */}
+      <PriceTracker query={normalize(info.activeIngredient)} label={info.activeIngredient} />
 
       {/* Navigation */}
       <div className="flex flex-wrap gap-3 pt-2">

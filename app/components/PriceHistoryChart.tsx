@@ -1,12 +1,11 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import type { PharmacyHistory } from '@/app/utils/priceHistory'
+import type { PharmacyHistory } from '@/app/utils/priceHistoryTypes'
 import { formatCOP } from '@/app/utils/format'
 
 interface Props {
   histories: PharmacyHistory[]
-  unit: string
 }
 
 const W = 680
@@ -21,14 +20,14 @@ function formatShort(n: number): string {
   return String(n)
 }
 
-export function PriceHistoryChart({ histories, unit }: Props) {
+export function PriceHistoryChart({ histories }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
   const [hoverX, setHoverX] = useState(0)
   const [hidden, setHidden] = useState<Set<string>>(new Set())
 
-  const months = histories[0]?.data.map((p) => p.month) ?? []
+  const months = histories[0]?.data.map((p) => p.label) ?? []
   const n = months.length
 
   const allPrices = histories.flatMap((h) => h.data.map((p) => p.price))
@@ -198,7 +197,7 @@ export function PriceHistoryChart({ histories, unit }: Props) {
           }
         >
           <p className="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wider mb-3">
-            {months[hoverIdx]} 2025
+            {months[hoverIdx]}
           </p>
           <div className="flex flex-col gap-3">
             {tooltipRows.map((h, i) => (

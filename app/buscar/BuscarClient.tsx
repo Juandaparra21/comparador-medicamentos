@@ -8,14 +8,12 @@ import { useNearbyPharmacies } from '@/app/hooks/useNearbyPharmacies'
 
 // Presentation names that use volume (ml) as quantity unit
 const LIQUID_FILTER_NAMES = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
-import { getMedicationHistory } from '@/app/utils/priceHistory'
 import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
 import { ProductGroupCard } from '@/app/components/ProductGroupCard'
 import { RadioFilter, QuantitySlider } from '@/app/components/FilterControls'
-import { PriceChart } from '@/app/components/PriceChart'
-import { PriceHistoryChart } from '@/app/components/PriceHistoryChart'
+import { PriceTracker } from '@/app/components/PriceTracker'
 import { groupResults } from '@/app/utils/groupResults'
 
 type TypeFilter = 'all' | MedicationType
@@ -135,7 +133,6 @@ export default function BuscarClient() {
     : null
 
   const selectedIndex = TYPE_FILTERS.findIndex((f) => f.value === typeFilter)
-  const history = getMedicationHistory(normalize(q))
 
   return (
     <>
@@ -455,20 +452,8 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Gráficas — dos columnas en desktop */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <PriceChart results={filtered} minPrice={minPrice} />
-              {history && (
-                <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-1">
-                    <h2 className="text-[14px] font-bold text-[#1a1b1f]">Historial de precios</h2>
-                    <span className="text-[11px] text-[#c1c6d7] font-medium">Ultimos 12 meses</span>
-                  </div>
-                  <p className="text-[12px] text-[#717786] mb-4">{history.label}</p>
-                  <PriceHistoryChart histories={history.histories} unit={history.unit} />
-                </div>
-              )}
-            </div>
+            {/* Historial de precios real + rastreo */}
+            {q.trim() && <PriceTracker query={normalize(q)} label={q.trim()} />}
           </>
         )}
       </section>

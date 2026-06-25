@@ -57,6 +57,45 @@ CREATE INDEX IF NOT EXISTS idx_products_pharmacy
 CREATE INDEX IF NOT EXISTS idx_price_history_product
   ON price_history (product_id, scraped_at DESC);
 
+-- ============================================================
+-- Rastreo de precios (historial real construido dia a dia)
+-- ============================================================
+
+-- Medicamentos que un usuario pidio rastrear. Alimenta el cron diario.
+CREATE TABLE IF NOT EXISTS tracked_medications (
+  query            TEXT PRIMARY KEY,           -- normalizado: minusculas, sin acentos
+  label            TEXT NOT NULL,              -- texto legible (consulta original)
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_snapshot_at TIMESTAMPTZ
+);
+
+-- Un precio real por farmacia, por medicamento rastreado, por dia.
+-- Es el repositorio de datos que construimos nosotros (sin precios simulados).
+CREATE TABLE IF NOT EXISTS price_snapshots (
+  id           BIGSERIAL PRIMARY KEY,
+  query        TEXT    NOT NULL REFERENCES tracked_medications(query) ON DELETE CASCADE,
+  pharmacy     TEXT    NOT NULL,
+  product_name TEXT,
+  price        INTEGER NOT NULL,
+  day          DATE    NOT NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (query, pharmacy, day)
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_snapshots_query_day
+  ON price_snapshots (query, day);
+
+-- Datos publicos de precio: lectura para todos; escritura solo via service key
+-- (rutas de servidor) que ignora RLS.
+ALTER TABLE tracked_medications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE price_snapshots     ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "public read tracked_medications" ON tracked_medications;
+CREATE POLICY "public read tracked_medications" ON tracked_medications FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "public read price_snapshots" ON price_snapshots;
+CREATE POLICY "public read price_snapshots" ON price_snapshots FOR SELECT USING (true);
+
 -- Vista util para el API de busqueda (reemplaza MOCK_DATA)
 CREATE OR REPLACE VIEW search_results AS
 SELECT
