@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { PharmacyResult, MedicationType } from '@/app/types'
-import { searchMock, sortResults, SORT_OPTIONS, normalize, type SortKey } from '@/app/utils/search'
+import { sortResults, SORT_OPTIONS, normalize, type SortKey } from '@/app/utils/search'
 import { useNearbyPharmacies } from '@/app/hooks/useNearbyPharmacies'
 
 // Presentation names that use volume (ml) as quantity unit
@@ -41,6 +41,8 @@ export default function BuscarClient() {
   const [presentFilter,  setPresentFilter]  = useState<string>('')
   const [qtyFilter,      setQtyFilter]      = useState<number | null>(null)
   const [viewMode,       setViewMode]       = useState<ViewMode>('grouped')
+  const [loadError,      setLoadError]      = useState(false)
+  const [reloadKey,      setReloadKey]      = useState(0)
 
   useEffect(() => {
     if (!q.trim()) {
@@ -49,6 +51,7 @@ export default function BuscarClient() {
       return
     }
     setLoading(true)
+    setLoadError(false)
     setFetchedAt(null)
     setSortKey('price-asc')
     setPriceBasis('total')
@@ -59,7 +62,10 @@ export default function BuscarClient() {
     setViewMode('grouped')
     const controller = new AbortController()
     fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
       .then((data) => {
         setResults(data.results ?? [])
         setFetchedAt(data.fetchedAt ?? null)
@@ -67,12 +73,14 @@ export default function BuscarClient() {
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
-          setResults(searchMock(q))
+          // Never fall back to simulated prices: show a real error instead.
+          setResults([])
+          setLoadError(true)
           setLoading(false)
         }
       })
     return () => controller.abort()
-  }, [q])
+  }, [q, reloadKey])
 
   const { distances, stores, loading: locLoading, error: locError, hasDistances, request: requestLoc, clear: clearLoc } = useNearbyPharmacies()
 
@@ -177,6 +185,21 @@ export default function BuscarClient() {
             <p className="text-[18px] font-semibold text-[#1a1b1f]">
               Escribe un medicamento para buscar
             </p>
+          </div>
+        ) : loadError ? (
+          <div className="text-center py-28">
+            <p className="text-[20px] font-semibold text-[#1a1b1f] mb-2">
+              No pudimos cargar los precios
+            </p>
+            <p className="text-[15px] text-[#717786] mb-5">
+              Hubo un problema al consultar las farmacias. Revisa tu conexion e intenta de nuevo.
+            </p>
+            <button
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="px-5 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[14px] font-semibold rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
+            >
+              Reintentar
+            </button>
           </div>
         ) : results.length === 0 ? (
           <div className="text-center py-28">
