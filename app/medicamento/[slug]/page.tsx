@@ -5,8 +5,7 @@ import { getMedicineInfo, getAllMedicineSlugs } from '@/app/utils/medicineInfo'
 import { normalize } from '@/app/utils/search'
 import { MedicationImage } from '@/app/components/MedicationImage'
 import { PriceTracker } from '@/app/components/PriceTracker'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://farmi.co'
+import { SITE_URL } from '@/app/lib/siteUrl'
 
 interface Props {
   params: Promise<{ slug: string }>

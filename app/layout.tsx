@@ -7,6 +7,7 @@ import { WishlistNav } from '@/app/components/WishlistNav'
 import { CartNav } from '@/app/components/CartNav'
 import { MedDisclaimer } from '@/app/components/MedDisclaimer'
 import { ChatAssistant } from '@/app/components/ChatAssistant'
+import { SITE_URL } from '@/app/lib/siteUrl'
 import './globals.css'
 
 const hanken = Hanken_Grotesk({
@@ -15,8 +16,6 @@ const hanken = Hanken_Grotesk({
   weight: ['400', '500', '600', '700'],
   display: 'swap',
 })
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://farmi.co'
 
 export const metadata: Metadata = {
   title: {
