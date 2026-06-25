@@ -3,6 +3,7 @@ import { SearchBar } from '@/app/components/SearchBar'
 import { QuickChips } from '@/app/components/QuickChips'
 import { DiscountsSection } from '@/app/components/DiscountsSection'
 import { NearbyMapSection } from '@/app/components/NearbyMapSection'
+import { Reveal } from '@/app/components/Reveal'
 import {
   ValueProps,
   HowItWorks,
@@ -16,48 +17,44 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-14 sm:pt-24 pb-10 sm:pb-14">
-        <div className="mx-auto px-4 sm:px-5 max-w-2xl">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-secondary/10 border border-secondary/20 text-secondary text-[12px] font-bold px-3 py-1.5 rounded-full mb-5 tracking-wide">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+      <section className="pt-20 sm:pt-32 pb-14 sm:pb-24">
+        <div className="mx-auto px-4 sm:px-5 max-w-3xl">
+          <div className="text-center mb-9 sm:mb-12">
+            <div className="inline-flex items-center gap-2 bg-black/[0.04] border border-black/[0.06] text-[#6e6e73] text-[12px] font-semibold px-3.5 py-1.5 rounded-full mb-6 tracking-wide">
+              <svg className="w-3.5 h-3.5 text-secondary" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
               </svg>
               Genericos &middot; Marcas &middot; Precios reales
             </div>
-            <h1 className="text-[26px] sm:text-[36px] font-bold leading-tight tracking-[-0.02em] text-[#1a1b1f] mb-3">
-              Compara precios de{' '}
-              <span className="text-primary">medicamentos</span>{' '}
-              en Colombia
+            <h1 className="text-[36px] sm:text-[60px] font-bold leading-[1.04] tracking-[-0.03em] text-[#1d1d1f] mb-4 sm:mb-5">
+              El mejor precio de tus{' '}
+              <span className="text-primary">medicamentos</span>
             </h1>
-            <p className="text-[15px] sm:text-[17px] text-[#414755] leading-relaxed max-w-lg mx-auto">
-              Busca por nombre generico o de marca. Encuentra el mejor precio en Drogas La Rebaja,
-              Cruz Verde, Colsubsidio y mas.
+            <p className="text-[17px] sm:text-[22px] text-[#6e6e73] leading-relaxed max-w-xl mx-auto">
+              Busca por nombre generico o de marca y compara, en segundos, las
+              principales farmacias de Colombia.
             </p>
           </div>
 
-          <SearchBar />
-          <QuickChips />
+          <div className="max-w-2xl mx-auto">
+            <SearchBar />
+            <QuickChips />
+          </div>
         </div>
       </section>
 
-      {/* Por que Farmi */}
-      <ValueProps />
+      <Reveal><ValueProps /></Reveal>
+      <Reveal><NearbyMapSection /></Reveal>
 
-      {/* Mapa de farmacias cercanas */}
-      <NearbyMapSection />
-
-      {/* Discounts */}
       <Suspense fallback={null}>
-        <DiscountsSection />
+        <Reveal><DiscountsSection /></Reveal>
       </Suspense>
 
-      {/* Contenido informativo */}
-      <HowItWorks />
-      <PharmacyStrip />
-      <GenericVsBrand />
-      <HomeFaq />
-      <HomeCta />
+      <Reveal><HowItWorks /></Reveal>
+      <Reveal><PharmacyStrip /></Reveal>
+      <Reveal><GenericVsBrand /></Reveal>
+      <Reveal><HomeFaq /></Reveal>
+      <Reveal><HomeCta /></Reveal>
     </>
   )
 }

@@ -52,20 +52,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" className={`${hanken.variable} h-full`}>
-      <body className="min-h-full flex flex-col relative">
-        {/* Ambient background — static gradients (no blur filter) so mobile GPUs
-            don't recomposite large blurred layers on every scroll frame. */}
-        <div
-          className="fixed inset-0 -z-10"
-          aria-hidden="true"
-          style={{
-            background:
-              'radial-gradient(55% 45% at 12% -5%, rgba(0,88,188,0.13), transparent 70%),' +
-              'radial-gradient(50% 45% at 105% 105%, rgba(0,110,40,0.11), transparent 70%),' +
-              'radial-gradient(40% 40% at 78% 50%, rgba(76,74,202,0.07), transparent 72%)',
-          }}
-        />
-
+      <body className="min-h-full flex flex-col relative bg-[#fbfbfd]">
         <AuthProvider>
           {/* Medical disclaimer — dismissible, shown once per browser */}
           <MedDisclaimer />
@@ -78,8 +65,8 @@ export default function RootLayout({
                 className="font-bold text-[17px] tracking-tight select-none hover:opacity-75 transition-opacity shrink-0"
                 aria-label="Farmi - Inicio"
               >
-                <span className="text-[#1a1b1f]">Farmi</span>
-                <span className="text-primary">Ya</span>
+                <span className="text-[#1a1b1f]">Far</span>
+                <span className="text-primary">mi</span>
               </Link>
 
               <nav aria-label="Navegacion principal" className="flex items-center gap-3">
@@ -112,8 +99,8 @@ export default function RootLayout({
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-6">
                 <div>
                   <p className="font-bold text-[16px] tracking-tight">
-                    <span className="text-[#1a1b1f]">Farmi</span>
-                    <span className="text-primary">Ya</span>
+                    <span className="text-[#1a1b1f]">Far</span>
+                    <span className="text-primary">mi</span>
                   </p>
                   <p className="text-[12px] text-[#717786] mt-1">
                     Comparador gratuito de precios de medicamentos en Colombia.

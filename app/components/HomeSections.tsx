@@ -3,13 +3,13 @@ import { PharmacyLogo } from './PharmacyLogo'
 
 /* Static, server-rendered home sections (no client JS) to keep the page light. */
 
-const CARD = 'bg-white/80 border border-[#eef0f4] rounded-2xl shadow-sm'
+const CARD = 'bg-white border border-black/[0.06] rounded-3xl shadow-[0_1px_3px_rgba(0,0,0,0.05)]'
 
 function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-5">
-      <h2 className="text-[20px] sm:text-[24px] font-bold tracking-tight text-[#1a1b1f]">{title}</h2>
-      {subtitle && <p className="text-[13px] sm:text-[14px] text-[#717786] mt-1">{subtitle}</p>}
+    <div className="mb-8 sm:mb-10 text-center">
+      <h2 className="text-[26px] sm:text-[36px] font-bold tracking-[-0.02em] text-[#1d1d1f] leading-tight">{title}</h2>
+      {subtitle && <p className="text-[15px] sm:text-[18px] text-[#6e6e73] mt-2.5 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>}
     </div>
   )
 }
@@ -25,7 +25,7 @@ const VALUES: { title: string; desc: string; path: string }[] = [
 
 export function ValueProps() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-12">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16 sm:mb-24">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {VALUES.map((v) => (
           <div key={v.title} className={`${CARD} p-4 sm:p-5`}>
@@ -34,8 +34,8 @@ export function ValueProps() {
                 <path d={v.path} />
               </svg>
             </div>
-            <p className="text-[14px] font-bold text-[#1a1b1f] leading-snug">{v.title}</p>
-            <p className="text-[12px] text-[#717786] mt-1 leading-relaxed">{v.desc}</p>
+            <p className="text-[14px] font-bold text-[#1d1d1f] leading-snug">{v.title}</p>
+            <p className="text-[12px] text-[#6e6e73] mt-1 leading-relaxed">{v.desc}</p>
           </div>
         ))}
       </div>
@@ -53,7 +53,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-12">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16 sm:mb-24">
       <SectionHeading title="Como funciona" subtitle="Encuentra el mejor precio en tres pasos." />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {STEPS.map((s) => (
@@ -61,8 +61,8 @@ export function HowItWorks() {
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-tertiary text-white flex items-center justify-center font-bold text-[15px] mb-3">
               {s.n}
             </div>
-            <p className="text-[15px] font-bold text-[#1a1b1f]">{s.title}</p>
-            <p className="text-[13px] text-[#717786] mt-1 leading-relaxed">{s.desc}</p>
+            <p className="text-[15px] font-bold text-[#1d1d1f]">{s.title}</p>
+            <p className="text-[13px] text-[#6e6e73] mt-1 leading-relaxed">{s.desc}</p>
           </div>
         ))}
       </div>
@@ -83,7 +83,7 @@ const PHARMACIES: { key: string; label: string }[] = [
 
 export function PharmacyStrip() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-12">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16 sm:mb-24">
       <SectionHeading title="Comparamos estas farmacias" subtitle="Precios en tiempo real de las cadenas mas grandes de Colombia." />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {PHARMACIES.map((p) => (
@@ -105,15 +105,15 @@ export function PharmacyStrip() {
 
 export function GenericVsBrand() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-12">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16 sm:mb-24">
       <SectionHeading title="Generico o de marca?" subtitle="Mismo efecto, distinto precio. Tu decides." />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div className={`${CARD} p-5`}>
           <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/20 mb-3">
             Generico
           </span>
-          <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1.5">El mismo principio activo, mas barato</p>
-          <p className="text-[13px] text-[#717786] leading-relaxed">
+          <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El mismo principio activo, mas barato</p>
+          <p className="text-[13px] text-[#6e6e73] leading-relaxed">
             Tiene el mismo principio activo, dosis y forma que el de marca, y esta regulado por el INVIMA.
             Suele costar entre 30% y 80% menos.
           </p>
@@ -122,8 +122,8 @@ export function GenericVsBrand() {
           <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 mb-3">
             Marca
           </span>
-          <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1.5">El laboratorio que ya conoces</p>
-          <p className="text-[13px] text-[#717786] leading-relaxed">
+          <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El laboratorio que ya conoces</p>
+          <p className="text-[13px] text-[#6e6e73] leading-relaxed">
             Es el producto original de un laboratorio reconocido. Cuesta mas, pero algunas personas
             prefieren la marca de confianza. Farmi te muestra ambos para que compares.
           </p>
@@ -145,18 +145,18 @@ const FAQS: { q: string; a: string }[] = [
 
 export function HomeFaq() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-3xl mb-16">
+    <section className="mx-auto px-4 sm:px-5 max-w-3xl mb-16 sm:mb-24">
       <SectionHeading title="Preguntas frecuentes" />
       <div className="flex flex-col gap-2.5">
         {FAQS.map((f) => (
           <details key={f.q} className={`${CARD} group px-5 py-0.5`}>
             <summary className="flex items-center justify-between gap-3 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-              <span className="text-[14px] font-semibold text-[#1a1b1f]">{f.q}</span>
+              <span className="text-[14px] font-semibold text-[#1d1d1f]">{f.q}</span>
               <svg className="w-4 h-4 text-[#9ca3af] shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clipRule="evenodd" />
               </svg>
             </summary>
-            <p className="text-[13px] text-[#717786] leading-relaxed pb-4 -mt-1">{f.a}</p>
+            <p className="text-[13px] text-[#6e6e73] leading-relaxed pb-4 -mt-1">{f.a}</p>
           </details>
         ))}
       </div>
@@ -168,9 +168,9 @@ export function HomeFaq() {
 
 export function HomeCta() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16">
-      <div className="bg-gradient-to-br from-primary to-tertiary rounded-2xl shadow-sm p-7 sm:p-10 text-center">
-        <h2 className="text-[20px] sm:text-[26px] font-bold text-white tracking-tight">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-28">
+      <div className="bg-gradient-to-br from-primary to-tertiary rounded-3xl shadow-sm p-10 sm:p-16 text-center">
+        <h2 className="text-[26px] sm:text-[40px] font-bold text-white tracking-[-0.02em] leading-tight">
           Deja de pagar de mas por tus medicamentos
         </h2>
         <p className="text-[14px] sm:text-[15px] text-white/85 mt-2 max-w-xl mx-auto leading-relaxed">
