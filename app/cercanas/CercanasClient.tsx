@@ -182,7 +182,7 @@ export default function CercanasClient() {
           )}
           <p className="text-[11px] text-[#c1c6d7] mt-5 leading-relaxed">
             Datos de ubicacion: OpenStreetMap (colaboradores de OSM). &ldquo;Con precios&rdquo; son sedes de las
-            cadenas cuyos precios comparamos. FarmiYa es independiente y no esta afiliado a estas farmacias; sus marcas
+            cadenas cuyos precios comparamos. Farmi es independiente y no esta afiliado a estas farmacias; sus marcas
             pertenecen a sus titulares. La disponibilidad real de cada medicamento puede variar; confirma en la farmacia.
           </p>
         </>

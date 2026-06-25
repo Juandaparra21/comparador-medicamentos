@@ -2,9 +2,9 @@
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Contacto - FarmiYa',
+  title: 'Contacto - Farmi',
   description:
-    'Contacta al equipo de FarmiYa para reportar precios incorrectos, sugerir farmacias o resolver dudas sobre la plataforma.',
+    'Contacta al equipo de Farmi para reportar precios incorrectos, sugerir farmacias o resolver dudas sobre la plataforma.',
 }
 
 const TOPICS = [
@@ -91,13 +91,13 @@ export default function ContactoPage() {
       <section className="bg-primary/5 border border-primary/15 rounded-2xl p-5 sm:p-6 mb-8">
         <h2 className="text-[14px] font-bold text-primary mb-2">Reportar un precio incorrecto</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-3">
-          Si el precio que ves en FarmiYa no coincide con el que muestra la farmacia, escribenos con:
+          Si el precio que ves en Farmi no coincide con el que muestra la farmacia, escribenos con:
         </p>
         <ul className="space-y-1.5">
           {[
             'Nombre del medicamento',
             'Nombre de la farmacia',
-            'Precio que muestra FarmiYa',
+            'Precio que muestra Farmi',
             'Precio real en la farmacia (con captura de pantalla si es posible)',
           ].map((item) => (
             <li key={item} className="flex items-start gap-2 text-[12px] text-[#414755]">

@@ -20,16 +20,16 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://farmi.co'
 
 export const metadata: Metadata = {
   title: {
-    default: 'FarmiYa - Comparador de medicamentos en Colombia',
-    template: '%s | FarmiYa',
+    default: 'Farmi - Comparador de medicamentos en Colombia',
+    template: '%s | Farmi',
   },
   description:
     'Compara precios de medicamentos en las principales farmacias de Colombia: La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y mas. Genericos y marcas.',
   metadataBase: new URL(SITE_URL),
   openGraph: {
     type: 'website',
-    siteName: 'FarmiYa',
-    title: 'FarmiYa - Comparador de medicamentos en Colombia',
+    siteName: 'Farmi',
+    title: 'Farmi - Comparador de medicamentos en Colombia',
     description:
       'Encuentra el mejor precio en medicamentos en las farmacias de Colombia. Gratis, sin registro y en tiempo real.',
     url: SITE_URL,
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'FarmiYa - Comparador de medicamentos en Colombia',
+    title: 'Farmi - Comparador de medicamentos en Colombia',
     description:
       'Compara precios de medicamentos en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo y mas.',
   },
@@ -76,7 +76,7 @@ export default function RootLayout({
               <Link
                 href="/"
                 className="font-bold text-[17px] tracking-tight select-none hover:opacity-75 transition-opacity shrink-0"
-                aria-label="FarmiYa - Inicio"
+                aria-label="Farmi - Inicio"
               >
                 <span className="text-[#1a1b1f]">Farmi</span>
                 <span className="text-primary">Ya</span>
@@ -139,10 +139,10 @@ export default function RootLayout({
               {/* Disclaimer */}
               <div className="border-t border-[#c1c6d7]/30 pt-5">
                 <p className="text-[11px] text-[#717786] leading-relaxed">
-                  <strong className="text-[#414755]">Aviso legal:</strong> FarmiYa es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. FarmiYa no vende medicamentos ni interviene en ningun proceso de compra. Las marcas y logos de las farmacias pertenecen a sus respectivos titulares; FarmiYa es un comparador independiente y no esta afiliado ni patrocinado por ellas. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a farmiya001@gmail.com.
+                  <strong className="text-[#414755]">Aviso legal:</strong> Farmi es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. Farmi no vende medicamentos ni interviene en ningun proceso de compra. Las marcas y logos de las farmacias pertenecen a sus respectivos titulares; Farmi es un comparador independiente y no esta afiliado ni patrocinado por ellas. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a farmiya001@gmail.com.
                 </p>
                 <p className="text-[11px] text-[#c1c6d7] mt-3">
-                  &copy; {new Date().getFullYear()} FarmiYa. Colombia.
+                  &copy; {new Date().getFullYear()} Farmi. Colombia.
                 </p>
               </div>
             </div>

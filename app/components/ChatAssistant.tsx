@@ -16,7 +16,7 @@ interface QuickReply {
 
 const INITIAL_REPLIES: QuickReply[] = [
   { label: 'Que es un generico?',      value: 'generico'  },
-  { label: 'Como funciona FarmiYa?',     value: 'como'      },
+  { label: 'Como funciona Farmi?',     value: 'como'      },
   { label: 'Que farmacias comparan?',  value: 'farmacias' },
   { label: 'El precio es exacto?',     value: 'precio'    },
 ]
@@ -25,12 +25,12 @@ const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
   generico: {
     text: 'Un medicamento generico tiene exactamente el mismo principio activo, dosis y forma farmaceutica que el de marca. Son equivalentes terapeuticamente y en Colombia estan regulados por el INVIMA. La unica diferencia es el precio: los genericos suelen costar entre 30% y 80% menos.',
     replies: [
-      { label: 'Como funciona FarmiYa?',     value: 'como'   },
+      { label: 'Como funciona Farmi?',     value: 'como'   },
       { label: 'Ver medicamentos baratos', value: 'buscar' },
     ],
   },
   como: {
-    text: 'Escribe el nombre del medicamento en el buscador: puedes usar el nombre generico (ej: ibuprofeno) o el de marca (ej: Advil). FarmiYa consulta en tiempo real 6 farmacias y muestra los precios de menor a mayor. Si activas tu ubicacion, tambien te mostramos cual farmacia tienes mas cerca.',
+    text: 'Escribe el nombre del medicamento en el buscador: puedes usar el nombre generico (ej: ibuprofeno) o el de marca (ej: Advil). Farmi consulta en tiempo real 6 farmacias y muestra los precios de menor a mayor. Si activas tu ubicacion, tambien te mostramos cual farmacia tienes mas cerca.',
     replies: [
       { label: 'Que farmacias comparan?', value: 'farmacias' },
       { label: 'Buscar un medicamento',   value: 'buscar'    },
@@ -40,7 +40,7 @@ const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
     text: 'Comparamos precios en tiempo real en 6 farmacias colombianas:\n\n• Drogas La Rebaja\n• Cruz Verde\n• Cafam\n• Colsubsidio\n• Olimpica Drogueria\n• Farmatodo\n\nLos precios se consultan directamente desde cada farmacia cuando buscas.',
     replies: [
       { label: 'El precio es exacto?', value: 'precio' },
-      { label: 'Como funciona FarmiYa?', value: 'como'   },
+      { label: 'Como funciona Farmi?', value: 'como'   },
     ],
   },
   precio: {
@@ -54,7 +54,7 @@ const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
     text: 'Usa el buscador arriba e intenta con el nombre del principio activo (ej: metformina, losartan, atorvastatina). Si no encuentras resultados, prueba con el nombre de marca o verifica la ortografia.',
     replies: [
       { label: 'El precio es exacto?', value: 'precio' },
-      { label: 'Como funciona FarmiYa?', value: 'como'   },
+      { label: 'Como funciona Farmi?', value: 'como'   },
     ],
   },
   ubicacion: {
@@ -94,7 +94,7 @@ function mkMsg(from: Message['from'], text: string): Message {
 export function ChatAssistant() {
   const [open,      setOpen]      = useState(false)
   const [messages,  setMessages]  = useState<Message[]>([
-    mkMsg('bot', 'Hola, soy FarmiYa. Te ayudo a encontrar el medicamento mas barato en Colombia.'),
+    mkMsg('bot', 'Hola, soy Farmi. Te ayudo a encontrar el medicamento mas barato en Colombia.'),
   ])
   const [replies,   setReplies]   = useState<QuickReply[]>(INITIAL_REPLIES)
   const [bubble,    setBubble]    = useState(true)
@@ -180,7 +180,7 @@ export function ChatAssistant() {
         <div
           className="fixed bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[360px] max-h-[560px] flex flex-col bg-white rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.18)] border border-[#e5e7eb] overflow-hidden"
           role="dialog"
-          aria-label="Asistente FarmiYa"
+          aria-label="Asistente Farmi"
         >
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-primary to-tertiary text-white shrink-0">
@@ -191,7 +191,7 @@ export function ChatAssistant() {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[14px] font-bold leading-tight">FarmiYa Asistente</p>
+              <p className="text-[14px] font-bold leading-tight">Farmi Asistente</p>
               <p className="text-[11px] text-white/75 leading-tight">{aiEnabled ? 'Asistente con IA' : 'En linea ahora'}</p>
             </div>
             <button
@@ -287,7 +287,7 @@ export function ChatAssistant() {
           {/* Disclaimer */}
           <div className="px-4 py-2 border-t border-[#f0f1f5] bg-white shrink-0">
             <p className="text-[10px] text-[#c1c6d7] text-center">
-              FarmiYa no reemplaza la consulta medica. Verifica en farmacia.
+              Farmi no reemplaza la consulta medica. Verifica en farmacia.
             </p>
           </div>
         </div>
@@ -305,7 +305,7 @@ export function ChatAssistant() {
         <button
           onClick={() => { setBubble(false); setOpen((v) => !v) }}
           className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-tertiary text-white shadow-[0_8px_24px_rgba(0,88,188,0.35)] hover:shadow-[0_12px_32px_rgba(0,88,188,0.45)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
-          aria-label={open ? 'Cerrar asistente' : 'Abrir asistente FarmiYa'}
+          aria-label={open ? 'Cerrar asistente' : 'Abrir asistente Farmi'}
           aria-expanded={open}
         >
           {open ? (

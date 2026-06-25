@@ -21,7 +21,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const info = getMedicineInfo(slug)
-  if (!info) return { title: 'Medicamento - FarmiYa' }
+  if (!info) return { title: 'Medicamento - Farmi' }
 
   const title = `Precio de ${info.activeIngredient} en Colombia`
   const description = `Compara el precio de ${info.activeIngredient} en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo y mas. Usos, dosis y advertencias de ${info.activeIngredient} (${info.therapeuticClass}).`
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical },
     openGraph: {
       type: 'article',
-      title: `${title} | FarmiYa`,
+      title: `${title} | Farmi`,
       description,
       url: `${SITE_URL}${canonical}`,
       locale: 'es_CO',
@@ -121,7 +121,7 @@ export default async function MedicamentoPage({ params }: Props) {
         </div>
         <div>
           <p className="text-[13px] font-bold text-amber-800 mb-1">
-            FarmiYa es un comparador de precios, no una farmacia
+            Farmi es un comparador de precios, no una farmacia
           </p>
           <p className="text-[12px] text-amber-700 leading-relaxed">
             No vendemos medicamentos. Toda la informacion medica es de caracter educativo y no reemplaza la consulta con un profesional de salud. Para comprar, seras redirigido al sitio oficial de cada farmacia.{' '}

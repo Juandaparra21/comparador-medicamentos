@@ -14,7 +14,7 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle?: string 
   )
 }
 
-/* ── Why FarmiYa ─────────────────────────────────────────────────────── */
+/* ── Why Farmi ─────────────────────────────────────────────────────── */
 
 const VALUES: { title: string; desc: string; path: string }[] = [
   { title: '100% gratis',            desc: 'Sin registro ni costos. Solo busca y compara.', path: 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' },
@@ -94,7 +94,7 @@ export function PharmacyStrip() {
         ))}
       </div>
       <p className="text-[11px] text-[#c1c6d7] mt-3 text-center">
-        Logos y marcas pertenecen a sus respectivos titulares. FarmiYa es un comparador independiente,
+        Logos y marcas pertenecen a sus respectivos titulares. Farmi es un comparador independiente,
         no afiliado ni patrocinado por estas farmacias.
       </p>
     </section>
@@ -125,7 +125,7 @@ export function GenericVsBrand() {
           <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1.5">El laboratorio que ya conoces</p>
           <p className="text-[13px] text-[#717786] leading-relaxed">
             Es el producto original de un laboratorio reconocido. Cuesta mas, pero algunas personas
-            prefieren la marca de confianza. FarmiYa te muestra ambos para que compares.
+            prefieren la marca de confianza. Farmi te muestra ambos para que compares.
           </p>
         </div>
       </div>
@@ -136,11 +136,11 @@ export function GenericVsBrand() {
 /* ── FAQ (native details, no JS) ───────────────────────────────────── */
 
 const FAQS: { q: string; a: string }[] = [
-  { q: 'FarmiYa vende medicamentos?', a: 'No. FarmiYa compara precios y te lleva a la pagina de la farmacia para que compres directamente con ella. No vendemos ni intervenimos en la compra.' },
+  { q: 'Farmi vende medicamentos?', a: 'No. Farmi compara precios y te lleva a la pagina de la farmacia para que compres directamente con ella. No vendemos ni intervenimos en la compra.' },
   { q: 'Los precios son exactos?',  a: 'Son referenciales y se obtienen en tiempo real de cada farmacia. Pueden variar por sede, disponibilidad o promociones. Confirma siempre el precio final en la farmacia.' },
   { q: 'Necesito registrarme?',     a: 'No. Puedes buscar y comparar sin crear cuenta. El registro solo sirve para guardar tu lista de favoritos.' },
   { q: 'Que farmacias comparan?',   a: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olimpica. Consultamos sus precios cuando haces una busqueda.' },
-  { q: 'Tiene algun costo?',        a: 'No. FarmiYa es 100% gratis para los usuarios.' },
+  { q: 'Tiene algun costo?',        a: 'No. Farmi es 100% gratis para los usuarios.' },
 ]
 
 export function HomeFaq() {

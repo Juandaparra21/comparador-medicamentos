@@ -1,7 +1,7 @@
 ﻿import RegisterClient from './RegisterClient'
 
 export const metadata = {
-  title: 'Crear cuenta - FarmiYa',
+  title: 'Crear cuenta - Farmi',
   robots: { index: false, follow: true },
 }
 

@@ -1,7 +1,7 @@
 ﻿import LoginClient from './LoginClient'
 
 export const metadata = {
-  title: 'Iniciar sesion - FarmiYa',
+  title: 'Iniciar sesion - Farmi',
   robots: { index: false, follow: true },
 }
 

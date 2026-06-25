@@ -157,7 +157,7 @@ export function NearbyMapSection() {
             <p className="text-[12px] text-[#717786] px-5 py-3 border-t border-[#f0f1f5]">
               {view === 'affiliate'
                 ? <><span className="font-semibold text-primary">{affiliateCount}</span> farmacias cuyos precios comparamos, cerca de ti.</>
-                : <><span className="font-semibold text-[#1a1b1f]">{pharmacies.length}</span> farmacias cerca de ti, <span className="font-semibold text-primary">{affiliateCount}</span> con precios en FarmiYa.</>}
+                : <><span className="font-semibold text-[#1a1b1f]">{pharmacies.length}</span> farmacias cerca de ti, <span className="font-semibold text-primary">{affiliateCount}</span> con precios en Farmi.</>}
               {' '}Toca un marcador para ver detalles.
             </p>
           </>

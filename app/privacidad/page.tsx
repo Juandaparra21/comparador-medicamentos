@@ -2,15 +2,15 @@
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Politica de privacidad - FarmiYa',
+  title: 'Politica de privacidad - Farmi',
   description:
-    'Conoce como FarmiYa recopila, usa y protege tus datos personales conforme a la Ley 1581 de 2012 (Habeas Data) de Colombia.',
+    'Conoce como Farmi recopila, usa y protege tus datos personales conforme a la Ley 1581 de 2012 (Habeas Data) de Colombia.',
 }
 
 const SECTIONS = [
   {
     title: '1. Responsable del tratamiento',
-    body: `FarmiYa (en adelante "la Plataforma") es responsable del tratamiento de los datos personales recolectados a traves de farmi.co.
+    body: `Farmi (en adelante "la Plataforma") es responsable del tratamiento de los datos personales recolectados a traves de farmi.co.
 
 Para ejercer tus derechos o hacer consultas sobre privacidad, puedes contactarnos en: farmiya001@gmail.com`,
   },
@@ -76,7 +76,7 @@ No utilizamos cookies de seguimiento o publicidad de terceros.`,
   },
   {
     title: '9. Menores de edad',
-    body: `FarmiYa no esta dirigida a menores de 14 anos. Si eres menor, requieres autorizacion de un adulto para registrarte. Si detectamos que un menor se ha registrado sin autorizacion, eliminaremos la cuenta.`,
+    body: `Farmi no esta dirigida a menores de 14 anos. Si eres menor, requieres autorizacion de un adulto para registrarte. Si detectamos que un menor se ha registrado sin autorizacion, eliminaremos la cuenta.`,
   },
   {
     title: '10. Cambios en esta politica',

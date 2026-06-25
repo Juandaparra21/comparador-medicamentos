@@ -2,7 +2,7 @@
 import ListaClient from './ListaClient'
 
 export const metadata = {
-  title: 'Lista de deseos - FarmiYa',
+  title: 'Lista de deseos - Farmi',
   robots: { index: false, follow: true },
 }
 

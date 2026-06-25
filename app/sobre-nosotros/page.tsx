@@ -2,9 +2,9 @@
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Sobre nosotros - FarmiYa',
+  title: 'Sobre nosotros - Farmi',
   description:
-    'FarmiYa es una plataforma gratuita que compara precios de medicamentos en las principales farmacias de Colombia. Conoce nuestra mision y como funcionamos.',
+    'Farmi es una plataforma gratuita que compara precios de medicamentos en las principales farmacias de Colombia. Conoce nuestra mision y como funcionamos.',
 }
 
 const PHARMACIES = [
@@ -55,7 +55,7 @@ export default function SobreNosotrosPage() {
       {/* Hero */}
       <div className="mb-10">
         <h1 className="text-[24px] sm:text-[30px] font-bold text-[#1a1b1f] tracking-tight mb-3">
-          Sobre FarmiYa
+          Sobre Farmi
         </h1>
         <p className="text-[15px] text-[#414755] leading-relaxed">
           Somos una plataforma gratuita que ayuda a los colombianos a encontrar el mejor precio en
@@ -76,7 +76,7 @@ export default function SobreNosotrosPage() {
       <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
         <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-3">Que hacemos</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-3">
-          FarmiYa compara los precios publicados por las principales farmacias y droguerias de Colombia
+          Farmi compara los precios publicados por las principales farmacias y droguerias de Colombia
           en tiempo casi real. Buscamos por nombre generico o de marca y agrupamos los resultados
           equivalentes para que puedas ver de un vistazo cuanto puedes ahorrar.
         </p>
@@ -146,7 +146,7 @@ export default function SobreNosotrosPage() {
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 sm:p-6 mb-8">
         <p className="text-[12px] font-bold text-amber-700 uppercase tracking-widest mb-2">Aviso importante</p>
         <p className="text-[13px] text-amber-900 leading-relaxed">
-          La informacion publicada en FarmiYa tiene caracter exclusivamente informativo y de
+          La informacion publicada en Farmi tiene caracter exclusivamente informativo y de
           orientacion de precios. <strong>No sustituye la asesorıa medica o farmaceutica profesional.</strong>{' '}
           Consulta siempre a un medico o farmaceutico antes de iniciar, modificar o suspender cualquier
           tratamiento.
