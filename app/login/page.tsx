@@ -2,6 +2,7 @@
 
 export const metadata = {
   title: 'Iniciar sesion - FarmiYa',
+  robots: { index: false, follow: true },
 }
 
 export default function LoginPage() {

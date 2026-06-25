@@ -3,6 +3,9 @@ import BuscarClient from './BuscarClient'
 
 export const metadata = {
   title: 'Resultados - FarmiYa',
+  // Per-query results are dynamic and thin: keep them out of the index but let
+  // crawlers follow links through to the canonical medication pages.
+  robots: { index: false, follow: true },
 }
 
 function LoadingSpinner() {

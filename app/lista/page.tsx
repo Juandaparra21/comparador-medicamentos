@@ -3,6 +3,7 @@ import ListaClient from './ListaClient'
 
 export const metadata = {
   title: 'Lista de deseos - FarmiYa',
+  robots: { index: false, follow: true },
 }
 
 export default function ListaPage() {

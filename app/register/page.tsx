@@ -2,6 +2,7 @@
 
 export const metadata = {
   title: 'Crear cuenta - FarmiYa',
+  robots: { index: false, follow: true },
 }
 
 export default function RegisterPage() {
