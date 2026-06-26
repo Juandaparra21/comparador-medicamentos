@@ -15,12 +15,18 @@ Farmi no es una farmacia, no vende medicamentos, no gestiona inventarios y no in
   },
   {
     title: '2. Naturaleza de la informacion de precios',
-    body: `Los precios mostrados en Farmi son obtenidos de fuentes publicas (sitios web de farmacias, APIs oficiales y fuentes equivalentes) con fines estrictamente informativos. Pueden existir diferencias entre el precio publicado y el precio real al momento de la compra debido a:
+    body: `Los precios mostrados en Farmi corresponden a los precios de lista (precios publicos) que cada farmacia o drogueria publica en sus canales oficiales. Se obtienen de fuentes publicas (sitios web, APIs oficiales y fuentes equivalentes) con fines estrictamente informativos.
 
-- Cambios de precio por parte de la farmacia despues de la consulta.
-- Disponibilidad de stock limitado o agotado.
-- Precios especiales por tarjetas de lealtad, convenios o descuentos presenciales.
-- Errores de sincronizacion entre la fuente y nuestra plataforma.
+Estos precios son propiedad de cada farmacia y NO son fijados, definidos ni controlados por Farmi. Farmi unicamente los recopila y los muestra para facilitar la comparacion; no son precios nuestros.
+
+Los precios de lista NO contemplan descuentos personales ni precios preferenciales derivados de afiliaciones o condiciones particulares del usuario, tales como:
+
+- Afiliacion a EPS, cajas de compensacion o planes corporativos.
+- Tarjetas de lealtad, membresias o convenios de la farmacia.
+- Descuentos presenciales, promociones por sede o cupones personales.
+- Coberturas, subsidios o autorizaciones de planes de salud.
+
+Por lo anterior, el precio final que pague el usuario en la farmacia puede ser menor o mayor al precio de lista mostrado. Tambien pueden existir diferencias por cambios de precio posteriores a la consulta, stock limitado o agotado, o errores de sincronizacion entre la fuente y nuestra plataforma.
 
 Farmi no garantiza la exactitud, vigencia ni disponibilidad de los precios mostrados.`,
   },
@@ -93,7 +99,7 @@ export default function TerminosPage() {
         <ul className="space-y-2 mt-3">
           {[
             'Farmi compara precios. No vendemos medicamentos ni cobramos nada.',
-            'Los precios son orientativos. Verificalos en el sitio de la farmacia antes de comprar.',
+            'Mostramos los precios de lista (publicos) de cada farmacia, no son nuestros y no incluyen descuentos por afiliaciones. Verificalos antes de comprar.',
             'La informacion medica es educativa. Consulta siempre a un profesional de salud.',
           ].map((point, i) => (
             <li key={i} className="flex items-start gap-2.5 text-[13px] text-[#414755]">
