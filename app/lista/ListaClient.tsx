@@ -17,7 +17,7 @@ function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: st
     return (
       <div className="w-full h-[90px] bg-white overflow-hidden rounded-t-xl">
         <img
-          src={thumbnailUrl(imageUrl, 200)}
+          src={thumbnailUrl(imageUrl, 120)}
           alt=""
           loading="lazy"
           decoding="async"

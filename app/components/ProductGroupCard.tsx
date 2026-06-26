@@ -28,7 +28,7 @@ function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredien
   if (imageUrl && !failed) {
     return (
       <div className="w-full h-[80px] relative overflow-hidden rounded-t-xl bg-white">
-        <img src={thumbnailUrl(imageUrl, 200)} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} className="w-full h-full object-contain p-2" />
+        <img src={thumbnailUrl(imageUrl, 120)} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} className="w-full h-full object-contain p-2" />
       </div>
     )
   }

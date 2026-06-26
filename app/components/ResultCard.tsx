@@ -55,7 +55,7 @@ function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredi
     return (
       <div className="w-full h-[80px] relative overflow-hidden rounded-t-xl bg-white">
         <img
-          src={thumbnailUrl(imageUrl, 200)}
+          src={thumbnailUrl(imageUrl, 120)}
           alt=""
           loading="lazy"
           decoding="async"

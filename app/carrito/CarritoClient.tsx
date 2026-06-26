@@ -13,7 +13,7 @@ function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: st
   if (imageUrl && !failed) {
     return (
       <div className="w-full h-[90px] bg-white overflow-hidden rounded-t-xl">
-        <img src={thumbnailUrl(imageUrl, 200)} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} className="w-full h-full object-contain p-2" />
+        <img src={thumbnailUrl(imageUrl, 120)} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} className="w-full h-full object-contain p-2" />
       </div>
     )
   }
