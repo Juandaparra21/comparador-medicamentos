@@ -8,6 +8,7 @@ import { MedicationImage } from './MedicationImage'
 import { WishlistButton } from './WishlistButton'
 import { CartButton } from './CartButton'
 import { formatCOP } from '@/app/utils/format'
+import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
 import type { NearestStore } from '@/app/hooks/useNearbyPharmacies'
@@ -54,8 +55,10 @@ function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredi
     return (
       <div className="w-full h-[80px] relative overflow-hidden rounded-t-xl bg-white">
         <img
-          src={imageUrl}
+          src={thumbnailUrl(imageUrl, 200)}
           alt=""
+          loading="lazy"
+          decoding="async"
           onError={() => setImgFailed(true)}
           className="w-full h-full object-contain p-2"
         />

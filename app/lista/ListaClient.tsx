@@ -8,6 +8,7 @@ import {
   getWishlistDB, removeFromWishlistDB,
 } from '@/app/utils/wishlist'
 import { formatCOP } from '@/app/utils/format'
+import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { MedicationImage } from '@/app/components/MedicationImage'
 
 function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
@@ -16,8 +17,10 @@ function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: st
     return (
       <div className="w-full h-[90px] bg-white overflow-hidden rounded-t-xl">
         <img
-          src={imageUrl}
+          src={thumbnailUrl(imageUrl, 200)}
           alt=""
+          loading="lazy"
+          decoding="async"
           onError={() => setFailed(true)}
           className="w-full h-full object-contain p-2"
         />

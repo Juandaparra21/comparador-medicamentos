@@ -8,6 +8,7 @@ import { PharmacyLogo } from './PharmacyLogo'
 import { WishlistButton } from './WishlistButton'
 import { CartButton } from './CartButton'
 import { formatCOP } from '@/app/utils/format'
+import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
 import type { PharmacyDistances, PharmacyStores } from '@/app/hooks/useNearbyPharmacies'
@@ -27,7 +28,7 @@ function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredien
   if (imageUrl && !failed) {
     return (
       <div className="w-full h-[80px] relative overflow-hidden rounded-t-xl bg-white">
-        <img src={imageUrl} alt="" onError={() => setFailed(true)} className="w-full h-full object-contain p-2" />
+        <img src={thumbnailUrl(imageUrl, 200)} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} className="w-full h-full object-contain p-2" />
       </div>
     )
   }
