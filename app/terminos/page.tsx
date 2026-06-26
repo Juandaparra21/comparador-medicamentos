@@ -9,12 +9,20 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: '1. Que es Farmi',
-    body: `Farmi es una plataforma gratuita de comparacion de precios de medicamentos en Colombia. Su unico proposito es mostrar al usuario los precios publicados por farmacias y droguerias para que pueda tomar decisiones de compra informadas.
+    body: `Farmi es una plataforma gratuita y meramente informativa de comparacion de precios de medicamentos en Colombia. Su unico proposito es mostrar, de forma neutral, los precios que las farmacias y droguerias publican en sus canales oficiales, para que el usuario pueda comparar y tomar decisiones de compra informadas.
 
-Farmi no es una farmacia, no vende medicamentos, no gestiona inventarios y no interviene en ninguna transaccion comercial entre el usuario y los establecimientos listados.`,
+Farmi NO es una farmacia ni un establecimiento farmaceutico. No vende, no ofrece, no dispensa, no almacena ni distribuye medicamentos; no gestiona inventarios; y no interviene ni participa en ninguna transaccion comercial entre el usuario y los establecimientos listados.`,
   },
   {
-    title: '2. Naturaleza de la informacion de precios',
+    title: '2. El servicio no constituye publicidad',
+    body: `Farmi es una herramienta de informacion y comparacion de precios, no un medio publicitario. Farmi no realiza publicidad, promocion, patrocinio, incentivo ni induccion al consumo de medicamentos, marcas, laboratorios o farmacias.
+
+La informacion se muestra unicamente como respuesta a las busquedas que el propio usuario realiza de forma voluntaria, con caracter referencial y comparativo. El orden de los resultados responde a criterios informativos (como el precio o la cercania) y no a contraprestaciones publicitarias: ningun medicamento, laboratorio o farmacia es destacado o recomendado comercialmente por encima de otro.
+
+Farmi no anuncia ni promociona medicamentos de venta bajo formula medica. Respecto de estos, la informacion mostrada es estrictamente de referencia y su adquisicion y dispensacion estan sujetas a la presentacion de formula medica valida, conforme a la regulacion sanitaria colombiana (INVIMA y normas concordantes). Farmi no facilita ni promueve la adquisicion de medicamentos sin el cumplimiento de dichos requisitos.`,
+  },
+  {
+    title: '3. Naturaleza de la informacion de precios',
     body: `Los precios mostrados en Farmi corresponden a los precios de lista (precios publicos) que cada farmacia o drogueria publica en sus canales oficiales. Se obtienen de fuentes publicas (sitios web, APIs oficiales y fuentes equivalentes) con fines estrictamente informativos.
 
 Estos precios son propiedad de cada farmacia y NO son fijados, definidos ni controlados por Farmi. Farmi unicamente los recopila y los muestra para facilitar la comparacion; no son precios nuestros.
@@ -31,7 +39,7 @@ Por lo anterior, el precio final que pague el usuario en la farmacia puede ser m
 Farmi no garantiza la exactitud, vigencia ni disponibilidad de los precios mostrados.`,
   },
   {
-    title: '3. Sitios de terceros',
+    title: '4. Sitios de terceros',
     body: `Cada farmacia listada en Farmi es un negocio independiente y autónomo. Al hacer clic en "Comprar" o en cualquier enlace que lleve a un sitio externo, el usuario sera redirigido al sitio web oficial de esa farmacia.
 
 Farmi no es responsable de:
@@ -43,31 +51,58 @@ Farmi no es responsable de:
 Recomendamos al usuario verificar siempre el precio directamente en el sitio de la farmacia antes de completar cualquier compra.`,
   },
   {
-    title: '4. Informacion medica y de salud',
-    body: `La informacion sobre medicamentos publicada en Farmi (usos, dosis, advertencias, contraindicaciones y efectos secundarios) tiene caracter exclusivamente educativo e informativo. No constituye consejo medico, diagnostico ni prescripcion.
+    title: '5. Informacion medica y de salud',
+    body: `La informacion sobre medicamentos publicada en Farmi (usos, dosis, advertencias, contraindicaciones y efectos secundarios) tiene caracter exclusivamente educativo e informativo. No constituye publicidad, consejo medico, diagnostico, prescripcion ni invitacion a automedicarse.
 
-Antes de iniciar, modificar o suspender cualquier tratamiento farmacologico, consulte siempre a un medico o farmaceutico licenciado. Farmi no asume ninguna responsabilidad por decisiones de salud tomadas con base en el contenido de esta plataforma.`,
+Las orientaciones del asistente virtual se limitan a medicamentos de venta libre para molestias leves, son generadas por inteligencia artificial, pueden contener errores y no reemplazan la consulta con un profesional de salud.
+
+Antes de iniciar, modificar o suspender cualquier tratamiento farmacologico, consulte siempre a un medico o quimico farmaceutico licenciado. Farmi no asume ninguna responsabilidad por decisiones de salud, por la automedicacion ni por el uso de medicamentos tomados con base en el contenido de esta plataforma.`,
   },
   {
-    title: '5. Gratuidad del servicio',
+    title: '6. Limitacion de responsabilidad',
+    body: `El servicio se presta "tal cual" y "segun disponibilidad", sin garantias de ningun tipo sobre la exactitud, vigencia, completitud o disponibilidad de la informacion.
+
+En la maxima medida permitida por la ley aplicable, Farmi y sus desarrolladores no seran responsables por danos o perjuicios directos, indirectos, incidentales o consecuenciales derivados de:
+
+- El uso o la imposibilidad de uso de la plataforma.
+- Diferencias entre los precios mostrados y los precios reales en la farmacia.
+- Decisiones de compra, de consumo o de salud tomadas con base en la informacion.
+- Actos, omisiones, productos, precios o servicios de las farmacias u otros terceros.
+
+El usuario utiliza Farmi bajo su propia responsabilidad y reconoce el caracter referencial e informativo de todo su contenido.`,
+  },
+  {
+    title: '7. Uso adecuado e indemnidad',
+    body: `El usuario se compromete a usar Farmi de forma licita, de buena fe y conforme a estas condiciones y a la ley.
+
+El usuario mantendra indemne a Farmi y a sus desarrolladores frente a cualquier reclamacion, queja, sancion o demanda de terceros que se derive del uso indebido de la plataforma o del incumplimiento de estas condiciones por parte del usuario.`,
+  },
+  {
+    title: '8. Gratuidad del servicio',
     body: `El uso basico de Farmi es gratuito para los usuarios. No intervenimos en el precio que paga el usuario al momento de comprar en una farmacia.
 
 La plataforma puede incorporar modelos de monetizacion en el futuro, los cuales seran claramente identificados como tal.`,
   },
   {
-    title: '6. Propiedad intelectual',
-    body: `Los nombres, logotipos y marcas de las farmacias listadas son propiedad de sus respectivos duenos y se utilizan con fines referenciales e informativos. Farmi no reclama derechos sobre dichas marcas.
+    title: '9. Propiedad intelectual',
+    body: `Los nombres, logotipos y marcas de las farmacias y laboratorios listados son propiedad de sus respectivos duenos y se utilizan unicamente con fines referenciales, identificativos e informativos (uso nominativo). Farmi no reclama derechos sobre dichas marcas, y su uso no implica afiliacion, asociacion, patrocinio ni respaldo entre Farmi y dichos titulares.
 
 El diseño, codigo y contenido propio de Farmi son propiedad de sus desarrolladores.`,
   },
   {
-    title: '7. Privacidad de datos',
+    title: '10. Privacidad de datos',
     body: `Farmi no solicita datos personales sensibles para el uso basico de la plataforma. En caso de registro voluntario, los datos proporcionados se utilizan unicamente para funcionalidades como guardar favoritos o historial de busquedas, y no son compartidos con terceros con fines comerciales.
 
 En desarrollo: politica de privacidad completa conforme a la Ley 1581 de 2012 (Habeas Data, Colombia).`,
   },
   {
-    title: '8. Modificaciones',
+    title: '11. Ley aplicable y resolucion de controversias',
+    body: `Estas condiciones se rigen e interpretan conforme a las leyes de la Republica de Colombia, incluyendo el Estatuto del Consumidor (Ley 1480 de 2011) y la Ley 1581 de 2012 sobre proteccion de datos personales.
+
+Cualquier controversia derivada del uso de la plataforma se procurara resolver de buena fe y de manera directa; en su defecto, se sometera a la jurisdiccion de los jueces y autoridades competentes de Colombia.`,
+  },
+  {
+    title: '12. Modificaciones',
     body: `Farmi se reserva el derecho de modificar estas condiciones en cualquier momento. Los cambios se publicaran en esta misma pagina. El uso continuado de la plataforma despues de una modificacion implica la aceptacion de los nuevos terminos.`,
   },
 ]
@@ -95,12 +130,13 @@ export default function TerminosPage() {
 
       {/* Summary card */}
       <div className="bg-primary/5 border border-primary/15 rounded-2xl p-5 sm:p-6 mb-8">
-        <p className="text-[13px] font-bold text-primary mb-1">Resumen en tres puntos</p>
+        <p className="text-[13px] font-bold text-primary mb-1">En resumen</p>
         <ul className="space-y-2 mt-3">
           {[
-            'Farmi compara precios. No vendemos medicamentos ni cobramos nada.',
+            'Farmi solo compara precios: no vende, no ofrece ni dispensa medicamentos, y no cobra nada.',
+            'No hacemos publicidad ni promovemos el consumo de medicamentos; mostramos informacion solo cuando tu la buscas.',
             'Mostramos los precios de lista (publicos) de cada farmacia, no son nuestros y no incluyen descuentos por afiliaciones. Verificalos antes de comprar.',
-            'La informacion medica es educativa. Consulta siempre a un profesional de salud.',
+            'La informacion medica es educativa y no reemplaza al medico. La usas bajo tu responsabilidad.',
           ].map((point, i) => (
             <li key={i} className="flex items-start gap-2.5 text-[13px] text-[#414755]">
               <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
