@@ -15,10 +15,10 @@ interface QuickReply {
 }
 
 const INITIAL_REPLIES: QuickReply[] = [
-  { label: 'Que es un generico?',      value: 'generico'  },
-  { label: 'Como funciona Farmi?',     value: 'como'      },
-  { label: 'Que farmacias comparan?',  value: 'farmacias' },
-  { label: 'El precio es exacto?',     value: 'precio'    },
+  { label: 'Algo para el dolor de cabeza?', value: 'sintoma'   },
+  { label: 'Que es un generico?',           value: 'generico'  },
+  { label: 'Como funciona Farmi?',          value: 'como'      },
+  { label: 'Que farmacias comparan?',       value: 'farmacias' },
 ]
 
 const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
@@ -63,6 +63,13 @@ const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
       { label: 'Que farmacias comparan?', value: 'farmacias' },
     ],
   },
+  sintoma: {
+    text: 'Para molestias leves y comunes hay opciones de venta libre. Por ejemplo, para dolor de cabeza o fiebre leve se suele usar acetaminofen, y para dolor o inflamacion, ibuprofeno. Lee siempre la etiqueta y respeta la dosis maxima.\n\nEsto es solo orientativo: soy una IA, no reemplaza la consulta con un medico o quimico farmaceutico y Farmi no se hace responsable. Si los sintomas son fuertes o duran mas de 3 dias, consulta a un medico.',
+    replies: [
+      { label: 'Buscar un medicamento',   value: 'buscar'    },
+      { label: 'Que es un generico?',     value: 'generico'  },
+    ],
+  },
 }
 
 // Keyword fallback used in FAQ mode and when an AI call fails.
@@ -74,7 +81,9 @@ function faqAnswer(text: string): string {
   if (t.includes('ubicac')   || t.includes('cerca'))  return RESPONSES.ubicacion.text
   if (t.includes('buscar')   || t.includes('busqued'))return RESPONSES.buscar.text
   if (t.includes('funciona') || t.includes('usar') || t.includes('como')) return RESPONSES.como.text
-  return 'Puedo ayudarte a buscar medicamentos, comparar precios entre farmacias y encontrar las mas cercanas. Usa el buscador o preguntame algo concreto.'
+  if (/(dolor|fiebre|gripa|gripe|tos|alergia|acidez|congesti|malestar|sintoma|tomar para|que me tomo|recomienda)/.test(t))
+    return RESPONSES.sintoma.text
+  return 'Puedo ayudarte a buscar medicamentos, comparar precios entre farmacias, encontrar las mas cercanas y orientarte sobre medicamentos de venta libre para molestias leves. Preguntame algo concreto.'
 }
 
 function nl2br(text: string) {
@@ -94,7 +103,7 @@ function mkMsg(from: Message['from'], text: string): Message {
 export function ChatAssistant() {
   const [open,      setOpen]      = useState(false)
   const [messages,  setMessages]  = useState<Message[]>([
-    mkMsg('bot', 'Hola, soy Farmi. Te ayudo a encontrar el medicamento mas barato en Colombia.'),
+    mkMsg('bot', 'Hola, soy Farmi. Te ayudo a encontrar el medicamento mas barato en Colombia y puedo orientarte sobre medicamentos de venta libre para molestias leves.'),
   ])
   const [replies,   setReplies]   = useState<QuickReply[]>(INITIAL_REPLIES)
   const [bubble,    setBubble]    = useState(true)
@@ -284,10 +293,10 @@ export function ChatAssistant() {
             </form>
           )}
 
-          {/* Disclaimer */}
+          {/* Disclaimer — siempre visible */}
           <div className="px-4 py-2 border-t border-[#f0f1f5] bg-white shrink-0">
-            <p className="text-[10px] text-[#c1c6d7] text-center">
-              Farmi no reemplaza la consulta medica. Verifica en farmacia.
+            <p className="text-[10px] text-[#9ca3af] text-center leading-snug">
+              Asistente con IA, solo orientativo y para medicamentos de venta libre. No reemplaza al medico ni al quimico farmaceutico; Farmi no se hace responsable del uso de esta informacion.
             </p>
           </div>
         </div>
