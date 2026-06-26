@@ -68,6 +68,33 @@ export function useNearbyPharmacies() {
     )
   }
 
+  // Manual fallback to geolocation: type an address, city or neighbourhood.
+  // /api/nearby?place= geocodes it server-side (Nominatim) and returns the
+  // same nearby-pharmacy payload.
+  async function searchByPlace(place: string) {
+    const q = place.trim()
+    if (!q) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/nearby?place=${encodeURIComponent(q)}`)
+      if (res.status === 404) {
+        setError(`No encontramos "${q}". Prueba con otra direccion o ciudad.`)
+        setLoading(false)
+        return
+      }
+      if (!res.ok) throw new Error(`http ${res.status}`)
+      const data = (await res.json()) as { origin?: { lat: number; lng: number }; pharmacies: NearbyPharmacy[] }
+      if (data.origin) setPosition(data.origin)
+      const s = nearestByChain(data.pharmacies ?? [])
+      if (Object.keys(s).length === 0) setError('No encontramos farmacias conocidas cerca de esa direccion')
+      setStores(s)
+    } catch {
+      setError('No se pudo buscar esa direccion')
+    }
+    setLoading(false)
+  }
+
   function clear() {
     setPosition(null)
     setStores({})
@@ -82,5 +109,5 @@ export function useNearbyPharmacies() {
 
   const hasDistances = Object.keys(stores).length > 0
 
-  return { position, distances, stores, loading, error, hasDistances, request, clear }
+  return { position, distances, stores, loading, error, hasDistances, request, searchByPlace, clear }
 }

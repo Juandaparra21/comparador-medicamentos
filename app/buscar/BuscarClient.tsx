@@ -82,7 +82,16 @@ export default function BuscarClient() {
     return () => controller.abort()
   }, [q, reloadKey])
 
-  const { distances, stores, loading: locLoading, error: locError, hasDistances, request: requestLoc, clear: clearLoc } = useNearbyPharmacies()
+  const { distances, stores, loading: locLoading, error: locError, hasDistances, request: requestLoc, searchByPlace: searchByAddress, clear: clearLoc } = useNearbyPharmacies()
+  const [showAddr, setShowAddr] = useState(false)
+  const [addr,     setAddr]     = useState('')
+
+  function submitAddress(e: React.FormEvent) {
+    e.preventDefault()
+    if (!addr.trim()) return
+    searchByAddress(addr)
+    setShowAddr(false)
+  }
 
   // Cascading filter options: each layer's options come from results that pass all *other* active filters.
   function topValues<T extends string | number>(arr: T[]): T[] {
@@ -407,6 +416,22 @@ export default function BuscarClient() {
                   </svg>
                   {locLoading ? 'Buscando...' : hasDistances ? 'Ubicacion activa' : 'Mas cercano'}
                 </button>
+                {/* Address input toggle — alternative to GPS */}
+                <button
+                  onClick={() => setShowAddr((v) => !v)}
+                  className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+                    showAddr
+                      ? 'bg-primary/10 text-primary border-primary/30'
+                      : 'bg-white/70 text-[#717786] border-[#c1c6d7]/60 hover:text-primary hover:border-primary/30'
+                  }`}
+                  aria-expanded={showAddr}
+                  title="Escribir una direccion o ciudad"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                  </svg>
+                  Direccion
+                </button>
                 <label htmlFor="sort" className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap">
                   Ordenar
                 </label>
@@ -422,6 +447,28 @@ export default function BuscarClient() {
                 </select>
               </div>
             </div>
+
+            {/* Address input — geocode a typed address/city instead of GPS */}
+            {showAddr && (
+              <form onSubmit={submitAddress} className="flex items-stretch gap-2 mb-4">
+                <input
+                  type="text"
+                  value={addr}
+                  onChange={(e) => setAddr(e.target.value)}
+                  placeholder="Escribe tu direccion, barrio o ciudad (ej: Calle 80 #20-30, Bogota)"
+                  aria-label="Direccion o ciudad"
+                  autoFocus
+                  className="flex-1 px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
+                />
+                <button
+                  type="submit"
+                  disabled={!addr.trim() || locLoading}
+                  className="px-4 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer whitespace-nowrap"
+                >
+                  {locLoading ? 'Buscando...' : 'Usar direccion'}
+                </button>
+              </form>
+            )}
 
             {/* Aviso de geolocalizacion (permiso denegado / sin farmacias cercanas) */}
             {locError && !locLoading && (
