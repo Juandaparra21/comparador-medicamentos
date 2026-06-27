@@ -7,7 +7,7 @@ const CARD = 'bg-white border border-black/[0.06] rounded-3xl shadow-[0_1px_3px_
 
 function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-8 sm:mb-10 text-center">
+    <div className="mb-10 sm:mb-14 text-center">
       <h2 className="text-[26px] sm:text-[36px] font-bold tracking-[-0.02em] text-[#1d1d1f] leading-tight">{title}</h2>
       {subtitle && <p className="text-[15px] sm:text-[18px] text-[#6e6e73] mt-2.5 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>}
     </div>
@@ -25,7 +25,7 @@ const VALUES: { title: string; desc: string; path: string }[] = [
 
 export function ValueProps() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16 sm:mb-24">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {VALUES.map((v) => (
           <div key={v.title} className={`${CARD} p-4 sm:p-5`}>
@@ -53,7 +53,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16 sm:mb-24">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
       <SectionHeading title="Como funciona" subtitle="Encuentra el mejor precio en tres pasos." />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {STEPS.map((s) => (
@@ -83,7 +83,7 @@ const PHARMACIES: { key: string; label: string }[] = [
 
 export function PharmacyStrip() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16 sm:mb-24">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
       <SectionHeading title="Comparamos estas farmacias" subtitle="Precios en tiempo real de las cadenas mas grandes de Colombia." />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {PHARMACIES.map((p) => (
@@ -105,7 +105,7 @@ export function PharmacyStrip() {
 
 export function GenericVsBrand() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-16 sm:mb-24">
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
       <SectionHeading title="Generico o de marca?" subtitle="Mismo efecto, distinto precio. Tu decides." />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div className={`${CARD} p-5`}>
@@ -145,7 +145,7 @@ const FAQS: { q: string; a: string }[] = [
 
 export function HomeFaq() {
   return (
-    <section className="mx-auto px-4 sm:px-5 max-w-3xl mb-16 sm:mb-24">
+    <section className="mx-auto px-4 sm:px-5 max-w-3xl mb-20 sm:mb-32">
       <SectionHeading title="Preguntas frecuentes" />
       <div className="flex flex-col gap-2.5">
         {FAQS.map((f) => (
