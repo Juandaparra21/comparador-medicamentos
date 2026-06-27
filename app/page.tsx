@@ -5,6 +5,7 @@ import { DiscountsSection } from '@/app/components/DiscountsSection'
 import { NearbyMapSection } from '@/app/components/NearbyMapSection'
 import { Reveal } from '@/app/components/Reveal'
 import {
+  TrustStrip,
   ValueProps,
   HowItWorks,
   PharmacyStrip,
@@ -46,6 +47,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto">
             <SearchBar />
             <QuickChips />
+            <TrustStrip />
           </div>
         </div>
       </section>

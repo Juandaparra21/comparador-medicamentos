@@ -14,6 +14,29 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle?: string 
   )
 }
 
+/* ── Trust strip (under the hero search) ───────────────────────────── */
+
+const TRUST_SIGNALS = [
+  'Precios en tiempo real',
+  '6 farmacias en una busqueda',
+  '100% gratis, sin registro',
+]
+
+export function TrustStrip() {
+  return (
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] font-semibold text-[#414755]">
+      {TRUST_SIGNALS.map((label) => (
+        <span key={label} className="inline-flex items-center gap-1.5">
+          <svg className="w-4 h-4 text-secondary shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+          </svg>
+          {label}
+        </span>
+      ))}
+    </div>
+  )
+}
+
 /* ── Why Farmi ─────────────────────────────────────────────────────── */
 
 const VALUES: { title: string; desc: string; path: string }[] = [
