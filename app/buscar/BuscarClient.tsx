@@ -8,7 +8,7 @@ import { useNearbyPharmacies } from '@/app/hooks/useNearbyPharmacies'
 
 // Presentation names that use volume (ml) as quantity unit
 const LIQUID_FILTER_NAMES = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
-import { formatCOP } from '@/app/utils/format'
+import { formatCOP, formatRelativeTime } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
 import { ProductGroupCard } from '@/app/components/ProductGroupCard'
@@ -359,8 +359,12 @@ export default function BuscarClient() {
                   )}
                 </p>
                 {fetchedAt && (
-                  <span className="text-[11px] text-[#c1c6d7]" title="Hora en que se consultaron los precios">
-                    Actualizado {new Date(fetchedAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
+                  <span
+                    className="flex items-center gap-1 text-[11px] text-secondary font-semibold"
+                    title={`Precios consultados en tiempo real a las ${new Date(fetchedAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-secondary inline-block" aria-hidden="true" />
+                    Actualizado {formatRelativeTime(fetchedAt)}
                   </span>
                 )}
                 <div className="flex bg-black/[0.05] rounded-lg p-0.5">
@@ -490,8 +494,9 @@ export default function BuscarClient() {
                   {priceBasis === 'unit' ? 'Max/und' : 'Max'}: {formatCOP(maxPrice)}
                 </span>
                 {maxPrice - minPrice > (priceBasis === 'unit' ? 50 : 1000) && (
-                  <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  <span className="text-[12px] font-bold px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                     Ahorra hasta {formatCOP(maxPrice - minPrice)}{priceBasis === 'unit' ? ' por unidad' : ''}
+                    {maxPrice > 0 ? ` (${Math.round((1 - minPrice / maxPrice) * 100)}%)` : ''}
                   </span>
                 )}
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 text-[#414755] border border-white/40">

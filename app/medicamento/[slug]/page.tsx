@@ -45,9 +45,37 @@ export default async function MedicamentoPage({ params }: Props) {
   const info = getMedicineInfo(slug)
   if (!info) notFound()
 
-  // Structured data: the Drug entity (medical info, accurate) plus breadcrumbs.
-  // Offer/price structured data is intentionally omitted until prices are served
-  // live on this page — emitting stale prices to Google harms ranking.
+  // FAQs derived from the medication's own data — real content that targets
+  // common "para que sirve / necesita formula / donde comprar" search queries
+  // and powers the FAQPage rich result below.
+  const faqs = [
+    {
+      q: `Para que sirve el ${info.activeIngredient}?`,
+      a: `${info.activeIngredient} (${info.therapeuticClass}) se usa para: ${info.uses.join('; ')}.`,
+    },
+    {
+      q: `El ${info.activeIngredient} necesita formula medica en Colombia?`,
+      a: info.requiresPrescription
+        ? `Si. ${info.activeIngredient} es un medicamento de venta bajo formula medica; su compra y dispensacion requieren prescripcion de un profesional de salud.`
+        : `${info.activeIngredient} es de venta libre para molestias leves. Si los sintomas persisten, consulta a un medico o quimico farmaceutico.`,
+    },
+    {
+      q: `Cual es la dosis del ${info.activeIngredient}?`,
+      a: `La dosis orientativa es ${info.typicalDose} (maximo ${info.maxDailyDose}). Es solo informativa: la dosis correcta la determina tu medico o quimico farmaceutico.`,
+    },
+    {
+      q: `El generico de ${info.activeIngredient} es igual al de marca?`,
+      a: `Si. El generico tiene el mismo principio activo, dosis y forma que el de marca, esta regulado por el INVIMA y suele costar bastante menos.`,
+    },
+    {
+      q: `Donde comprar ${info.activeIngredient} mas barato en Colombia?`,
+      a: `En Farmi puedes comparar el precio de ${info.activeIngredient} en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olimpica, y elegir la opcion mas economica.`,
+    },
+  ]
+
+  // Structured data: the Drug entity (medical info, accurate), breadcrumbs and
+  // a FAQ rich result. Offer/price structured data is intentionally omitted
+  // until prices are served live on this page — stale prices harm ranking.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -67,6 +95,14 @@ export default async function MedicamentoPage({ params }: Props) {
           { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITE_URL}/` },
           { '@type': 'ListItem', position: 2, name: info.activeIngredient, item: `${SITE_URL}/medicamento/${slug}` },
         ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
       },
     ],
   }
@@ -232,6 +268,26 @@ export default async function MedicamentoPage({ params }: Props) {
 
       {/* Real price history + tracking */}
       <PriceTracker query={normalize(info.activeIngredient)} label={info.activeIngredient} />
+
+      {/* FAQ */}
+      <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6">
+        <h2 className="text-[16px] font-bold text-[#1a1b1f] mb-3">
+          Preguntas frecuentes sobre {info.activeIngredient}
+        </h2>
+        <div className="flex flex-col">
+          {faqs.map((f) => (
+            <details key={f.q} className="group border-b border-[#f0f1f5] last:border-0">
+              <summary className="flex items-center justify-between gap-3 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <span className="text-[13px] font-semibold text-[#1a1b1f]">{f.q}</span>
+                <svg className="w-4 h-4 text-[#9ca3af] shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clipRule="evenodd" />
+                </svg>
+              </summary>
+              <p className="text-[12px] sm:text-[13px] text-[#6e6e73] leading-relaxed pb-3 -mt-0.5">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
 
       {/* Navigation */}
       <div className="flex flex-wrap gap-3 pt-2">

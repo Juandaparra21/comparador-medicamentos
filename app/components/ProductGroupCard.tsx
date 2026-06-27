@@ -41,6 +41,8 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
   const cheapest = avail[0] ?? null
   const slug     = normalize(group.activeIngredient)
   const hasMany  = avail.length > 1
+  // Savings vs the most expensive pharmacy for the same product (real, not invented)
+  const savingsPct = savings > 0 && maxPrice > 0 ? Math.round((savings / maxPrice) * 100) : 0
   const unitSuffix = LIQUID_PRESENTATIONS.has(group.presentation) ? '/ml' : '/und'
 
   return (
@@ -51,8 +53,8 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
 
       {/* Savings badge */}
       {savings > 1000 && (
-        <span className="absolute top-2 left-2 bg-secondary text-white text-[11px] font-black px-2 py-0.5 rounded-lg shadow-sm z-10">
-          Ahorras {formatCOP(savings)}
+        <span className="absolute top-2 left-2 bg-secondary text-white text-[12px] font-black px-2.5 py-1 rounded-lg shadow-sm z-10">
+          Ahorras {formatCOP(savings)}{savingsPct >= 5 ? ` (${savingsPct}%)` : ''}
         </span>
       )}
 
