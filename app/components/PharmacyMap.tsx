@@ -9,6 +9,9 @@ import { formatDistance, formatTripShort, directionsUrl } from '@/app/utils/geo'
 interface Props {
   origin:     { lat: number; lng: number }
   pharmacies: NearbyPharmacyView[]
+  // When provided, the user's blue pin becomes draggable and this fires with the
+  // new coordinates on drag end (so the page can offer "search here").
+  onPinDrag?: (lat: number, lng: number) => void
 }
 
 // Affiliate (one of our priced chains): prominent branded blue pin with a
@@ -52,8 +55,11 @@ function popupHtml(p: NearbyPharmacyView): string {
   </div>`
 }
 
-export default function PharmacyMap({ origin, pharmacies }: Props) {
+export default function PharmacyMap({ origin, pharmacies, onPinDrag }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
+  // Keep the latest callback without making the map effect depend on it.
+  const onPinDragRef = useRef(onPinDrag)
+  useEffect(() => { onPinDragRef.current = onPinDrag }, [onPinDrag])
 
   useEffect(() => {
     const el = containerRef.current
@@ -66,10 +72,19 @@ export default function PharmacyMap({ origin, pharmacies }: Props) {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map)
 
-    L.marker([origin.lat, origin.lng], {
+    const draggable = Boolean(onPinDragRef.current)
+    const userMarker = L.marker([origin.lat, origin.lng], {
       icon: L.divIcon({ className: '', html: userHtml(), iconSize: [16, 16], iconAnchor: [8, 8] }),
       zIndexOffset: 1000,
-    }).addTo(map).bindPopup('Tu ubicacion')
+      draggable,
+    }).addTo(map).bindPopup(draggable ? 'Arrastrame para fijar tu direccion' : 'Tu ubicacion')
+
+    if (draggable) {
+      userMarker.on('dragend', () => {
+        const { lat, lng } = userMarker.getLatLng()
+        onPinDragRef.current?.(lat, lng)
+      })
+    }
 
     const group = L.featureGroup()
     for (const p of pharmacies) {

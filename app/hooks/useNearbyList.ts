@@ -78,5 +78,11 @@ export function useNearbyList() {
     )
   }, [loadFromUrl])
 
-  return { status, pharmacies, error, origin, requestLocation, searchByPlace }
+  // Explicit coordinates: from an autocomplete pick or a dragged map pin.
+  const searchByCoords = useCallback(async (lat: number, lng: number) => {
+    setError(null)
+    await loadFromUrl(`/api/nearby?lat=${lat}&lng=${lng}`, '')
+  }, [loadFromUrl])
+
+  return { status, pharmacies, error, origin, requestLocation, searchByPlace, searchByCoords }
 }

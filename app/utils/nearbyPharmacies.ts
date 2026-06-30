@@ -150,6 +150,33 @@ export async function geocodePlace(query: string): Promise<{ lat: number; lng: n
   return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
 }
 
+export interface PlaceSuggestion {
+  label: string   // human-readable address (Nominatim display_name)
+  lat:   number
+  lng:   number
+}
+
+// Address autocomplete: returns up to 5 Colombian matches for a partial query.
+// Server-side only (Nominatim requires a User-Agent and rate-limits hard).
+export async function suggestPlaces(query: string): Promise<PlaceSuggestion[]> {
+  const q = query.trim()
+  if (q.length < 3) return []
+  const url =
+    `${NOMINATIM_URL}?q=${encodeURIComponent(q)}` +
+    `&format=json&limit=5&countrycodes=co&accept-language=es&addressdetails=0`
+  const res = await fetch(url, {
+    headers: { 'User-Agent': USER_AGENT, 'Accept': 'application/json' },
+    signal:  AbortSignal.timeout(8_000),
+  })
+  if (!res.ok) return []
+  const data = (await res.json()) as Array<{ lat: string; lon: string; display_name: string }>
+  return data.map((d) => ({
+    label: d.display_name,
+    lat:   parseFloat(d.lat),
+    lng:   parseFloat(d.lon),
+  }))
+}
+
 /* ── Open-now parser ──────────────────────────────────────────────────
    Handles the common OSM opening_hours subset. Returns 'unknown' for any
    construct it cannot parse with confidence, so it never guesses. */

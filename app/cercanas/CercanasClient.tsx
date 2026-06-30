@@ -8,6 +8,7 @@ import { useNearbyList } from '@/app/hooks/useNearbyList'
 import type { NearbyPharmacyView, OpenState } from '@/app/utils/nearbyPharmacies'
 import { formatDistance, formatTripShort, directionsUrl } from '@/app/utils/geo'
 import { formatCOP } from '@/app/utils/format'
+import { AddressAutocomplete } from '@/app/components/AddressAutocomplete'
 
 const PharmacyMap = dynamic(() => import('@/app/components/PharmacyMap'), {
   ssr: false,
@@ -27,8 +28,13 @@ const OPEN_BADGE: Record<OpenState, { label: string; cls: string }> = {
 }
 
 export default function CercanasClient() {
-  const { status, pharmacies, error, origin, requestLocation, searchByPlace } = useNearbyList()
-  const [place, setPlace] = useState('')
+  const { status, pharmacies, error, origin, requestLocation, searchByCoords } = useNearbyList()
+
+  // Pin dragged on the map but not yet confirmed. Cleared as soon as any new
+  // search starts (the wrappers below), so a stale "search here" never lingers.
+  const [pendingPin, setPendingPin] = useState<{ lat: number; lng: number } | null>(null)
+  const locateMe = () => { setPendingPin(null); requestLocation() }
+  const goTo = (lat: number, lng: number) => { setPendingPin(null); searchByCoords(lat, lng) }
 
   // Two location types: all pharmacies (OSM) vs affiliates (our priced chains).
   const [view, setView] = useState<'all' | 'affiliate'>('all')
@@ -80,7 +86,7 @@ export default function CercanasClient() {
       {/* Location controls */}
       <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm p-5 mb-5">
         <button
-          onClick={requestLocation}
+          onClick={locateMe}
           disabled={status === 'locating' || status === 'loading'}
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-60 transition-opacity cursor-pointer"
         >
@@ -90,32 +96,22 @@ export default function CercanasClient() {
           {status === 'locating' ? 'Ubicando...' : status === 'loading' ? 'Buscando farmacias...' : 'Usar mi ubicacion'}
         </button>
 
-        {/* Manual address entry (also used when geolocation is denied) */}
+        {/* Manual address entry with autocomplete (also used when geolocation is denied) */}
         <div className="mt-3 flex items-center gap-3">
           <div className="flex-1 h-px bg-[#e5e7eb]" />
           <span className="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wide">o ingresa tu direccion</span>
           <div className="flex-1 h-px bg-[#e5e7eb]" />
         </div>
-        <form
-          onSubmit={(e) => { e.preventDefault(); searchByPlace(place) }}
-          className="mt-3 flex items-stretch gap-2"
-        >
-          <input
-            type="text"
-            value={place}
-            onChange={(e) => setPlace(e.target.value)}
+        <div className="mt-3">
+          <AddressAutocomplete
+            onSelect={(s) => goTo(s.lat, s.lng)}
             placeholder="Direccion, barrio o ciudad (ej: Calle 53 # 25-10, Bogota)"
-            aria-label="Direccion, barrio o ciudad"
-            className="flex-1 px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
+            disabled={status === 'locating' || status === 'loading'}
           />
-          <button
-            type="submit"
-            disabled={!place.trim() || status === 'locating' || status === 'loading'}
-            className="px-4 py-2.5 bg-white border border-[#e5e7eb] text-[#414755] text-[14px] font-semibold rounded-lg hover:border-primary/40 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
-          >
-            Buscar
-          </button>
-        </form>
+          <p className="text-[11px] text-[#9ca3af] mt-1.5">
+            Escribe y elige una sugerencia. Luego puedes arrastrar el punto azul del mapa para afinar tu direccion.
+          </p>
+        </div>
 
         {error && (
           <p className="mt-3 text-[13px] text-[#c0392b] bg-[#fdecec] border border-[#f5c6c6] rounded-lg px-3 py-2" role="status">
@@ -185,8 +181,19 @@ export default function CercanasClient() {
                 <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Con precios</span>
                 <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#9ca3af] inline-block" /> Otra</span>
               </div>
-              <div className="h-[320px] sm:h-[420px] w-full">
-                <PharmacyMap origin={origin} pharmacies={shown} />
+              <div className="relative h-[320px] sm:h-[420px] w-full">
+                <PharmacyMap origin={origin} pharmacies={shown} onPinDrag={(lat, lng) => setPendingPin({ lat, lng })} />
+                {pendingPin && (
+                  <button
+                    onClick={() => goTo(pendingPin.lat, pendingPin.lng)}
+                    className="absolute z-[1100] left-1/2 -translate-x-1/2 bottom-3 flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-[13px] font-semibold rounded-full shadow-lg hover:opacity-90 transition-opacity cursor-pointer"
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                    </svg>
+                    Buscar farmacias aqui
+                  </button>
+                )}
               </div>
             </div>
           )}
