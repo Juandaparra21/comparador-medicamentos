@@ -45,8 +45,21 @@ export const LIQUID_PRESENTATIONS = new Set([
  *
  * Never mistakes concentrations ("400MG", "250MG/5ML") for quantities.
  */
+// Solid unit words, including the abbreviations Colombian pharmacies use
+// ("tab", "cap", "comp", "und"). Used by both the "x N <unit>" and "N <unit>"
+// patterns below so e.g. "30 COMP" and "15 CAP" are not lost.
+const SOLID_UNIT = '(?:tabletas?|tabs?|capsulas?|caps?|comprimidos?|comps?|pastillas?|grageas?|gelcaps?|unds?)'
+
 export function extractPackQuantity(name: string, presentation: string): number {
   const s = name.toLowerCase()
+
+  // ── SPRAY / AEROSOL: dose (puff) count ───────────────────────────────────
+  // Checked BEFORE liquids: 'Spray' is also in LIQUID_PRESENTATIONS, and the
+  // actuation count ("200 dosis") is the real pack size, not any ml of solution.
+  if (presentation === 'Spray') {
+    const doses = s.match(/(\d+)\s*dosis/)
+    if (doses) return parseInt(doses[1])
+  }
 
   // ── LIQUIDS: extract total volume ────────────────────────────────────────
   if (LIQUID_PRESENTATIONS.has(presentation)) {
@@ -58,12 +71,6 @@ export function extractPackQuantity(name: string, presentation: string): number 
     return 1
   }
 
-  // ── SPRAY / AEROSOL: dose count ──────────────────────────────────────────
-  if (presentation === 'Spray') {
-    const doses = s.match(/(\d+)\s*dosis/)
-    if (doses) return parseInt(doses[1])
-  }
-
   // ── SOLIDS ───────────────────────────────────────────────────────────────
 
   // "N BLISTER(S) X M" → N × M   e.g. "2 blister x 10" → 20
@@ -71,11 +78,11 @@ export function extractPackQuantity(name: string, presentation: string): number 
   if (blisterMul) return parseInt(blisterMul[1]) * parseInt(blisterMul[2])
 
   // "X N TABLETAS / CAPSULAS / COMPRIMIDOS / …" — explicit solid unit, most reliable
-  const xSolid = s.match(/[x×]\s*(\d+)\s*(?:tabletas?|capsulas?|comprimidos?|pastillas?|grageas?|gelcaps?)\b/)
+  const xSolid = s.match(new RegExp(`[x×]\\s*(\\d+)\\s*${SOLID_UNIT}\\b`))
   if (xSolid) return parseInt(xSolid[1])
 
-  // "N TABLETAS / CAPSULAS" without x prefix  e.g. "30 tabletas"
-  const nSolid = s.match(/\b(\d+)\s*(?:tabletas?|capsulas?|comprimidos?|pastillas?|grageas?)\b/)
+  // "N TABLETAS / CAPSULAS" without x prefix  e.g. "30 tabletas", "30 comp"
+  const nSolid = s.match(new RegExp(`\\b(\\d+)\\s*${SOLID_UNIT}\\b`))
   if (nSolid) {
     const n = parseInt(nSolid[1])
     if (n >= 2 && n <= 1000) return n

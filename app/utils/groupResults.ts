@@ -53,16 +53,22 @@ function makeKey(productName: string): string {
   // first, then "x N" (but never "x 500mg"), then "N tabletas".
   s = s.replace(/(\d+)\s*blisters?\s*(?:[x×]|de)\s*\d+/g, ' ')
   s = s.replace(/[x×]\s*\d+(?![a-z0-9])/g, ' ')
-  s = s.replace(/\b\d+\s*(?:tabletas?|capsulas?|comprimidos?|pastillas?|grageas?|sobres?|unidades?|und)\b/g, ' ')
+  // Include the abbreviations (tab, cap, comp, und) so "30 COMP" is dropped just
+  // like "30 TABLETAS"; otherwise the same product would get two different keys.
+  s = s.replace(/\b\d+\s*(?:tabletas?|tabs?|capsulas?|caps?|comprimidos?|comps?|pastillas?|grageas?|gelcaps?|sobres?|unidades?|unds?)\b/g, ' ')
 
-  // Strip packaging/presentation noise words
+  // Strip packaging/presentation noise words (abbreviations included so a leftover
+  // "tab"/"cap"/"comp" token never makes two equal products look different).
   s = s.replace(
-    /\b(?:tabletas?|capsulas?|comprimidos?|ampollas?|jeringas?|plumas?|viales?|jarabe|suspen[sc]ion|solucion|crema|gel|pomada|spray|aerosol|gotas|polvo|supositorio|parche|ovulo|inyectable|encapsulado|refrigerado|frasco|fco|caja|blister|sobre|sachet|ampolleta|unidades?|und)\b/g,
+    /\b(?:tabletas?|tabs?|capsulas?|caps?|comprimidos?|comps?|pastillas?|grageas?|gelcaps?|ampollas?|jeringas?|plumas?|viales?|jarabe|suspen[sc]ion|solucion|crema|gel|pomada|spray|aerosol|gotas|polvo|supositorio|parche|ovulo|inyectable|encapsulado|refrigerado|frasco|fco|caja|blister|sobre|sachet|ampolleta|unidades?|unds?)\b/g,
     ' '
   )
 
-  // Tokenize: keep alphanumeric tokens of length >= 1
-  const tokens = s.split(/[\s\-\/,.()+]+/).filter(t => /[a-z0-9]/.test(t))
+  // Tokenize: keep alphanumeric tokens, dropping connector/stop words that appear
+  // in pack descriptions ("caja POR 30", "frasco DE 120ml"). Leaving them in would
+  // give the same product two different keys depending on the pharmacy's wording.
+  const STOP = new Set(['por', 'de', 'con', 'para', 'del', 'la', 'el', 'los', 'las', 'y', 'o', 'en', 'x'])
+  const tokens = s.split(/[\s\-\/,.()+]+/).filter(t => /[a-z0-9]/.test(t) && !STOP.has(t))
 
   // Sort for order-independence across pharmacy naming conventions
   tokens.sort()
@@ -160,7 +166,11 @@ export function groupResults(results: PharmacyResult[]): GroupedResults {
       maxPrice:         max,
       minPricePerUnit:  minUnit,
       maxPricePerUnit:  maxUnit,
-      savings:          avail.length > 1 ? max - min : 0,
+      // Only claim savings when the pack size is confirmed (quantity > 1). When a
+      // product name carries no unit count, quantity defaults to 1 and we cannot
+      // be sure two pharmacies sell the same size — so we never show a savings
+      // figure that might compare different-sized packs.
+      savings:          avail.length > 1 && rep.quantity > 1 ? max - min : 0,
       availableCount:   avail.length,
     })
   }

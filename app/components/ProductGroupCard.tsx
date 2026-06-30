@@ -16,10 +16,12 @@ import type { PharmacyDistances, PharmacyStores } from '@/app/hooks/useNearbyPha
 
 const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
 
+// quantity === 1 means the pack size could not be confirmed from the name, so we
+// show the form (e.g. "Tabletas") without asserting a misleading count of 1.
 function qtyDisplay(quantity: number, presentation: string): string {
-  if (LIQUID_PRESENTATIONS.has(presentation)) return `${quantity}ml`
-  if (!presentation) return `× ${quantity}`
-  return `${quantity} ${presentation}${quantity !== 1 ? 's' : ''}`
+  if (LIQUID_PRESENTATIONS.has(presentation)) return quantity > 1 ? `${quantity}ml` : presentation
+  if (!presentation) return quantity > 1 ? `× ${quantity}` : ''
+  return quantity > 1 ? `${quantity} ${presentation}s` : `${presentation}s`
 }
 
 interface Props { group: ProductGroup; priceBasis?: 'total' | 'unit'; distances?: PharmacyDistances; stores?: PharmacyStores; fetchedAt?: string }
@@ -101,9 +103,11 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
             <span className="text-[22px] font-bold leading-[28px] text-[#1a1b1f] tabular-nums">
               {formatCOP(minPrice)}
             </span>
-            <span className={`block text-[11px] tabular-nums mt-0.5 ${priceBasis === 'unit' ? 'font-bold text-secondary' : 'font-semibold text-[#717786]'}`}>
-              {formatCOP(group.minPricePerUnit)}{unitSuffix}
-            </span>
+            {group.quantity > 1 && (
+              <span className={`block text-[11px] tabular-nums mt-0.5 ${priceBasis === 'unit' ? 'font-bold text-secondary' : 'font-semibold text-[#717786]'}`}>
+                {formatCOP(group.minPricePerUnit)}{unitSuffix}
+              </span>
+            )}
           </div>
           {hasMany && (
             <span className="text-[11px] text-[#c1c6d7] tabular-nums">

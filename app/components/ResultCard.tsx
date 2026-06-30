@@ -16,10 +16,12 @@ import type { NearestStore } from '@/app/hooks/useNearbyPharmacies'
 
 const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
 
+// quantity === 1 means the pack size could not be confirmed from the name, so we
+// show the form (e.g. "Tabletas") without asserting a misleading count of 1.
 function qtyDisplay(quantity: number, presentation: string): string {
-  if (LIQUID_PRESENTATIONS.has(presentation)) return `${quantity}ml`
-  if (!presentation) return `× ${quantity}`
-  return `${quantity} ${presentation}${quantity !== 1 ? 's' : ''}`
+  if (LIQUID_PRESENTATIONS.has(presentation)) return quantity > 1 ? `${quantity}ml` : presentation
+  if (!presentation) return quantity > 1 ? `× ${quantity}` : ''
+  return quantity > 1 ? `${quantity} ${presentation}s` : `${presentation}s`
 }
 
 const AVAILABILITY_LABEL: Record<PharmacyResult['availability'], string> = {
@@ -175,9 +177,11 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
               {formatCOP(result.price)}
             </span>
           </div>
-          <span className={`text-[11px] tabular-nums ${perUnitHighlight ? 'font-bold text-secondary' : 'font-semibold text-[#717786]'}`}>
-            {formatCOP(result.pricePerUnit)}{LIQUID_PRESENTATIONS.has(result.presentation) ? '/ml' : '/und'}
-          </span>
+          {result.quantity > 1 && (
+            <span className={`text-[11px] tabular-nums ${perUnitHighlight ? 'font-bold text-secondary' : 'font-semibold text-[#717786]'}`}>
+              {formatCOP(result.pricePerUnit)}{LIQUID_PRESENTATIONS.has(result.presentation) ? '/ml' : '/und'}
+            </span>
+          )}
         </div>
 
         {/* Cuándo se consultó este precio (timestamp real de la búsqueda) */}
