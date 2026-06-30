@@ -32,12 +32,14 @@ export const metadata: Metadata = {
       'Encuentra el mejor precio en medicamentos en las farmacias de Colombia. Gratis, sin registro y en tiempo real.',
     url: SITE_URL,
     locale: 'es_CO',
+    images: [{ url: '/farmi_logo.png', width: 1254, height: 1254, alt: 'Farmi' }],
   },
   twitter: {
     card: 'summary',
     title: 'Farmi - Comparador de medicamentos en Colombia',
     description:
       'Compara precios de medicamentos en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo y mas.',
+    images: ['/farmi_logo.png'],
   },
   robots: {
     index: true,
