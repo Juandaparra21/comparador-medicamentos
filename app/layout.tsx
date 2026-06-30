@@ -59,11 +59,15 @@ export default function RootLayout({
             <div className="mx-auto px-4 sm:px-5 max-w-5xl h-14 flex items-center justify-between gap-4">
               <Link
                 href="/"
-                className="font-bold text-[17px] tracking-tight select-none hover:opacity-75 transition-opacity shrink-0"
+                className="flex items-center gap-2 select-none hover:opacity-75 transition-opacity shrink-0"
                 aria-label="Farmi - Inicio"
               >
-                <span className="text-[#1a1b1f]">Far</span>
-                <span className="text-primary">mi</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/farmi_mark.png" alt="" width={26} height={31} className="h-[30px] w-auto" />
+                <span className="font-bold text-[17px] tracking-tight">
+                  <span className="text-[#1a1b1f]">Far</span>
+                  <span className="text-primary">mi</span>
+                </span>
               </Link>
 
               <nav aria-label="Navegacion principal" className="flex items-center gap-3">
