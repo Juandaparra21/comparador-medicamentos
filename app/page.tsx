@@ -4,6 +4,7 @@ import { QuickChips } from '@/app/components/QuickChips'
 import { DiscountsSection } from '@/app/components/DiscountsSection'
 import { NearbyMapSection } from '@/app/components/NearbyMapSection'
 import { Reveal } from '@/app/components/Reveal'
+import { HeroStats } from '@/app/components/HeroStats'
 import {
   TrustStrip,
   ValueProps,
@@ -46,8 +47,12 @@ export default function Home() {
 
           <div className="max-w-2xl mx-auto">
             <SearchBar />
+            <p className="mt-3 text-center text-[12px] sm:text-[13px] text-[#6e6e73]">
+              Precios consultados en el momento de tu busqueda.
+            </p>
             <QuickChips />
             <TrustStrip />
+            <HeroStats />
           </div>
         </div>
       </section>

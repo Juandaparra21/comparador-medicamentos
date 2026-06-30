@@ -116,3 +116,40 @@ SELECT
   p.last_updated        AS "lastUpdated"
 FROM products p
 JOIN pharmacies ph ON ph.id = p.pharmacy_id;
+
+-- ============================================================
+-- Confianza y retencion (busquedas reales + alertas de precio)
+-- ============================================================
+
+-- Registro de cada busqueda realizada. Alimenta la barra de estadisticas
+-- reales (numero de busquedas). Sin datos personales: solo el termino y la fecha.
+CREATE TABLE IF NOT EXISTS search_events (
+  id         BIGSERIAL   PRIMARY KEY,
+  query      TEXT        NOT NULL,           -- normalizado: minusculas, sin acentos
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_search_events_created ON search_events (created_at);
+CREATE INDEX IF NOT EXISTS idx_search_events_query   ON search_events (query);
+
+-- Alertas de bajada de precio. El usuario deja UN canal (email o WhatsApp).
+-- Guardamos el precio actual para comparar contra futuros snapshots y avisar.
+CREATE TABLE IF NOT EXISTS price_alerts (
+  id            BIGSERIAL   PRIMARY KEY,
+  query         TEXT        NOT NULL,        -- normalizado: minusculas, sin acentos
+  label         TEXT        NOT NULL,        -- texto legible (consulta original)
+  current_price INTEGER,                     -- COP, precio mas bajo al crear la alerta
+  channel       TEXT        NOT NULL CHECK (channel IN ('email', 'whatsapp')),
+  contact       TEXT        NOT NULL,        -- email o numero de WhatsApp
+  notified      BOOLEAN     NOT NULL DEFAULT FALSE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Alertas pendientes por medicamento (las que aun no se han avisado).
+CREATE INDEX IF NOT EXISTS idx_price_alerts_pending
+  ON price_alerts (query) WHERE notified = FALSE;
+
+-- Ambas tablas son privadas: solo el service role (rutas de servidor) escribe/lee.
+-- Sin politicas publicas => el cliente anon no puede leer datos de contacto.
+ALTER TABLE search_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE price_alerts  ENABLE ROW LEVEL SECURITY;

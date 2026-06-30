@@ -10,6 +10,7 @@ import {
 import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { MedicationImage } from '@/app/components/MedicationImage'
+import { ListComparison } from '@/app/components/ListComparison'
 
 function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -137,6 +138,7 @@ export default function ListaClient() {
           </Link>
         </div>
       ) : (
+        <>
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Card grid */}
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -238,6 +240,10 @@ export default function ListaClient() {
             </p>
           </div>
         </div>
+
+        {/* Comparación consolidada: total por farmacia (pacientes crónicos) */}
+        <ListComparison items={items} />
+        </>
       )}
     </section>
   )

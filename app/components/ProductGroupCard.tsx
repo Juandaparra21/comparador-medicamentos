@@ -7,6 +7,7 @@ import { MedicationImage } from './MedicationImage'
 import { PharmacyLogo } from './PharmacyLogo'
 import { WishlistButton } from './WishlistButton'
 import { CartButton } from './CartButton'
+import { RelativeTime } from './RelativeTime'
 import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
@@ -21,7 +22,7 @@ function qtyDisplay(quantity: number, presentation: string): string {
   return `${quantity} ${presentation}${quantity !== 1 ? 's' : ''}`
 }
 
-interface Props { group: ProductGroup; priceBasis?: 'total' | 'unit'; distances?: PharmacyDistances; stores?: PharmacyStores }
+interface Props { group: ProductGroup; priceBasis?: 'total' | 'unit'; distances?: PharmacyDistances; stores?: PharmacyStores; fetchedAt?: string }
 
 function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -35,7 +36,7 @@ function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredien
   return <MedicationImage ingredient={ingredient} height={80} />
 }
 
-export function ProductGroupCard({ group, priceBasis = 'total', distances, stores }: Props) {
+export function ProductGroupCard({ group, priceBasis = 'total', distances, stores, fetchedAt }: Props) {
   const { results, minPrice, maxPrice, savings } = group
   const avail    = results.filter(r => r.availability !== 'unavailable')
   const cheapest = avail[0] ?? null
@@ -170,6 +171,16 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
             )
           })}
         </div>
+
+        {/* Cuándo se consultaron estos precios (timestamp real de la búsqueda) */}
+        {fetchedAt && (
+          <div className="flex items-center gap-1 text-[10px] text-[#9ca3af]">
+            <svg className="w-3 h-3 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .27.144.518.378.651l3 1.714a.75.75 0 10.744-1.302L10.75 9.566V5z" clipRule="evenodd" />
+            </svg>
+            <RelativeTime iso={fetchedAt} prefix="Actualizado" />
+          </div>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-auto">

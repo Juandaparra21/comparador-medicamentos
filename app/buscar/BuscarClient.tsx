@@ -8,12 +8,15 @@ import { useNearbyPharmacies } from '@/app/hooks/useNearbyPharmacies'
 
 // Presentation names that use volume (ml) as quantity unit
 const LIQUID_FILTER_NAMES = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
-import { formatCOP, formatRelativeTime } from '@/app/utils/format'
+import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
 import { ProductGroupCard } from '@/app/components/ProductGroupCard'
 import { RadioFilter, QuantitySlider } from '@/app/components/FilterControls'
 import { PriceTracker } from '@/app/components/PriceTracker'
+import { PriceAlert } from '@/app/components/PriceAlert'
+import { ShareComparison } from '@/app/components/ShareComparison'
+import { RelativeTime } from '@/app/components/RelativeTime'
 import { groupResults } from '@/app/utils/groupResults'
 
 type TypeFilter = 'all' | MedicationType
@@ -142,6 +145,18 @@ export default function BuscarClient() {
   const maxPrice = availableFiltered.length > 0
     ? Math.max(...availableFiltered.map(basisVal))
     : null
+
+  // Concrete savings of THIS search: cheapest vs most expensive available pharmacy
+  // (absolute pesos, total price). Names the pharmacies for a trust-building line.
+  const cheapestResult = availableFiltered.length
+    ? availableFiltered.reduce((m, r) => (r.price < m.price ? r : m))
+    : null
+  const dearestResult = availableFiltered.length
+    ? availableFiltered.reduce((m, r) => (r.price > m.price ? r : m))
+    : null
+  const concreteSavings = cheapestResult && dearestResult ? dearestResult.price - cheapestResult.price : 0
+  const currentBestPrice = cheapestResult ? cheapestResult.price : null
+
   const sorted = sortResults(filtered, sortKey, distances)
   const { comparisons, singles } = groupResults(filtered)
 
@@ -364,7 +379,7 @@ export default function BuscarClient() {
                     title={`Precios consultados en tiempo real a las ${new Date(fetchedAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-secondary inline-block" aria-hidden="true" />
-                    Actualizado {formatRelativeTime(fetchedAt)}
+                    <RelativeTime iso={fetchedAt} prefix="Actualizado" />
                   </span>
                 )}
                 <div className="flex bg-black/[0.05] rounded-lg p-0.5">
@@ -484,6 +499,22 @@ export default function BuscarClient() {
               </div>
             )}
 
+            {/* Ahorro concreto de esta busqueda, con farmacias nombradas */}
+            {cheapestResult && dearestResult && concreteSavings > 1000 && cheapestResult.pharmacy !== dearestResult.pharmacy && (
+              <div className="flex items-start gap-3 mb-4 p-4 rounded-2xl bg-secondary/10 border border-secondary/20">
+                <div className="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8v1m0 10v1m0-12V4m0 16v-1" />
+                  </svg>
+                </div>
+                <p className="text-[13px] sm:text-[14px] text-[#1a1b1f] leading-snug self-center">
+                  Ahorras hasta <span className="font-bold text-secondary">{formatCOP(concreteSavings)}</span>{' '}
+                  comprando en <span className="font-semibold">{cheapestResult.pharmacy}</span>{' '}
+                  en vez de <span className="font-semibold">{dearestResult.pharmacy}</span>.
+                </p>
+              </div>
+            )}
+
             {/* Precios min / max — segun la base (total o por unidad) */}
             {minPrice !== null && maxPrice !== null && (
               <div className="flex flex-wrap gap-2 mb-4">
@@ -517,7 +548,7 @@ export default function BuscarClient() {
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {orderedComparisons.map((group) => (
-                          <ProductGroupCard key={group.key} group={group} priceBasis={priceBasis} distances={distances} stores={stores} />
+                          <ProductGroupCard key={group.key} group={group} priceBasis={priceBasis} distances={distances} stores={stores} fetchedAt={fetchedAt ?? undefined} />
                         ))}
                       </div>
                     </div>
@@ -539,6 +570,7 @@ export default function BuscarClient() {
                             cheapestLabel={priceBasis === 'unit' ? 'Mejor x unidad' : 'Mejor precio'}
                             distanceKm={distances[result.pharmacy]}
                             store={stores[result.pharmacy]}
+                            fetchedAt={fetchedAt ?? undefined}
                           />
                         ))}
                       </div>
@@ -555,6 +587,7 @@ export default function BuscarClient() {
                       cheapestLabel={priceBasis === 'unit' ? 'Mejor x unidad' : 'Mejor precio'}
                       distanceKm={distances[result.pharmacy]}
                       store={stores[result.pharmacy]}
+                      fetchedAt={fetchedAt ?? undefined}
                     />
                   ))}
                 </div>
@@ -570,6 +603,19 @@ export default function BuscarClient() {
                 >
                   Limpiar filtros
                 </button>
+              </div>
+            )}
+
+            {/* Retención: avísame si baja + compartir comparación */}
+            {filtered.length > 0 && (
+              <div className="flex flex-col gap-3 mb-8">
+                <PriceAlert query={normalize(q)} label={q.trim()} currentPrice={currentBestPrice} />
+                <div className="flex items-center justify-between gap-3 flex-wrap bg-white/50 border border-white/40 rounded-2xl px-4 py-3.5">
+                  <p className="text-[13px] text-[#414755] font-medium leading-snug">
+                    ¿Le sirve a alguien más? Comparte esta comparación.
+                  </p>
+                  <ShareComparison query={q.trim()} />
+                </div>
               </div>
             )}
 

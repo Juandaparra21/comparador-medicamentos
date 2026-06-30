@@ -21,3 +21,18 @@ export function formatRelativeTime(iso: string): string {
   const days = Math.round(hours / 24)
   return `hace ${days} dia${days !== 1 ? 's' : ''}`
 }
+
+// Compact relative time for tight spaces (cards on mobile): "hace un momento",
+// "hace 2 min", "hace 1 h", "hace 3 d". Computed at render time.
+export function formatRelativeShort(iso: string): string {
+  const then = new Date(iso).getTime()
+  if (!Number.isFinite(then)) return ''
+  const secs = Math.max(0, Math.round((Date.now() - then) / 1000))
+  if (secs < 60) return 'hace un momento'
+  const mins = Math.round(secs / 60)
+  if (mins < 60) return `hace ${mins} min`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `hace ${hours} h`
+  const days = Math.floor(hours / 24)
+  return `hace ${days} d`
+}
