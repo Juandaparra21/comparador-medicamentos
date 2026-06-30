@@ -146,16 +146,11 @@ export default function BuscarClient() {
     ? Math.max(...availableFiltered.map(basisVal))
     : null
 
-  // Concrete savings of THIS search: cheapest vs most expensive available pharmacy
-  // (absolute pesos, total price). Names the pharmacies for a trust-building line.
-  const cheapestResult = availableFiltered.length
-    ? availableFiltered.reduce((m, r) => (r.price < m.price ? r : m))
+  // Precio actual mas bajo disponible (para la alerta "hoy lo mas barato esta en $X").
+  // Es un minimo informativo, no una comparacion entre productos distintos.
+  const currentBestPrice = availableFiltered.length
+    ? Math.min(...availableFiltered.map((r) => r.price))
     : null
-  const dearestResult = availableFiltered.length
-    ? availableFiltered.reduce((m, r) => (r.price > m.price ? r : m))
-    : null
-  const concreteSavings = cheapestResult && dearestResult ? dearestResult.price - cheapestResult.price : 0
-  const currentBestPrice = cheapestResult ? cheapestResult.price : null
 
   const sorted = sortResults(filtered, sortKey, distances)
   const { comparisons, singles } = groupResults(filtered)
@@ -169,6 +164,21 @@ export default function BuscarClient() {
       ? b.availableCount - a.availableCount
       : groupMin(a) - groupMin(b),
   )
+
+  // Ahorro real y comparable: SOLO entre el mismo producto exacto (mismos principio
+  // activo, concentracion, presentacion y cantidad) vendido en 2+ farmacias. Asi
+  // nunca comparamos productos distintos entre si. Tomamos el grupo con mayor ahorro
+  // y descartamos diferencias absurdas (> 3x), que casi siempre son errores de dato.
+  const bestSaving = comparisons
+    .filter((g) => g.availableCount >= 2 && g.savings > 1000)
+    .map((g) => {
+      const avail = g.results.filter((r) => r.availability !== 'unavailable')
+      const cheapest = avail.reduce((m, r) => (r.price < m.price ? r : m))
+      const dearest = avail.reduce((m, r) => (r.price > m.price ? r : m))
+      return { group: g, cheapest, dearest, savings: dearest.price - cheapest.price }
+    })
+    .filter((s) => s.cheapest.pharmacy !== s.dearest.pharmacy && s.dearest.price <= s.cheapest.price * 3)
+    .sort((a, b) => b.savings - a.savings)[0] ?? null
 
   // Switching basis also sets a matching default sort for the flat list.
   function changeBasis(b: 'total' | 'unit') {
@@ -499,19 +509,26 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Ahorro concreto de esta busqueda, con farmacias nombradas */}
-            {cheapestResult && dearestResult && concreteSavings > 1000 && cheapestResult.pharmacy !== dearestResult.pharmacy && (
+            {/* Ahorro concreto, SOLO sobre el mismo producto exacto en 2+ farmacias */}
+            {bestSaving && (
               <div className="flex items-start gap-3 mb-4 p-4 rounded-2xl bg-secondary/10 border border-secondary/20">
                 <div className="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
                   <svg className="w-5 h-5 text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8v1m0 10v1m0-12V4m0 16v-1" />
                   </svg>
                 </div>
-                <p className="text-[13px] sm:text-[14px] text-[#1a1b1f] leading-snug self-center">
-                  Ahorras hasta <span className="font-bold text-secondary">{formatCOP(concreteSavings)}</span>{' '}
-                  comprando en <span className="font-semibold">{cheapestResult.pharmacy}</span>{' '}
-                  en vez de <span className="font-semibold">{dearestResult.pharmacy}</span>.
-                </p>
+                <div className="self-center">
+                  <p className="text-[13px] sm:text-[14px] text-[#1a1b1f] leading-snug">
+                    Ahorras hasta <span className="font-bold text-secondary">{formatCOP(bestSaving.savings)}</span>{' '}
+                    comprando en <span className="font-semibold">{bestSaving.cheapest.pharmacy}</span>{' '}
+                    en vez de <span className="font-semibold">{bestSaving.dearest.pharmacy}</span>.
+                  </p>
+                  <p className="text-[11px] text-[#717786] mt-0.5">
+                    Mismo producto: {bestSaving.group.activeIngredient}
+                    {bestSaving.group.concentration ? ` ${bestSaving.group.concentration}` : ''}
+                    {bestSaving.group.quantity > 1 ? ` · ${bestSaving.group.quantity} unidades` : ''}
+                  </p>
+                </div>
               </div>
             )}
 
@@ -524,12 +541,6 @@ export default function BuscarClient() {
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 text-[#414755] border border-white/40">
                   {priceBasis === 'unit' ? 'Max/und' : 'Max'}: {formatCOP(maxPrice)}
                 </span>
-                {maxPrice - minPrice > (priceBasis === 'unit' ? 50 : 1000) && (
-                  <span className="text-[12px] font-bold px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    Ahorra hasta {formatCOP(maxPrice - minPrice)}{priceBasis === 'unit' ? ' por unidad' : ''}
-                    {maxPrice > 0 ? ` (${Math.round((1 - minPrice / maxPrice) * 100)}%)` : ''}
-                  </span>
-                )}
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 text-[#414755] border border-white/40">
                   {availableFiltered.length} farmacias disponibles
                 </span>
