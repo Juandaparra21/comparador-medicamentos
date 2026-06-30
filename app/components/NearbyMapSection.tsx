@@ -128,6 +128,28 @@ export function NearbyMapSection() {
 
         {showMap && origin && (
           <>
+            {/* Manual location change — always available once results are shown */}
+            <form
+              onSubmit={(e) => { e.preventDefault(); searchByPlace(place) }}
+              className="flex items-stretch gap-2 px-5 pt-4"
+            >
+              <input
+                type="text"
+                value={place}
+                onChange={(e) => setPlace(e.target.value)}
+                placeholder="Cambiar ubicacion: escribe tu direccion o barrio"
+                aria-label="Cambiar ubicacion"
+                className="flex-1 px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
+              />
+              <button
+                type="submit"
+                disabled={!place.trim()}
+                className="px-4 py-2.5 bg-white border border-[#e5e7eb] text-[#414755] text-[14px] font-semibold rounded-lg hover:border-primary/40 hover:text-primary disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                Buscar
+              </button>
+            </form>
+
             {/* Type filter */}
             <div className="flex items-center gap-2 px-5 pt-4 flex-wrap">
               <div className="flex bg-black/[0.05] rounded-lg p-0.5">
