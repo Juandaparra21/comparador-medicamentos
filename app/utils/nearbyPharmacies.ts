@@ -127,14 +127,13 @@ async function queryOverpass(body: string): Promise<OverpassElement[]> {
   throw lastErr instanceof Error ? lastErr : new Error('All Overpass mirrors failed')
 }
 
-// Progressive radius: start at 5 km, expand to 10 km only if nothing is found.
+// Fixed 5 km radius: keep results genuinely "nearby". We do not expand further,
+// so the user can trust that every branch shown is within walking/short-trip range.
+export const NEARBY_RADIUS_M = 5000
+
 export async function fetchNearbyPharmacies(lat: number, lng: number): Promise<NearbyPharmacy[]> {
-  for (const radius of [5000, 10000]) {
-    const elements = await queryOverpass(buildQuery(lat, lng, radius))
-    const list = parseElements(elements, lat, lng).sort((a, b) => a.distanceKm - b.distanceKm)
-    if (list.length > 0) return list
-  }
-  return []
+  const elements = await queryOverpass(buildQuery(lat, lng, NEARBY_RADIUS_M))
+  return parseElements(elements, lat, lng).sort((a, b) => a.distanceKm - b.distanceKm)
 }
 
 // Geocode a typed city/neighbourhood to coordinates (fallback when geolocation

@@ -72,8 +72,8 @@ export default function CercanasClient() {
           Farmacias cercanas
         </h1>
         <p className="text-[14px] text-[#717786] mt-1.5 leading-relaxed">
-          Resultados en tiempo real desde OpenStreetMap. Los precios, cuando existen, vienen de las
-          farmacias en linea que comparamos.
+          Farmacias a 5 km a la redonda, en tiempo real desde OpenStreetMap. Usa tu ubicacion o
+          escribe tu direccion. Los precios, cuando existen, vienen de las farmacias en linea que comparamos.
         </p>
       </header>
 
@@ -90,7 +90,12 @@ export default function CercanasClient() {
           {status === 'locating' ? 'Ubicando...' : status === 'loading' ? 'Buscando farmacias...' : 'Usar mi ubicacion'}
         </button>
 
-        {/* City fallback */}
+        {/* Manual address entry (also used when geolocation is denied) */}
+        <div className="mt-3 flex items-center gap-3">
+          <div className="flex-1 h-px bg-[#e5e7eb]" />
+          <span className="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wide">o ingresa tu direccion</span>
+          <div className="flex-1 h-px bg-[#e5e7eb]" />
+        </div>
         <form
           onSubmit={(e) => { e.preventDefault(); searchByPlace(place) }}
           className="mt-3 flex items-stretch gap-2"
@@ -99,8 +104,8 @@ export default function CercanasClient() {
             type="text"
             value={place}
             onChange={(e) => setPlace(e.target.value)}
-            placeholder="O escribe tu ciudad o barrio (ej: Chapinero, Bogota)"
-            aria-label="Ciudad o barrio"
+            placeholder="Direccion, barrio o ciudad (ej: Calle 53 # 25-10, Bogota)"
+            aria-label="Direccion, barrio o ciudad"
             className="flex-1 px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
           />
           <button
@@ -151,7 +156,7 @@ export default function CercanasClient() {
       {status === 'ready' && pharmacies.length === 0 && (
         <div className="text-center py-20">
           <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">Sin resultados confiables</p>
-          <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 10 km.</p>
+          <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 5 km. Prueba con otra direccion.</p>
         </div>
       )}
 
