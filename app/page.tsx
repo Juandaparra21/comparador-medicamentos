@@ -29,9 +29,6 @@ export default function Home() {
         </div>
         <div className="mx-auto px-4 sm:px-5 max-w-3xl">
           <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center bg-black/[0.04] border border-black/[0.06] text-[#6e6e73] text-[12px] font-semibold px-3.5 py-1.5 rounded-full mb-6 tracking-wide">
-              Genericos &middot; Marcas &middot; Precios reales
-            </div>
             <h1 className="text-[36px] sm:text-[60px] font-bold leading-[1.04] tracking-[-0.03em] text-[#1d1d1f] mb-4 sm:mb-5">
               El mejor precio de tus{' '}
               <span className="text-primary">medicamentos</span>
