@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const SECTIONS = [
   {
     title: '1. Responsable del tratamiento',
-    body: `Farmi (en adelante "la Plataforma") es responsable del tratamiento de los datos personales recolectados a traves de farmi.co.
+    body: `Farmi (en adelante "la Plataforma") es responsable del tratamiento de los datos personales recolectados a traves de farmi.com.co.
 
 Para ejercer tus derechos o hacer consultas sobre privacidad, puedes contactarnos en: farmiya001@gmail.com`,
   },

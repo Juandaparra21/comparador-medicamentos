@@ -12,7 +12,7 @@ const OVERPASS_MIRRORS = [
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ]
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
-const USER_AGENT = 'Farmi/1.0 (comparador de medicamentos; https://farmi.co)'
+const USER_AGENT = 'Farmi/1.0 (comparador de medicamentos; https://www.farmi.com.co)'
 
 export type OpenState = 'open' | 'closed' | 'unknown'
 
