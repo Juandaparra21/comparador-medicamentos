@@ -36,7 +36,7 @@ export function NearbyMapSection() {
               Farmacias cerca de ti
             </h2>
             <p className="text-[13px] text-[#717786] mt-0.5">
-              A 5 km a la redonda. Ubicaciones reales en el mapa, desde OpenStreetMap.
+              A 2 km a la redonda. Ubicaciones reales en el mapa, desde OpenStreetMap.
             </p>
           </div>
           {status === 'ready' && (
@@ -122,7 +122,7 @@ export function NearbyMapSection() {
         {status === 'ready' && pharmacies.length === 0 && (
           <div className="text-center py-16 px-5">
             <p className="text-[15px] font-semibold text-[#1a1b1f] mb-1">Sin resultados confiables</p>
-            <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 5 km. Prueba con otra direccion.</p>
+            <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 2 km. Prueba con otra direccion.</p>
           </div>
         )}
 

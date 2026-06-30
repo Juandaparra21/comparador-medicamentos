@@ -127,9 +127,9 @@ async function queryOverpass(body: string): Promise<OverpassElement[]> {
   throw lastErr instanceof Error ? lastErr : new Error('All Overpass mirrors failed')
 }
 
-// Fixed 5 km radius: keep results genuinely "nearby". We do not expand further,
+// Fixed 2 km radius: keep results genuinely "nearby". We do not expand further,
 // so the user can trust that every branch shown is within walking/short-trip range.
-export const NEARBY_RADIUS_M = 5000
+export const NEARBY_RADIUS_M = 2000
 
 export async function fetchNearbyPharmacies(lat: number, lng: number): Promise<NearbyPharmacy[]> {
   const elements = await queryOverpass(buildQuery(lat, lng, NEARBY_RADIUS_M))

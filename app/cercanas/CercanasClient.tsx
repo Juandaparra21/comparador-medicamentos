@@ -72,7 +72,7 @@ export default function CercanasClient() {
           Farmacias cercanas
         </h1>
         <p className="text-[14px] text-[#717786] mt-1.5 leading-relaxed">
-          Farmacias a 5 km a la redonda, en tiempo real desde OpenStreetMap. Usa tu ubicacion o
+          Farmacias a 2 km a la redonda, en tiempo real desde OpenStreetMap. Usa tu ubicacion o
           escribe tu direccion. Los precios, cuando existen, vienen de las farmacias en linea que comparamos.
         </p>
       </header>
@@ -156,7 +156,7 @@ export default function CercanasClient() {
       {status === 'ready' && pharmacies.length === 0 && (
         <div className="text-center py-20">
           <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">Sin resultados confiables</p>
-          <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 5 km. Prueba con otra direccion.</p>
+          <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 2 km. Prueba con otra direccion.</p>
         </div>
       )}
 
