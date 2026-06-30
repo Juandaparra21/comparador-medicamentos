@@ -7,6 +7,7 @@ import { Reveal } from '@/app/components/Reveal'
 import { HeroStats } from '@/app/components/HeroStats'
 import {
   TrustStrip,
+  HeroPharmacies,
   ValueProps,
   HowItWorks,
   PharmacyStrip,
@@ -44,6 +45,7 @@ export default function Home() {
             <p className="mt-3 text-center text-[12px] sm:text-[13px] text-[#6e6e73]">
               Precios consultados en el momento de tu busqueda.
             </p>
+            <HeroPharmacies />
             <QuickChips />
             <TrustStrip />
             <HeroStats />

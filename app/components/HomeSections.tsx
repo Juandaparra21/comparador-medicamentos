@@ -104,6 +104,28 @@ const PHARMACIES: { key: string; label: string }[] = [
   { key: 'Olimpica Drogueria',    label: 'Olimpica' },
 ]
 
+// Compact, above-the-fold logo strip for the hero: shows the real pharmacy logos
+// the moment the page loads, so the user sees which sources are compared.
+export function HeroPharmacies() {
+  return (
+    <div className="mt-8 sm:mt-9">
+      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-[#9ca3af] mb-3.5">
+        Precios en tiempo real de
+      </p>
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-3 gap-y-4 max-w-sm sm:max-w-2xl mx-auto">
+        {PHARMACIES.map((p) => (
+          <div key={p.key} className="flex flex-col items-center gap-1.5">
+            <PharmacyLogo name={p.key} size={46} />
+            <span className="text-[10px] sm:text-[11px] font-medium text-[#717786] text-center leading-tight">
+              {p.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function PharmacyStrip() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
