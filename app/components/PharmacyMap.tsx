@@ -31,8 +31,16 @@ function genericPinHtml(): string {
   </svg>`
 }
 
-function userHtml(): string {
-  return `<div style="width:16px;height:16px;border-radius:9999px;background:#0058bc;border:3px solid white;box-shadow:0 0 0 2px rgba(0,88,188,0.4),0 1px 3px rgba(0,0,0,0.3)"></div>`
+function userHtml(draggable: boolean): string {
+  if (!draggable) {
+    return `<div style="width:16px;height:16px;border-radius:9999px;background:#0058bc;border:3px solid white;box-shadow:0 0 0 2px rgba(0,88,188,0.4),0 1px 3px rgba(0,0,0,0.3)"></div>`
+  }
+  // Bigger pin + grab cursor + animated ring so it clearly reads as draggable.
+  return `<div style="cursor:grab;width:24px;height:24px;border-radius:9999px;background:#0058bc;border:3px solid white;box-shadow:0 0 0 3px rgba(0,88,188,0.30),0 2px 6px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/>
+    </svg>
+  </div>`
 }
 
 function escapeHtml(s: string): string {
@@ -73,17 +81,24 @@ export default function PharmacyMap({ origin, pharmacies, onPinDrag }: Props) {
     }).addTo(map)
 
     const draggable = Boolean(onPinDragRef.current)
+    const userSize = draggable ? 24 : 16
     const userMarker = L.marker([origin.lat, origin.lng], {
-      icon: L.divIcon({ className: '', html: userHtml(), iconSize: [16, 16], iconAnchor: [8, 8] }),
+      icon: L.divIcon({ className: '', html: userHtml(draggable), iconSize: [userSize, userSize], iconAnchor: [userSize / 2, userSize / 2] }),
       zIndexOffset: 1000,
       draggable,
-    }).addTo(map).bindPopup(draggable ? 'Arrastrame para fijar tu direccion' : 'Tu ubicacion')
+      autoPan: true,
+    }).addTo(map)
 
     if (draggable) {
-      userMarker.on('dragend', () => {
-        const { lat, lng } = userMarker.getLatLng()
-        onPinDragRef.current?.(lat, lng)
-      })
+      userMarker
+        .bindTooltip('Arrastrame', { permanent: true, direction: 'top', offset: [0, -14], className: 'farmi-pin-tip' })
+        .on('dragstart', () => userMarker.closeTooltip())
+        .on('dragend', () => {
+          const { lat, lng } = userMarker.getLatLng()
+          onPinDragRef.current?.(lat, lng)
+        })
+    } else {
+      userMarker.bindPopup('Tu ubicacion')
     }
 
     const group = L.featureGroup()

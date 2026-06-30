@@ -177,9 +177,15 @@ export default function CercanasClient() {
           {/* Map — always visible while browsing nearby pharmacies */}
           {origin && shown.length > 0 && (
             <div className="rounded-2xl overflow-hidden border border-white/60 shadow-sm mb-4">
-              <div className="flex items-center justify-end gap-3 px-4 py-2 bg-white/70 border-b border-[#f0f1f5] text-[11px] text-[#717786]">
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Con precios</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#9ca3af] inline-block" /> Otra</span>
+              <div className="flex items-center justify-between gap-3 px-4 py-2 bg-white/70 border-b border-[#f0f1f5] text-[11px] text-[#717786]">
+                <span className="flex items-center gap-1 font-semibold text-primary">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
+                  Arrastra el punto azul para fijar tu direccion
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Con precios</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#9ca3af] inline-block" /> Otra</span>
+                </span>
               </div>
               <div className="relative h-[320px] sm:h-[420px] w-full">
                 <PharmacyMap origin={origin} pharmacies={shown} onPinDrag={(lat, lng) => setPendingPin({ lat, lng })} />

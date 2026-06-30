@@ -135,7 +135,11 @@ export function NearbyMapSection() {
               </div>
             </div>
 
-            <div className="relative h-[340px] sm:h-[440px] w-full mt-3">
+            <p className="flex items-center gap-1.5 px-5 pt-3 text-[11px] font-semibold text-primary">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
+              Arrastra el punto azul del mapa para fijar tu direccion
+            </p>
+            <div className="relative h-[340px] sm:h-[440px] w-full mt-1">
               <PharmacyMap origin={origin} pharmacies={shown} onPinDrag={(lat, lng) => setPendingPin({ lat, lng })} />
               {pendingPin && (
                 <button
