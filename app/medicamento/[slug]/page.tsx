@@ -77,22 +77,14 @@ export default async function MedicamentoPage({ params }: Props) {
     },
   ]
 
-  // Structured data: the Drug entity (medical info, accurate), breadcrumbs and
-  // a FAQ rich result. Offer/price structured data is intentionally omitted
-  // until prices are served live on this page — stale prices harm ranking.
+  // Structured data: breadcrumbs + a FAQ rich result. We deliberately do NOT emit
+  // a schema.org Drug node: Drug is a subtype of Product, so Google validates it as
+  // a merchant listing and demands offers/review/aggregateRating — which we cannot
+  // provide honestly (no live price in the static HTML, no invented ratings). The
+  // FAQPage is the valuable rich result here; Drug yields no rich result in Search.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Drug',
-        name: info.activeIngredient,
-        nonProprietaryName: info.activeIngredient,
-        drugClass: info.therapeuticClass,
-        prescriptionStatus: info.requiresPrescription ? 'PrescriptionOnly' : 'OTC',
-        mechanismOfAction: info.mechanism,
-        warning: info.warnings.join(' '),
-        url: `${SITE_URL}/medicamento/${slug}`,
-      },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
