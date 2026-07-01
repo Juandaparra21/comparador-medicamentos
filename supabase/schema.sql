@@ -57,6 +57,21 @@ CREATE INDEX IF NOT EXISTS idx_products_pharmacy
 CREATE INDEX IF NOT EXISTS idx_price_history_product
   ON price_history (product_id, scraped_at DESC);
 
+-- Datos publicos de catalogo/precio: lectura para todos; escritura solo via
+-- service key (rutas de servidor) que ignora RLS.
+ALTER TABLE pharmacies    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE price_history ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "public read pharmacies" ON pharmacies;
+CREATE POLICY "public read pharmacies" ON pharmacies FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "public read products" ON products;
+CREATE POLICY "public read products" ON products FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "public read price_history" ON price_history;
+CREATE POLICY "public read price_history" ON price_history FOR SELECT USING (true);
+
 -- ============================================================
 -- Rastreo de precios (historial real construido dia a dia)
 -- ============================================================
@@ -96,8 +111,9 @@ CREATE POLICY "public read tracked_medications" ON tracked_medications FOR SELEC
 DROP POLICY IF EXISTS "public read price_snapshots" ON price_snapshots;
 CREATE POLICY "public read price_snapshots" ON price_snapshots FOR SELECT USING (true);
 
--- Vista util para el API de busqueda (reemplaza MOCK_DATA)
-CREATE OR REPLACE VIEW search_results AS
+-- Vista util para el API de busqueda (reemplaza MOCK_DATA).
+-- security_invoker: corre con permisos de quien consulta (respeta RLS), no del creador.
+CREATE OR REPLACE VIEW search_results WITH (security_invoker = on) AS
 SELECT
   p.id::TEXT            AS id,
   ph.name               AS pharmacy,
