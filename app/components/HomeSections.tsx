@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { PharmacyLogo } from './PharmacyLogo'
+import { getAllMedicineSlugs, getMedicineInfo } from '@/app/utils/medicineInfo'
 
 /* Static, server-rendered home sections (no client JS) to keep the page light. */
 
@@ -142,6 +143,42 @@ export function PharmacyStrip() {
         Logos y marcas pertenecen a sus respectivos titulares. Farmi es un comparador independiente,
         no afiliado ni patrocinado por estas farmacias.
       </p>
+    </section>
+  )
+}
+
+/* ── Popular medications (internal links to indexable /medicamento pages) ──
+   These server-rendered links give crawlers a clear path from the homepage to
+   every medication page, which is what gets them out of "discovered, not
+   indexed". They also target real "precio de <medicamento> en Colombia" queries. */
+
+export function PopularMeds() {
+  const meds = getAllMedicineSlugs()
+    .map((slug) => getMedicineInfo(slug))
+    .filter((m): m is NonNullable<typeof m> => m !== null)
+    .sort((a, b) => a.activeIngredient.localeCompare(b.activeIngredient, 'es'))
+
+  if (meds.length === 0) return null
+
+  return (
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
+      <SectionHeading
+        title="Precios de medicamentos populares"
+        subtitle="Consulta información, usos y precios de los medicamentos más buscados en las farmacias de Colombia."
+      />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {meds.map((m) => (
+          <Link
+            key={m.slug}
+            href={`/medicamento/${m.slug}`}
+            className={`${CARD} p-4 flex flex-col gap-1 hover:border-primary/30 hover:shadow-[0_4px_16px_rgba(0,88,188,0.08)] transition-all`}
+          >
+            <span className="text-[14px] font-bold text-[#1d1d1f] leading-snug">{m.activeIngredient}</span>
+            <span className="text-[11px] text-[#6e6e73] leading-snug">{m.therapeuticClass}</span>
+            <span className="mt-1 text-[12px] font-semibold text-primary">Ver precio &rarr;</span>
+          </Link>
+        ))}
+      </div>
     </section>
   )
 }

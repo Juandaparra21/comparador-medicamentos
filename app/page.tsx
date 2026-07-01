@@ -11,6 +11,7 @@ import {
   ValueProps,
   HowItWorks,
   PharmacyStrip,
+  PopularMeds,
   GenericVsBrand,
   HomeFaq,
   HomeCta,
@@ -31,12 +32,12 @@ export default function Home() {
         <div className="mx-auto px-4 sm:px-5 max-w-3xl">
           <div className="text-center mb-12 sm:mb-16">
             <h1 className="text-[36px] sm:text-[60px] font-bold leading-[1.04] tracking-[-0.03em] text-[#1d1d1f] mb-4 sm:mb-5">
-              El mejor precio de tus{' '}
-              <span className="text-primary">medicamentos</span>
+              Compara precios de{' '}
+              <span className="text-primary">medicamentos</span> en Colombia
             </h1>
             <p className="text-[17px] sm:text-[22px] text-[#6e6e73] leading-relaxed max-w-xl mx-auto">
-              Busca por nombre generico o de marca y compara, en segundos, las
-              principales farmacias de Colombia.
+              Busca por nombre generico o de marca y encuentra, en segundos, el mejor
+              precio entre las principales farmacias de Colombia.
             </p>
           </div>
 
@@ -62,6 +63,7 @@ export default function Home() {
 
       <Reveal><HowItWorks /></Reveal>
       <Reveal><PharmacyStrip /></Reveal>
+      <Reveal><PopularMeds /></Reveal>
       <Reveal><GenericVsBrand /></Reveal>
       <Reveal><HomeFaq /></Reveal>
       <Reveal><HomeCta /></Reveal>

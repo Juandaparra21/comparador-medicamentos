@@ -50,9 +50,39 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Site-wide structured data: Organization (brand entity) + WebSite with a
+  // search action so Google can show a sitelinks search box.
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        name: 'Farmi',
+        url: SITE_URL,
+        logo: `${SITE_URL}/farmi_logo.png`,
+        description: 'Comparador gratuito de precios de medicamentos en Colombia.',
+      },
+      {
+        '@type': 'WebSite',
+        name: 'Farmi',
+        url: SITE_URL,
+        inLanguage: 'es-CO',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${SITE_URL}/buscar?q={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
+      },
+    ],
+  }
+
   return (
     <html lang="es" className={`${hanken.variable} h-full`}>
       <body className="min-h-full flex flex-col relative bg-[#fbfbfd]">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
         <AuthProvider>
           {/* Header */}
           <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-[0_1px_0_rgba(0,0,0,0.04)]">

@@ -92,7 +92,7 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
       className={`
         group relative flex flex-col cursor-pointer
         bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl shadow-sm
-        hover:bg-white/85 hover:backdrop-blur-[40px]
+        hover:bg-white/85
         hover:shadow-[0_8px_32px_rgba(0,88,188,0.10)]
         transition-all duration-300 overflow-hidden
         ${result.availability === 'unavailable' ? 'opacity-65' : ''}
