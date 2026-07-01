@@ -16,13 +16,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/privacidad`,      priority: 0.3,  changeFrequency: 'yearly'  },
   ] as const).map((r) => ({ ...r, lastModified: now }))
 
-  // One indexable landing page per medication with an info page.
-  const medRoutes: MetadataRoute.Sitemap = getAllMedicineSlugs().map((slug) => ({
+  const slugs = getAllMedicineSlugs()
+
+  // Transactional "precio de X en Colombia" pages — highest-intent, so top priority.
+  const precioRoutes: MetadataRoute.Sitemap = slugs.map((slug) => ({
+    url: `${SITE_URL}/precio/${slug}`,
+    lastModified: now,
+    changeFrequency: 'daily',
+    priority: 0.9,
+  }))
+
+  // Informational medication pages (usos, dosis, advertencias).
+  const medRoutes: MetadataRoute.Sitemap = slugs.map((slug) => ({
     url: `${SITE_URL}/medicamento/${slug}`,
     lastModified: now,
     changeFrequency: 'weekly',
-    priority: 0.8,
+    priority: 0.7,
   }))
 
-  return [...staticRoutes, ...medRoutes]
+  return [...staticRoutes, ...precioRoutes, ...medRoutes]
 }

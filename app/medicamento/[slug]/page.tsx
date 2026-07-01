@@ -22,8 +22,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const info = getMedicineInfo(slug)
   if (!info) return { title: 'Medicamento - Farmi' }
 
-  const title = `Precio de ${info.activeIngredient} en Colombia`
-  const description = `Compara el precio de ${info.activeIngredient} en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo y mas. Usos, dosis y advertencias de ${info.activeIngredient} (${info.therapeuticClass}).`
+  // Informational intent: this page answers "para que sirve / dosis / advertencias".
+  // The price-transactional query ("precio de X en Colombia") is owned by /precio/[slug],
+  // so the two pages don't compete for the same search.
+  const lc = info.activeIngredient.charAt(0).toLowerCase() + info.activeIngredient.slice(1)
+  const title = `${info.activeIngredient}: para qué sirve, dosis y advertencias`
+  const description = `Para qué sirve ${lc}, dosis orientativa, efectos secundarios y advertencias. Descubre si ${lc} necesita fórmula médica en Colombia y compara su precio.`
   const canonical = `/medicamento/${slug}`
 
   return {
@@ -146,6 +150,27 @@ export default async function MedicamentoPage({ params }: Props) {
           <p className="text-[13px] font-semibold text-[#717786]">{info.therapeuticClass}</p>
         </div>
       </div>
+
+      {/* Precio (cross-link to the transactional page) */}
+      <Link
+        href={`/precio/${slug}`}
+        className="flex items-center justify-between gap-3 bg-primary/[0.06] border border-primary/15 rounded-xl p-4 hover:bg-primary/[0.09] transition-colors group"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8v1m0 10v1m0-12V4m0 16v-1" />
+            </svg>
+          </span>
+          <div className="min-w-0">
+            <p className="text-[13px] font-bold text-[#1a1b1f] leading-tight">Ver el precio de {info.activeIngredient} en Colombia</p>
+            <p className="text-[12px] text-[#717786] leading-tight mt-0.5">Compara el valor real en 6 farmacias</p>
+          </div>
+        </div>
+        <svg className="w-5 h-5 text-primary shrink-0 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+        </svg>
+      </Link>
 
       {/* Disclaimer banner */}
       <div className="flex gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 sm:p-5">
