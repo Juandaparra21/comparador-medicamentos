@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import { SearchBar } from '@/app/components/SearchBar'
 import { QuickChips } from '@/app/components/QuickChips'
 import { DiscountsSection } from '@/app/components/DiscountsSection'
@@ -16,6 +17,11 @@ import {
   HomeFaq,
   HomeCta,
 } from '@/app/components/HomeSections'
+
+// Self-canonical for the homepage so Google fija la raíz como versión oficial.
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 export default function Home() {
   return (

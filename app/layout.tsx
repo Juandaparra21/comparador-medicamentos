@@ -45,6 +45,15 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Verificación de motores de búsqueda. Pega el token que te da cada herramienta
+  // como variable de entorno en Vercel (GOOGLE_SITE_VERIFICATION / BING_SITE_VERIFICATION)
+  // y se inserta la etiqueta <meta> automáticamente. Si no están, no se renderiza nada.
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION }
+      : {},
+  },
 }
 
 export default function RootLayout({
