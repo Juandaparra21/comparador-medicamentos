@@ -147,10 +147,11 @@ export function PharmacyStrip() {
   )
 }
 
-/* ── Popular medications (internal links to indexable /medicamento pages) ──
-   These server-rendered links give crawlers a clear path from the homepage to
-   every medication page, which is what gets them out of "discovered, not
-   indexed". They also target real "precio de <medicamento> en Colombia" queries. */
+/* ── Popular medications (internal links to the transactional /precio pages) ──
+   Server-rendered links that give crawlers a direct path from the homepage to
+   every /precio/<slug> page — the fastest way out of "discovered, not indexed"
+   for the high-intent "precio de <medicamento> en Colombia" queries. The /precio
+   pages cross-link to the /medicamento info pages, so those stay reachable too. */
 
 export function PopularMeds() {
   const meds = getAllMedicineSlugs()
@@ -170,7 +171,7 @@ export function PopularMeds() {
         {meds.map((m) => (
           <Link
             key={m.slug}
-            href={`/medicamento/${m.slug}`}
+            href={`/precio/${m.slug}`}
             className={`${CARD} p-4 flex flex-col gap-1 hover:border-primary/30 hover:shadow-[0_4px_16px_rgba(0,88,188,0.08)] transition-all`}
           >
             <span className="text-[14px] font-bold text-[#1d1d1f] leading-snug">{m.activeIngredient}</span>
