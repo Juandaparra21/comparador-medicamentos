@@ -17,10 +17,12 @@ import {
   HomeFaq,
   HomeCta,
 } from '@/app/components/HomeSections'
+import { SITE_URL } from '@/app/lib/siteUrl'
 
 // Self-canonical for the homepage so Google fija la raíz como versión oficial.
+// URL absoluta con barra final: https://www.farmi.com.co/
 export const metadata: Metadata = {
-  alternates: { canonical: '/' },
+  alternates: { canonical: `${SITE_URL}/` },
 }
 
 export default function Home() {
