@@ -1,14 +1,28 @@
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getMedicineInfo, getAllMedicineSlugs } from '@/app/utils/medicineInfo'
 import { normalize } from '@/app/utils/search'
 import { MedicationImage } from '@/app/components/MedicationImage'
 import { PriceTracker } from '@/app/components/PriceTracker'
+import { LivePriceCompare } from '@/app/components/LivePriceCompare'
 import { SITE_URL } from '@/app/lib/siteUrl'
 
 interface Props {
   params: Promise<{ slug: string }>
+}
+
+// A search slug is normalized (lowercase, no accents). We can't recover the exact
+// accents for a medication that has no curated sheet, so we title-case the slug for
+// a readable heading. Prices/history below use the slug as the (already normalized)
+// query, which is exactly what /api/search expects.
+function prettyName(slug: string): string {
+  return slug
+    .split('-')
+    .join(' ')
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
 }
 
 // Pre-render every medication page at build time: faster for users and gives
@@ -20,7 +34,17 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const info = getMedicineInfo(slug)
-  if (!info) return { title: 'Medicamento - Farmi' }
+  // No curated sheet: the page still works (prices + history), but it is thin content
+  // for search engines, so we keep it out of the index while letting links be followed.
+  if (!info) {
+    const name = prettyName(slug)
+    return {
+      title: `Precio de ${name} - Farmi`,
+      description: `Compara el precio de ${name} en las principales farmacias de Colombia.`,
+      robots: { index: false, follow: true },
+      alternates: { canonical: `/medicamento/${slug}` },
+    }
+  }
 
   // Informational intent: this page answers "para que sirve / dosis / advertencias".
   // The price-transactional query ("precio de X en Colombia") is owned by /precio/[slug],
@@ -47,7 +71,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function MedicamentoPage({ params }: Props) {
   const { slug } = await params
   const info = getMedicineInfo(slug)
-  if (!info) notFound()
+  // No curated clinical sheet yet: show a safe page (real prices + history) instead
+  // of a 404. We never invent doses, warnings or contraindications.
+  if (!info) return <MedicamentoFallback slug={slug} />
 
   // FAQs derived from the medication's own data — real content that targets
   // common "para que sirve / necesita formula / donde comprar" search queries
@@ -316,6 +342,90 @@ export default async function MedicamentoPage({ params }: Props) {
             <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
           </svg>
           Comparar precios de {info.activeIngredient}
+        </Link>
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-[#c1c6d7]/50 bg-white/60 text-[13px] font-semibold text-[#414755] hover:bg-white/80 transition-all"
+        >
+          Buscar otro medicamento
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// Shown when a medication has no curated clinical sheet. It NEVER invents medical
+// content (doses, warnings, contraindications). It only surfaces verifiable data:
+// the real live price comparison and the price history, plus the legal disclaimer.
+function MedicamentoFallback({ slug }: { slug: string }) {
+  const name = prettyName(slug)
+  const query = normalize(slug)
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 sm:px-5 py-8 sm:py-12 space-y-6">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-[12px] text-[#717786]">
+        <Link href="/" className="hover:text-primary transition-colors">Inicio</Link>
+        <span>/</span>
+        <Link href={`/buscar?q=${encodeURIComponent(name)}`} className="hover:text-primary transition-colors">
+          {name}
+        </Link>
+        <span>/</span>
+        <span className="text-[#1a1b1f] font-medium">Informacion</span>
+      </nav>
+
+      {/* Header */}
+      <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm overflow-hidden">
+        <MedicationImage ingredient={name} height={100} />
+        <div className="p-5 sm:p-6">
+          <h1 className="text-[24px] sm:text-[28px] font-bold text-[#1a1b1f] tracking-tight mb-2">
+            {name}
+          </h1>
+          <p className="text-[13px] text-[#717786] leading-relaxed">
+            Todavia estamos preparando la ficha detallada de {name}. Mientras tanto, aqui
+            puedes comparar su precio real en las farmacias y ver como ha cambiado.
+          </p>
+        </div>
+      </div>
+
+      {/* Disclaimer banner */}
+      <div className="flex gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 sm:p-5">
+        <div className="shrink-0 mt-0.5">
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-amber-500">
+            <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-[13px] font-bold text-amber-800 mb-1">
+            Farmi es un comparador de precios, no una farmacia
+          </p>
+          <p className="text-[12px] text-amber-700 leading-relaxed">
+            No vendemos medicamentos y no damos consejo medico. Para saber si {name} es
+            adecuado para ti, su dosis o sus advertencias, consulta a un medico o quimico
+            farmaceutico.{' '}
+            <Link href="/terminos" className="underline font-semibold hover:text-amber-900 transition-colors">
+              Ver condiciones del sitio
+            </Link>
+          </p>
+        </div>
+      </div>
+
+      {/* Comparador en vivo (precios reales) */}
+      <LivePriceCompare query={query} ingredient={name} />
+
+      {/* Historial de precios real */}
+      <PriceTracker query={query} label={name} />
+
+      {/* Navigation */}
+      <div className="flex flex-wrap gap-3 pt-2">
+        <Link
+          href={`/buscar?q=${encodeURIComponent(name)}`}
+          className="flex-1 min-w-[200px] flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+          </svg>
+          Comparar precios de {name}
         </Link>
         <Link
           href="/"

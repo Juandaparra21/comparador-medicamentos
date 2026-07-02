@@ -6,6 +6,7 @@ import { DiscountsSection } from '@/app/components/DiscountsSection'
 import { NearbyMapSection } from '@/app/components/NearbyMapSection'
 import { Reveal } from '@/app/components/Reveal'
 import { HeroStats } from '@/app/components/HeroStats'
+import { HomeBanner } from '@/app/components/HomeBanner'
 import {
   TrustStrip,
   HeroPharmacies,
@@ -61,6 +62,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Banner promocional (se oculta solo si aún no está la imagen) */}
+      <Reveal><HomeBanner /></Reveal>
 
       <Reveal><ValueProps /></Reveal>
       <Reveal><NearbyMapSection /></Reveal>
