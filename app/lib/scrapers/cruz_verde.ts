@@ -92,7 +92,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
     productName: name,
     type: classify(false, name),
     activeIngredient: extractIngredient(name, brand),
-    concentration: extractConcentration(name),
+    concentration: extractConcentration(name, presentation),
     presentation,
     quantity,
     price,

@@ -5,9 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import type { PharmacyResult, MedicationType } from '@/app/types'
 import { sortResults, SORT_OPTIONS, normalize, type SortKey } from '@/app/utils/search'
 import { useNearbyPharmacies } from '@/app/hooks/useNearbyPharmacies'
-
-// Presentation names that use volume (ml) as quantity unit
-const LIQUID_FILTER_NAMES = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
+import { isVolumePresentation, quantityUnit, formatQuantity } from '@/app/utils/units'
 import { formatCOP } from '@/app/utils/format'
 import { SearchBar } from '@/app/components/SearchBar'
 import ResultCard from '@/app/components/ResultCard'
@@ -112,8 +110,8 @@ export default function BuscarClient() {
   const afterConc    = concFilter ? afterPresent.filter(r => r.concentration === concFilter) : afterPresent
   const quantities   = topValues(afterConc.map(r => r.quantity).filter(q => q > 1)) as number[]
 
-  // Is current presentation a liquid? (drives quantity unit label)
-  const isLiquidFilter = LIQUID_FILTER_NAMES.has(presentFilter)
+  // Is current presentation a volume form? (drives quantity unit label)
+  const isLiquidFilter = isVolumePresentation(presentFilter)
 
   // Display order: concentrations ascending by mg, quantities ascending by pack size.
   // (topValues sorts by frequency, so keep the most-common one to tag it.)
@@ -363,7 +361,7 @@ export default function BuscarClient() {
                       title={isLiquidFilter ? 'Volumen' : 'Cantidad'}
                       values={quantitiesAsc}
                       active={qtyFilter}
-                      unitLabel={isLiquidFilter ? 'ml' : 'unidades'}
+                      unitLabel={quantityUnit(presentFilter)}
                       onChange={setQtyFilter}
                     />
                   </div>
@@ -526,7 +524,7 @@ export default function BuscarClient() {
                   <p className="text-[11px] text-[#717786] mt-0.5">
                     Mismo producto: {bestSaving.group.activeIngredient}
                     {bestSaving.group.concentration ? ` ${bestSaving.group.concentration}` : ''}
-                    {bestSaving.group.quantity > 1 ? ` · ${bestSaving.group.quantity} unidades` : ''}
+                    {bestSaving.group.quantity > 1 ? ` · ${formatQuantity(bestSaving.group.quantity, bestSaving.group.presentation)}` : ''}
                   </p>
                 </div>
               </div>

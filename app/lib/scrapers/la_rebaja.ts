@@ -50,19 +50,22 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
 
   // Numeric part of the concentration (e.g. 500 from "500mg") so we can detect
   // when a spec wrongly reports the dose as the unit count.
-  const concNum = parseInt(extractConcentration(name)) || 0
+  const concNum = parseInt(extractConcentration(name, presentation)) || 0
 
-  // For liquids, Cantidadunidadesmedida often holds the ml volume (not unit count).
-  // Use name-based extraction for liquids; the spec field for solids.
+  // Cantidadunidadesmedida means different things per form:
+  //  - volume forms (jarabe, crema, frasco): the ml/g CONTENT of one container
+  //  - solids: the unit COUNT in the pack
+  const specVal = parseInt(spec(p, 'Cantidadunidadesmedida')) || 0
   let quantity: number
   if (LIQUID_PRESENTATIONS.has(presentation)) {
-    quantity = extractPackQuantity(name, presentation)
+    // Show the net content in ml/g. Cremas/lociones carry no ml in the name, so the
+    // spec is the only source; prefer the name when it does state the volume.
+    const fromName = extractPackQuantity(name, presentation)
+    quantity = fromName > 1 ? fromName : (specVal >= 2 && specVal <= 5000 ? specVal : 1)
   } else {
-    const qtyStr = spec(p, 'Cantidadunidadesmedida')
-    const specQty = qtyStr ? parseInt(qtyStr) : 0
-    // Trust the spec only for sane pack sizes that are not just the dose number.
-    if (specQty >= 2 && specQty <= 1000 && specQty !== concNum) {
-      quantity = specQty
+    // Solids: trust the count only when sane and not just an echo of the dose number.
+    if (specVal >= 2 && specVal <= 1000 && specVal !== concNum) {
+      quantity = specVal
     } else {
       quantity = extractPackQuantity(name, presentation)
     }
@@ -77,7 +80,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     productName:    name,
     type:           classify(!isRx, name),
     activeIngredient: ingredient,
-    concentration:  extractConcentration(name),
+    concentration:  extractConcentration(name, presentation),
     presentation,
     quantity:       Math.max(quantity, 1),
     price,

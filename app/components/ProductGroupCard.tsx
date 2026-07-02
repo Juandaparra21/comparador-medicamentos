@@ -12,17 +12,8 @@ import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
+import { formatQuantity, perUnitSuffix } from '@/app/utils/units'
 import type { PharmacyDistances, PharmacyStores } from '@/app/hooks/useNearbyPharmacies'
-
-const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
-
-// quantity === 1 means the pack size could not be confirmed from the name, so we
-// show the form (e.g. "Tabletas") without asserting a misleading count of 1.
-function qtyDisplay(quantity: number, presentation: string): string {
-  if (LIQUID_PRESENTATIONS.has(presentation)) return quantity > 1 ? `${quantity}ml` : presentation
-  if (!presentation) return quantity > 1 ? `× ${quantity}` : ''
-  return quantity > 1 ? `${quantity} ${presentation}s` : `${presentation}s`
-}
 
 interface Props { group: ProductGroup; priceBasis?: 'total' | 'unit'; distances?: PharmacyDistances; stores?: PharmacyStores; fetchedAt?: string }
 
@@ -46,7 +37,7 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
   const hasMany  = avail.length > 1
   // Savings vs the most expensive pharmacy for the same product (real, not invented)
   const savingsPct = savings > 0 && maxPrice > 0 ? Math.round((savings / maxPrice) * 100) : 0
-  const unitSuffix = LIQUID_PRESENTATIONS.has(group.presentation) ? '/ml' : '/und'
+  const unitSuffix = perUnitSuffix(group.presentation)
 
   return (
     <article className="group relative flex flex-col bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl shadow-sm hover:bg-white/85 hover:shadow-[0_8px_32px_rgba(0,88,188,0.10)] transition-all duration-300 overflow-hidden">
@@ -84,7 +75,7 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
               ? <>
                   {group.activeIngredient}{group.concentration ? ` ${group.concentration}` : ''}
                   {group.presentation && (
-                    <><span className="text-[#c1c6d7] mx-1">&bull;</span>{qtyDisplay(group.quantity, group.presentation)}</>
+                    <><span className="text-[#c1c6d7] mx-1">&bull;</span>{formatQuantity(group.quantity, group.presentation)}</>
                   )}
                 </>
               : results[0]?.productName

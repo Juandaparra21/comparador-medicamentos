@@ -67,7 +67,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     productName:    name,
     type:           classify(false, name),
     activeIngredient: ingredient,
-    concentration:  extractConcentration(name),
+    concentration:  extractConcentration(name, presentation),
     presentation,
     quantity:       Math.max(quantity, 1),
     price,

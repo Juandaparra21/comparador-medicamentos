@@ -12,17 +12,11 @@ import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
+import { formatQuantity, perUnitSuffix } from '@/app/utils/units'
 import type { NearestStore } from '@/app/hooks/useNearbyPharmacies'
 
-const LIQUID_PRESENTATIONS = new Set(['Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray'])
-
-// quantity === 1 means the pack size could not be confirmed from the name, so we
-// show the form (e.g. "Tabletas") without asserting a misleading count of 1.
-function qtyDisplay(quantity: number, presentation: string): string {
-  if (LIQUID_PRESENTATIONS.has(presentation)) return quantity > 1 ? `${quantity}ml` : presentation
-  if (!presentation) return quantity > 1 ? `× ${quantity}` : ''
-  return quantity > 1 ? `${quantity} ${presentation}s` : `${presentation}s`
-}
+// Quantity meaning + display come from the shared units module so the volume/unit
+// rules never drift between the cards, the filters and the scrapers.
 
 const AVAILABILITY_LABEL: Record<PharmacyResult['availability'], string> = {
   available: 'Disponible',
@@ -159,7 +153,7 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
             {result.presentation ? (
               <>
                 <span className="text-[#c1c6d7] mx-1">&bull;</span>
-                {qtyDisplay(result.quantity, result.presentation)}
+                {formatQuantity(result.quantity, result.presentation)}
               </>
             ) : null}
           </p>
@@ -179,7 +173,7 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
           </div>
           {result.quantity > 1 && (
             <span className={`text-[11px] tabular-nums ${perUnitHighlight ? 'font-bold text-secondary' : 'font-semibold text-[#717786]'}`}>
-              {formatCOP(result.pricePerUnit)}{LIQUID_PRESENTATIONS.has(result.presentation) ? '/ml' : '/und'}
+              {formatCOP(result.pricePerUnit)}{perUnitSuffix(result.presentation)}
             </span>
           )}
         </div>

@@ -1,3 +1,5 @@
+import { VOLUME_PRESENTATIONS, ML_PER_ONZA } from '@/app/utils/units'
+
 export function normalize(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, '')
 }
@@ -20,17 +22,51 @@ export function matchesQuery(query: string, ...fields: string[]): boolean {
   return hay.includes(main)
 }
 
-export function extractConcentration(name: string): string {
-  const m = name.match(/(\d+(?:[.,]\d+)?)\s*(mg|g|ml|mcg|ui|%|ug)/i)
-  if (!m) return ''
-  const num  = m[1].replace(',', '.')
-  const unit = m[2].toLowerCase()
-  return `${num}${unit}`
+// Solid oral forms where a bare "g" is a real dose strength (e.g. "amoxicilina 1 g"
+// tablet). For creams, ointments and liquids a bare "g"/"ml" is the net content of
+// the container, NOT a concentration, so it must never be shown as a strength.
+const SOLID_DOSE_PRESENTATIONS = new Set([
+  'Tableta', 'Capsula', 'Polvo', 'Supositorio', 'Ovulo',
+])
+
+/**
+ * Drug strength shown next to the name (e.g. "500mg", "5%", "250mg/5ml").
+ *
+ * A bare volume/weight ("120ml", "400ml", "30g") is the PACKAGE CONTENT of a frasco
+ * or tube, not the active-ingredient concentration, so it is deliberately not
+ * returned here — it surfaces as the pack quantity instead. Otherwise a body lotion
+ * like "CREMA LUBRIDERM 120 ML" wrongly reads as "concentration 120ml".
+ */
+export function extractConcentration(name: string, presentation = ''): string {
+  const s = name.toLowerCase()
+
+  // Ratio strength of a syrup/suspension, e.g. "250mg/5ml" — the true concentration.
+  // Matched first so the volume part ("5ml") is never mistaken for package content.
+  const ratio = s.match(/(\d+(?:[.,]\d+)?)\s*(mg|g|mcg|ug|ui)\s*\/\s*(\d+(?:[.,]\d+)?)\s*ml\b/)
+  if (ratio) return `${ratio[1].replace(',', '.')}${ratio[2]}/${ratio[3].replace(',', '.')}ml`
+
+  // Percentage strength, e.g. a "5%" cream.
+  const pct = s.match(/(\d+(?:[.,]\d+)?)\s*%/)
+  if (pct) return `${pct[1].replace(',', '.')}%`
+
+  // Dose units that always denote drug strength, never package content.
+  const dose = s.match(/(\d+(?:[.,]\d+)?)\s*(mg|mcg|ug|ui)\b/)
+  if (dose) return `${dose[1].replace(',', '.')}${dose[2]}`
+
+  // A bare "g" counts as a strength only for solid oral forms; for creams/liquids it
+  // is content and is intentionally dropped.
+  if (SOLID_DOSE_PRESENTATIONS.has(presentation)) {
+    const g = s.match(/(\d+(?:[.,]\d+)?)\s*g\b/)
+    if (g) return `${g[1].replace(',', '.')}g`
+  }
+
+  return ''
 }
 
-export const LIQUID_PRESENTATIONS = new Set([
-  'Jarabe', 'Solucion', 'Gotas', 'Suspension', 'Spray',
-])
+// Content-volume forms (liquids, creams, gels, ointments): the ml/g figure is the
+// net content of a single container, not a unit count. Re-exported from the shared
+// units module so the scrapers, cards and filters can never drift apart.
+export const LIQUID_PRESENTATIONS = VOLUME_PRESENTATIONS
 
 /**
  * Rigorous pack-quantity extractor shared across all pharmacy scrapers.
@@ -66,6 +102,11 @@ export function extractPackQuantity(name: string, presentation: string): number 
     // Avoid matching concentrations like "250mg/5ml" — require no preceding /
     const ml = s.match(/(?:^|[^/\d])(\d+(?:[.,]\d+)?)\s*ml\b/)
     if (ml) return Math.round(parseFloat(ml[1].replace(',', '.')))
+    // Onzas: many syrups/lotions are sold "por onzas" (e.g. "JARABE X 4 ONZAS").
+    // An onza is a VOLUME, never a unit count — convert it to ml (1 onza = 30 ml)
+    // so it lives on the same ml scale as the rest and is priced per ml.
+    const oz = s.match(/(?:^|[^/\d])(\d+(?:[.,]\d+)?)\s*(?:onzas?|onz|oz)\b/)
+    if (oz) return Math.round(parseFloat(oz[1].replace(',', '.')) * ML_PER_ONZA)
     const g = s.match(/(?:^|[^/\d])(\d+(?:[.,]\d+)?)\s*g\b(?!\s*\/)/)
     if (g) return Math.round(parseFloat(g[1].replace(',', '.')))
     return 1
@@ -117,6 +158,7 @@ export function extractPresentation(name: string): string {
     [['inyectable', 'inyeccion', 'ampolla', 'vial'],   'Inyectable'],
     [['jarabe', 'suspension', 'suspencion'],            'Jarabe'],
     [['solucion', 'solucion oral'],                    'Solucion'],
+    [['locion', 'emulsion'],                            'Locion'],
     [['capsula', 'capsulas', 'encapsulado'],            'Capsula'],
     [['tableta', 'tabletas', 'comprimido', 'tab ', 'pastilla', 'pastillas', 'gragea', 'grageas'], 'Tableta'],
     [['crema'],                                         'Crema'],

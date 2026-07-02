@@ -85,7 +85,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
     productName:      name,
     type:             classify(Boolean(hit.isGeneric || hit.generic), name),
     activeIngredient: ingredient,
-    concentration:    extractConcentration(name),
+    concentration:    extractConcentration(name, presentation),
     presentation,
     quantity:         Math.max(quantity, 1),
     price,

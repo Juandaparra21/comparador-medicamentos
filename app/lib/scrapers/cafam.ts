@@ -53,7 +53,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     productName:      name,
     type:             classify(false, name),
     activeIngredient: name.split(/\s/)[0] ?? '',
-    concentration:    extractConcentration(name),
+    concentration:    extractConcentration(name, presentation),
     presentation,
     quantity,
     price:            Math.round(price),
