@@ -44,3 +44,8 @@ next-env.d.ts
 scraper/debug_*.json
 scraper/__pycache__/
 scraper/scrapers/__pycache__/
+
+# Claude Code local tooling artifacts (local settings + installed skills)
+.claude/
+.agents/
+skills-lock.json
