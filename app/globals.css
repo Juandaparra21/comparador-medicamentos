@@ -36,7 +36,9 @@ body {
   background-color: #fbfbfd; /* clean near-white, Apple-style */
   color: #1d1d1f;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  /* No usamos text-rendering: optimizeLegibility a proposito: en moviles lentos
+     obliga a calcular kerning/ligaduras antes de pintar el texto y retrasa el LCP
+     (el H1 del hero). El valor por defecto (auto) pinta el texto antes. */
 }
 
 /* Scroll-reveal: hidden until the Reveal component marks it in-view.
