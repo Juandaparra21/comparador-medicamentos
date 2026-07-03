@@ -225,9 +225,6 @@ export default async function PrecioPage({ params }: Props) {
           <Link href={`/buscar?q=${encodeURIComponent(ing)}`} className="text-[13px] font-semibold px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white hover:opacity-90 transition-opacity">
             Comparar precios de {ing}
           </Link>
-          <Link href={`/medicamento/${slug}`} className="text-[13px] font-semibold px-4 py-2 rounded-lg border border-[#c1c6d7]/60 bg-white/60 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">
-            Para qué sirve {lc}: usos y dosis
-          </Link>
           <Link href={`/historial/${slug}`} className="text-[13px] font-semibold px-4 py-2 rounded-lg border border-[#c1c6d7]/60 bg-white/60 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">
             Historial de precios
           </Link>

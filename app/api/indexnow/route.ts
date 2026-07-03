@@ -16,8 +16,9 @@ function allUrls(): string[] {
   const slugs = getAllMedicineSlugs()
   const staticRoutes = ['/', '/cercanas', '/sobre-nosotros', '/contacto', '/terminos', '/privacidad']
   const precio = slugs.map((s) => `/precio/${s}`)
-  const med = slugs.map((s) => `/medicamento/${s}`)
-  return [...staticRoutes, ...precio, ...med].map((p) => `${SITE_URL}${p}`)
+  // /medicamento/[slug] is omitted on purpose: it now 308-redirects to /precio, so it
+  // is no longer an indexable URL.
+  return [...staticRoutes, ...precio].map((p) => `${SITE_URL}${p}`)
 }
 
 // Visit /api/indexnow (or run it from a cron) to (re)notify search engines of

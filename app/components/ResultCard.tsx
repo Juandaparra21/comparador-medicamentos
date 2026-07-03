@@ -222,7 +222,7 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
               Historial
             </Link>
             <Link
-              href={`/medicamento/${encodeURIComponent(slug)}`}
+              href={`/precio/${encodeURIComponent(slug)}`}
               onClick={(e) => e.stopPropagation()}
               className="text-[11px] font-semibold text-[#717786] hover:text-primary transition-colors"
             >

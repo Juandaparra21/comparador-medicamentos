@@ -187,7 +187,7 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
               Historial
             </Link>
             <Link
-              href={`/medicamento/${encodeURIComponent(slug)}`}
+              href={`/precio/${encodeURIComponent(slug)}`}
               className="text-[11px] font-semibold text-[#717786] hover:text-primary transition-colors"
             >
               Info

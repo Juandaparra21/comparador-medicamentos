@@ -19,6 +19,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const slugs = getAllMedicineSlugs()
 
   // Transactional "precio de X en Colombia" pages — highest-intent, so top priority.
+  // /medicamento/[slug] is intentionally excluded: it now 308-redirects to /precio,
+  // so listing it here would surface as "Page with redirect" in Search Console.
   const precioRoutes: MetadataRoute.Sitemap = slugs.map((slug) => ({
     url: `${SITE_URL}/precio/${slug}`,
     lastModified: now,
@@ -26,13 +28,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }))
 
-  // Informational medication pages (usos, dosis, advertencias).
-  const medRoutes: MetadataRoute.Sitemap = slugs.map((slug) => ({
-    url: `${SITE_URL}/medicamento/${slug}`,
-    lastModified: now,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }))
-
-  return [...staticRoutes, ...precioRoutes, ...medRoutes]
+  return [...staticRoutes, ...precioRoutes]
 }

@@ -150,8 +150,7 @@ export function PharmacyStrip() {
 /* ── Popular medications (internal links to the transactional /precio pages) ──
    Server-rendered links that give crawlers a direct path from the homepage to
    every /precio/<slug> page — the fastest way out of "discovered, not indexed"
-   for the high-intent "precio de <medicamento> en Colombia" queries. The /precio
-   pages cross-link to the /medicamento info pages, so those stay reachable too. */
+   for the high-intent "precio de <medicamento> en Colombia" queries. */
 
 export function PopularMeds() {
   const meds = getAllMedicineSlugs()
