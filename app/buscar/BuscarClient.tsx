@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import type { PharmacyResult, MedicationType } from '@/app/types'
+import { suggestCorrection, capitalizeFirst } from '@/app/utils/spellCorrect'
 import { sortResults, SORT_OPTIONS, normalize, type SortKey } from '@/app/utils/search'
 import { useNearbyPharmacies } from '@/app/hooks/useNearbyPharmacies'
 import { isVolumePresentation, quantityUnit, formatQuantity } from '@/app/utils/units'
@@ -31,6 +33,9 @@ const N = TYPE_FILTERS.length
 export default function BuscarClient() {
   const searchParams = useSearchParams()
   const q = searchParams.get('q') ?? ''
+
+  // "¿Quisiste decir X?" — closest known medication when the query looks misspelled.
+  const correction = useMemo(() => suggestCorrection(q), [q])
 
   const [results,        setResults]        = useState<PharmacyResult[]>([])
   const [loading,        setLoading]        = useState(true)
@@ -238,9 +243,22 @@ export default function BuscarClient() {
             <p className="text-[20px] font-semibold text-[#1a1b1f] mb-2">
               Sin resultados para &ldquo;{q}&rdquo;
             </p>
-            <p className="text-[15px] text-[#717786]">
-              Intenta con el nombre generico o el principio activo del medicamento
-            </p>
+            {correction ? (
+              <p className="text-[15px] text-[#717786]">
+                ¿Quisiste decir{' '}
+                <Link
+                  href={`/buscar?q=${encodeURIComponent(correction)}`}
+                  className="font-semibold text-primary underline underline-offset-2 hover:opacity-80 transition-opacity"
+                >
+                  {capitalizeFirst(correction)}
+                </Link>
+                ?
+              </p>
+            ) : (
+              <p className="text-[15px] text-[#717786]">
+                Intenta con el nombre generico o el principio activo del medicamento
+              </p>
+            )}
           </div>
         ) : (
           <>

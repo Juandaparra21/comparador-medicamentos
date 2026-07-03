@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Suggestion } from '@/app/api/suggestions/route'
 import { saveSearchHistory } from '@/app/components/QuickChips'
+import { suggestCorrection, capitalizeFirst } from '@/app/utils/spellCorrect'
 
 interface Props {
   initialValue?: string
@@ -52,8 +53,11 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
       try {
         const res = await fetch(`/api/suggestions?q=${encodeURIComponent(val.trim())}`)
         const data = await res.json() as { suggestions: Suggestion[] }
-        setSuggestions(data.suggestions ?? [])
-        setOpen((data.suggestions ?? []).length > 0)
+        const list = data.suggestions ?? []
+        setSuggestions(list)
+        // Open the panel when there are hits, or when there's a spell suggestion to
+        // offer even though the index returned nothing (likely a typo).
+        setOpen(list.length > 0 || suggestCorrection(val) !== null)
         setActiveIdx(-1)
       } catch {
         setSuggestions([])
@@ -93,6 +97,10 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
 
   const ingredientSuggestions = suggestions.filter((s) => s.type === 'ingredient')
   const productSuggestions    = suggestions.filter((s) => s.type === 'product')
+
+  // Spell suggestion, shown only when the index returned no hits (likely a typo).
+  const correction = useMemo(() => suggestCorrection(query), [query])
+  const showCorrection = suggestions.length === 0 && correction !== null
 
   const globalIdx = useCallback(
     (type: 'ingredient' | 'product', localIdx: number) => {
@@ -151,8 +159,29 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
       </form>
 
       {/* Autocomplete dropdown */}
-      {open && suggestions.length > 0 && (
+      {open && (suggestions.length > 0 || showCorrection) && (
         <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_rgba(0,88,188,0.14)] overflow-hidden">
+          {/* ¿Quisiste decir…? — solo cuando no hubo resultados del índice */}
+          {showCorrection && correction && (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => navigate(correction)}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#f5f6fa] transition-colors cursor-pointer"
+            >
+              <div className="w-7 h-7 rounded-lg bg-tertiary/10 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 text-tertiary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] text-[#717786]">
+                  ¿Quisiste decir <span className="font-semibold text-primary">{capitalizeFirst(correction)}</span>?
+                </p>
+              </div>
+            </button>
+          )}
+
           {/* Principios activos */}
           {ingredientSuggestions.length > 0 && (
             <>
@@ -230,9 +259,11 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
             </>
           )}
 
-          <div className="px-4 py-2 border-t border-[#f0f1f5] text-[10px] text-[#c1c6d7] text-right">
-            &uarr;&darr; navegar &middot; Enter buscar &middot; Esc cerrar
-          </div>
+          {suggestions.length > 0 && (
+            <div className="px-4 py-2 border-t border-[#f0f1f5] text-[10px] text-[#c1c6d7] text-right">
+              &uarr;&darr; navegar &middot; Enter buscar &middot; Esc cerrar
+            </div>
+          )}
         </div>
       )}
     </div>
