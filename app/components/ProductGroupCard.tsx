@@ -120,8 +120,10 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
                 className={`flex items-center gap-2 px-2.5 py-2 ${unavail ? 'opacity-40' : isBest ? 'bg-secondary/[0.04]' : ''}`}
               >
                 <PharmacyLogo name={r.pharmacy} size={22} />
-                <span className="text-[11px] font-semibold text-[#414755] flex-1 truncate min-w-0 flex items-center gap-1">
-                  {r.pharmacy}
+                <div className="flex-1 min-w-0">
+                  <span className="block text-[11px] font-semibold text-[#414755] truncate">
+                    {r.pharmacy}
+                  </span>
                   {distances?.[r.pharmacy] !== undefined && (
                     stores?.[r.pharmacy] ? (
                       <a
@@ -129,17 +131,17 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
                         target="_blank"
                         rel="noopener noreferrer"
                         title={`Cómo llegar · ${formatTrip(distances[r.pharmacy])}`}
-                        className="shrink-0 text-[9px] font-bold text-secondary bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 px-1.5 py-0.5 rounded-full leading-none transition-colors"
+                        className="inline-block mt-0.5 text-[9px] font-bold text-secondary bg-secondary/10 border border-secondary/20 hover:bg-secondary/20 px-1.5 py-0.5 rounded-full leading-none whitespace-nowrap transition-colors"
                       >
                         {formatDistance(distances[r.pharmacy])} · {formatTripShort(distances[r.pharmacy])}
                       </a>
                     ) : (
-                      <span className="shrink-0 text-[9px] font-bold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full leading-none">
+                      <span className="inline-block mt-0.5 text-[9px] font-bold text-secondary bg-secondary/10 border border-secondary/20 px-1.5 py-0.5 rounded-full leading-none whitespace-nowrap">
                         {formatDistance(distances[r.pharmacy])}
                       </span>
                     )
                   )}
-                </span>
+                </div>
                 <span className={`text-[12px] font-bold tabular-nums shrink-0 ${isBest ? 'text-secondary' : 'text-[#1a1b1f]'}`}>
                   {formatCOP(r.price)}
                 </span>
