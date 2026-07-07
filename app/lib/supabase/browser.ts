@@ -10,7 +10,13 @@ let clientPromise: Promise<SupabaseClient> | null = null
 export function getBrowserClient(): Promise<SupabaseClient> {
   if (!clientPromise) {
     clientPromise = import('@supabase/supabase-js').then(({ createClient }) =>
-      createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { flowType: 'pkce' } }),
+      // Implicit flow: tokens come back in the URL hash, so there is no PKCE
+      // code_verifier to lose. PKCE stores that verifier in localStorage, which
+      // breaks whenever the return lands on a different origin (www vs non-www)
+      // or a different browser context (in-app browsers on mobile — 80%+ of our
+      // traffic). Implicit sidesteps that entire failure class for a purely
+      // client-side auth. /auth/callback already handles the hash-token path.
+      createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { flowType: 'implicit' } }),
     )
   }
   return clientPromise
