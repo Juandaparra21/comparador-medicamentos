@@ -143,6 +143,12 @@ export default function BuscarClient() {
     ? qtyFiltered.filter(r => r.pharmacy in distances)
     : qtyFiltered
 
+  // Cuantas farmacias distintas (de las que hay resultados) tienen sede fisica cerca.
+  const nearbyPharmacyCount = hasDistances
+    ? new Set(qtyFiltered.filter(r => r.pharmacy in distances).map(r => r.pharmacy)).size
+    : 0
+  const totalPharmacyCount = new Set(qtyFiltered.map(r => r.pharmacy)).size
+
   // Setters that auto-reset downstream filters to prevent impossible combinations
   function changePresentation(v: string) {
     setPresentFilter(v)
@@ -478,24 +484,6 @@ export default function BuscarClient() {
                   </svg>
                   {locLoading ? 'Buscando...' : hasDistances ? 'Ubicacion activa' : 'Mas cercano'}
                 </button>
-                {/* Filtro: solo cadenas con sede fisica cerca (aparece con ubicacion activa) */}
-                {hasDistances && (
-                  <button
-                    onClick={toggleNearbyOnly}
-                    className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
-                      nearbyOnly
-                        ? 'bg-secondary/10 text-secondary border-secondary/30'
-                        : 'bg-white/70 text-[#717786] border-[#c1c6d7]/60 hover:text-primary hover:border-primary/30'
-                    }`}
-                    aria-pressed={nearbyOnly}
-                    title="Mostrar solo farmacias con una sede fisica cerca de ti"
-                  >
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
-                    </svg>
-                    Solo cercanas
-                  </button>
-                )}
                 {/* Address input toggle — alternative to GPS */}
                 <button
                   onClick={() => setShowAddr((v) => !v)}
@@ -560,18 +548,57 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Aclaracion de stock: la cercania es la sede mas proxima de cada cadena,
-                pero aun no reflejamos el inventario real de cada drogueria fisica. */}
+            {/* Filtro por ubicacion explicito: interruptor grande + contador + aclaracion
+                de stock. Aparece cuando la ubicacion esta activa. */}
             {hasDistances && (
-              <div className="flex items-start gap-2 mb-4 px-3.5 py-2.5 rounded-xl bg-primary/[0.06] border border-primary/15" role="note">
-                <svg className="w-4 h-4 text-primary shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
-                </svg>
-                <p className="text-[12px] text-[#414755] leading-snug">
-                  La cercania muestra la sede mas proxima de cada cadena. Por ahora no reflejamos
-                  el inventario real de cada drogueria fisica: estamos en ese proceso. Los precios
-                  vienen del catalogo en linea de cada cadena; confirma la disponibilidad en la sede antes de ir.
-                </p>
+              <div className="mb-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm overflow-hidden">
+                <button
+                  onClick={toggleNearbyOnly}
+                  role="switch"
+                  aria-checked={nearbyOnly}
+                  className="w-full flex items-center justify-between gap-3 p-4 text-left cursor-pointer hover:bg-white/40 transition-colors"
+                >
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-secondary/12 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-secondary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-bold text-[#1a1b1f] leading-snug">
+                        Mostrar solo farmacias cerca de mi
+                      </p>
+                      <p className="text-[12px] text-[#717786] mt-0.5">
+                        {nearbyPharmacyCount > 0
+                          ? `${nearbyPharmacyCount} de ${totalPharmacyCount} con sede a menos de 2 km`
+                          : 'No hay sedes de estas cadenas a menos de 2 km de ti'}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Interruptor estilo iOS */}
+                  <span
+                    className={`relative shrink-0 w-[46px] h-[26px] rounded-full transition-colors duration-200 ${
+                      nearbyOnly ? 'bg-secondary' : 'bg-[#d1d5db]'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <span
+                      className="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-200"
+                      style={{ transform: nearbyOnly ? 'translateX(20px)' : 'translateX(0)' }}
+                    />
+                  </span>
+                </button>
+                {/* Aclaracion de stock */}
+                <div className="flex items-start gap-2 px-4 py-2.5 bg-primary/[0.05] border-t border-primary/10" role="note">
+                  <svg className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-[11px] text-[#414755] leading-snug">
+                    La cercania es la sede mas proxima de cada cadena. Aun no reflejamos el inventario
+                    real de cada drogueria fisica: estamos en ese proceso. Confirma la disponibilidad
+                    en la sede antes de ir.
+                  </p>
+                </div>
               </div>
             )}
 
