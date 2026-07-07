@@ -295,45 +295,12 @@ export default function BuscarClient() {
           </div>
         ) : (
           <>
-            {/* ── Tarjeta grande: ¿Genérico o de marca? ── */}
-            <div className="mb-5 p-5 sm:p-6 bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm">
-
-              {/* Cabecera */}
-              <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-[20px] sm:text-[22px] font-bold text-[#1a1b1f] tracking-tight leading-snug">
-                    ¿Genérico o de marca?
-                  </h2>
-                  <p className="text-[13px] sm:text-[14px] text-[#717786] mt-1.5 leading-relaxed">
-                    {savingsPct !== null
-                      ? `El genérico puede ser hasta ${savingsPct}% más barato con el mismo principio activo.`
-                      : 'Elige según tu preferencia y presupuesto.'}
-                  </p>
-                </div>
-
-                {/* Contadores */}
-                <div className="flex items-center gap-5 shrink-0">
-                  <div className="text-center">
-                    <p className="text-[28px] sm:text-[32px] font-bold text-secondary leading-none tabular-nums">
-                      {genericCount}
-                    </p>
-                    <p className="text-[11px] text-[#717786] mt-1">genéricos</p>
-                  </div>
-                  <div className="w-px h-10 bg-[#e5e7eb]" />
-                  <div className="text-center">
-                    <p className="text-[28px] sm:text-[32px] font-bold text-primary leading-none tabular-nums">
-                      {brandCount}
-                    </p>
-                    <p className="text-[11px] text-[#717786] mt-1">de marca</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Control deslizante estilo Apple ── */}
-              <div className="relative flex bg-black/[0.06] rounded-[14px] p-1">
-                {/* Indicador blanco deslizante — usa transform para GPU-smooth */}
+            {/* ── Tipo: genérico o de marca (control segmentado compacto) ── */}
+            <div className="mb-4">
+              <div className="relative flex bg-black/[0.06] rounded-[12px] p-1">
+                {/* Indicador blanco deslizante */}
                 <div
-                  className="absolute top-1 bottom-1 bg-white rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]"
+                  className="absolute top-1 bottom-1 bg-white rounded-[9px] shadow-[0_2px_8px_rgba(0,0,0,0.10),0_1px_3px_rgba(0,0,0,0.06)]"
                   style={{
                     left: '4px',
                     width: `calc((100% - 8px) / ${N})`,
@@ -342,42 +309,43 @@ export default function BuscarClient() {
                   }}
                 />
 
-                {TYPE_FILTERS.map((f, i) => {
+                {TYPE_FILTERS.map((f) => {
                   const isSelected = typeFilter === f.value
                   const count = f.value === 'generic' ? genericCount : f.value === 'brand' ? brandCount : null
                   return (
                     <button
                       key={f.value}
                       onClick={() => setTypeFilter(f.value)}
-                      className="relative z-10 flex-1 flex flex-col items-center gap-1 py-4 px-2 rounded-[10px] cursor-pointer select-none"
+                      className="relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-[9px] cursor-pointer select-none"
                     >
                       <span
-                        className="text-[15px] sm:text-[17px] font-semibold leading-tight"
-                        style={{
-                          color: isSelected ? '#1a1b1f' : '#9ca3af',
-                          transition: 'color 220ms ease',
-                        }}
+                        className="text-[13px] font-semibold leading-tight"
+                        style={{ color: isSelected ? '#1a1b1f' : '#9ca3af', transition: 'color 220ms ease' }}
                       >
                         {f.label}
                       </span>
                       {count !== null && (
                         <span
-                          className="text-[12px] leading-tight"
+                          className="text-[11px] font-semibold tabular-nums leading-tight"
                           style={{
                             color: isSelected
                               ? f.value === 'generic' ? '#006e28' : '#0058bc'
                               : '#c1c6d7',
-                            fontWeight: isSelected ? 600 : 400,
                             transition: 'color 220ms ease',
                           }}
                         >
-                          {count} disponibles
+                          {count}
                         </span>
                       )}
                     </button>
                   )
                 })}
               </div>
+              {savingsPct !== null && (
+                <p className="text-[11px] text-[#717786] mt-1.5 px-1 leading-snug">
+                  El genérico puede ser hasta <span className="font-semibold text-secondary">{savingsPct}%</span> más barato con el mismo principio activo.
+                </p>
+              )}
             </div>
 
             {/* ── Filtros (colapsables: presentacion, concentracion, cantidad) ── */}
