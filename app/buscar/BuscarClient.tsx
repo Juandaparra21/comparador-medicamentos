@@ -66,6 +66,7 @@ export default function BuscarClient() {
     setPresentFilter('')
     setQtyFilter(null)
     setViewMode('grouped')
+    setNearbyOnly(false)
     const controller = new AbortController()
     fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
       .then((r) => {
@@ -89,8 +90,19 @@ export default function BuscarClient() {
   }, [q, reloadKey])
 
   const { distances, stores, loading: locLoading, error: locError, hasDistances, request: requestLoc, searchByPlace: searchByAddress, clear: clearLoc } = useNearbyPharmacies()
-  const [showAddr, setShowAddr] = useState(false)
-  const [addr,     setAddr]     = useState('')
+  const [showAddr,   setShowAddr]   = useState(false)
+  const [addr,       setAddr]       = useState('')
+  const [nearbyOnly, setNearbyOnly] = useState(false)
+
+  // Filtrar por cercania: mostrar solo cadenas con una sede fisica dentro del radio
+  // cercano. Al activarlo, tambien ordena por cercania para que sea coherente.
+  function toggleNearbyOnly() {
+    setNearbyOnly((v) => {
+      const next = !v
+      if (next) setSortKey('nearest')
+      return next
+    })
+  }
 
   function submitAddress(e: React.FormEvent) {
     e.preventDefault()
@@ -124,7 +136,12 @@ export default function BuscarClient() {
   const concentrationsAsc = [...concentrations].sort((a, b) => (parseFloat(a) || 0) - (parseFloat(b) || 0))
   const quantitiesAsc     = [...quantities].sort((a, b) => a - b)
 
-  const filtered = qtyFilter ? afterConc.filter(r => r.quantity === qtyFilter) : afterConc
+  const qtyFiltered = qtyFilter ? afterConc.filter(r => r.quantity === qtyFilter) : afterConc
+  // Filtro por cercania: solo farmacias con sede fisica dentro del radio cercano
+  // (las que el lookup de OSM devolvio; por eso estan en `distances`).
+  const filtered = nearbyOnly && hasDistances
+    ? qtyFiltered.filter(r => r.pharmacy in distances)
+    : qtyFiltered
 
   // Setters that auto-reset downstream filters to prevent impossible combinations
   function changePresentation(v: string) {
@@ -461,6 +478,24 @@ export default function BuscarClient() {
                   </svg>
                   {locLoading ? 'Buscando...' : hasDistances ? 'Ubicacion activa' : 'Mas cercano'}
                 </button>
+                {/* Filtro: solo cadenas con sede fisica cerca (aparece con ubicacion activa) */}
+                {hasDistances && (
+                  <button
+                    onClick={toggleNearbyOnly}
+                    className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+                      nearbyOnly
+                        ? 'bg-secondary/10 text-secondary border-secondary/30'
+                        : 'bg-white/70 text-[#717786] border-[#c1c6d7]/60 hover:text-primary hover:border-primary/30'
+                    }`}
+                    aria-pressed={nearbyOnly}
+                    title="Mostrar solo farmacias con una sede fisica cerca de ti"
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                    </svg>
+                    Solo cercanas
+                  </button>
+                )}
                 {/* Address input toggle — alternative to GPS */}
                 <button
                   onClick={() => setShowAddr((v) => !v)}
@@ -522,6 +557,21 @@ export default function BuscarClient() {
                   <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.515 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                 </svg>
                 <p className="text-[12px] text-amber-800 leading-snug">{locError}</p>
+              </div>
+            )}
+
+            {/* Aclaracion de stock: la cercania es la sede mas proxima de cada cadena,
+                pero aun no reflejamos el inventario real de cada drogueria fisica. */}
+            {hasDistances && (
+              <div className="flex items-start gap-2 mb-4 px-3.5 py-2.5 rounded-xl bg-primary/[0.06] border border-primary/15" role="note">
+                <svg className="w-4 h-4 text-primary shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
+                </svg>
+                <p className="text-[12px] text-[#414755] leading-snug">
+                  La cercania muestra la sede mas proxima de cada cadena. Por ahora no reflejamos
+                  el inventario real de cada drogueria fisica: estamos en ese proceso. Los precios
+                  vienen del catalogo en linea de cada cadena; confirma la disponibilidad en la sede antes de ir.
+                </p>
               </div>
             )}
 
@@ -625,7 +675,7 @@ export default function BuscarClient() {
                   Sin resultados para los filtros seleccionados
                 </p>
                 <button
-                  onClick={() => { setTypeFilter('all'); setPresentFilter(''); setConcFilter(''); setQtyFilter(null) }}
+                  onClick={() => { setTypeFilter('all'); setPresentFilter(''); setConcFilter(''); setQtyFilter(null); setNearbyOnly(false) }}
                   className="text-[13px] text-primary font-semibold hover:opacity-75 transition-opacity cursor-pointer"
                 >
                   Limpiar filtros
