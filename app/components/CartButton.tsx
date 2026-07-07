@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { PharmacyResult } from '@/app/types'
 import { useAuth } from '@/app/context/AuthContext'
-import { addToCart, removeFromCart, isInCart, CART_EVENT } from '@/app/utils/cart'
+import { addToCartDB, removeFromCartDB, isInCartDB, CART_EVENT } from '@/app/utils/cart'
 
 interface Props { result: PharmacyResult }
 
@@ -12,21 +12,15 @@ export function CartButton({ result }: Props) {
   const { user }  = useAuth()
   const router    = useRouter()
   const [inCart,    setInCart]    = useState(false)
+  const [pending,   setPending]   = useState(false)
   const [showHint,  setShowHint]  = useState(false)
 
   useEffect(() => {
     if (!user) { setInCart(false); return }
-    function sync() { setInCart(isInCart(result.id)) }
-    sync()
-    window.addEventListener(CART_EVENT(), sync)
-    window.addEventListener('storage', sync)
-    return () => {
-      window.removeEventListener(CART_EVENT(), sync)
-      window.removeEventListener('storage', sync)
-    }
+    isInCartDB(result.id).then(setInCart)
   }, [result.id, user])
 
-  function toggle(e: React.MouseEvent) {
+  async function toggle(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
 
@@ -36,21 +30,27 @@ export function CartButton({ result }: Props) {
       return
     }
 
+    if (pending) return
+    setPending(true)
     if (inCart) {
-      removeFromCart(result.id)
+      await removeFromCartDB(result.id)
+      setInCart(false)
     } else {
-      addToCart(result)
+      await addToCartDB(result)
+      setInCart(true)
     }
-    setInCart(!inCart)
+    window.dispatchEvent(new Event(CART_EVENT()))
+    setPending(false)
   }
 
   return (
     <div className="relative shrink-0">
       <button
         onClick={toggle}
+        disabled={pending}
         aria-label={inCart ? 'Quitar del carrito' : 'Agregar al carrito'}
         title={inCart ? 'Quitar del carrito' : 'Agregar al carrito'}
-        className={`w-8 h-8 flex items-center justify-center rounded-full transition-all cursor-pointer ${
+        className={`w-8 h-8 flex items-center justify-center rounded-full transition-all cursor-pointer disabled:opacity-50 ${
           inCart
             ? 'text-secondary bg-secondary/10'
             : 'text-[#c1c6d7] hover:text-secondary hover:bg-secondary/10'

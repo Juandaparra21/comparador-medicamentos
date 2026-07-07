@@ -1,14 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { getCart, CART_EVENT } from '@/app/utils/cart'
+import { useAuth } from '@/app/context/AuthContext'
+import { getCartDB, CART_EVENT } from '@/app/utils/cart'
 
 export function CartNav() {
+  const { user } = useAuth()
   const [count, setCount] = useState(0)
+  const userRef = useRef(user)
+  userRef.current = user
 
   useEffect(() => {
-    function refresh() { setCount(getCart().length) }
+    async function refresh() {
+      if (userRef.current) {
+        const items = await getCartDB()
+        setCount(items.length)
+      } else {
+        setCount(0)
+      }
+    }
+
     refresh()
     window.addEventListener(CART_EVENT(), refresh)
     window.addEventListener('storage', refresh)
@@ -16,7 +28,7 @@ export function CartNav() {
       window.removeEventListener(CART_EVENT(), refresh)
       window.removeEventListener('storage', refresh)
     }
-  }, [])
+  }, [user])
 
   return (
     <Link

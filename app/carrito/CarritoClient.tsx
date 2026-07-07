@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { CartItem } from '@/app/utils/cart'
-import { getCart, removeFromCart, CART_EVENT } from '@/app/utils/cart'
+import { getCartDB, removeFromCartDB, CART_EVENT } from '@/app/utils/cart'
+import { useAuth } from '@/app/context/AuthContext'
 import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { MedicationImage } from '@/app/components/MedicationImage'
@@ -21,29 +22,79 @@ function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: st
 }
 
 export default function CarritoClient() {
-  const [items, setItems] = useState<CartItem[]>([])
-  const [mounted, setMounted] = useState(false)
+  const { user, loading: authLoading } = useAuth()
+  const [items,     setItems]     = useState<CartItem[]>([])
+  const [dbLoading, setDbLoading] = useState(false)
+  const [mounted,   setMounted]   = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
-    if (!mounted) return
-    function refresh() { setItems(getCart()) }
-    refresh()
+    if (!mounted || authLoading) return
+    if (user) {
+      setDbLoading(true)
+      getCartDB().then(setItems).finally(() => setDbLoading(false))
+    } else {
+      setItems([])
+    }
+  }, [user, authLoading, mounted])
+
+  useEffect(() => {
+    if (!mounted || !user) return
+    function refresh() { getCartDB().then(setItems) }
     window.addEventListener(CART_EVENT(), refresh)
     window.addEventListener('storage', refresh)
     return () => {
       window.removeEventListener(CART_EVENT(), refresh)
       window.removeEventListener('storage', refresh)
     }
-  }, [mounted])
+  }, [mounted, user])
 
-  function remove(id: string) {
-    removeFromCart(id)
+  async function remove(id: string) {
+    if (user) await removeFromCartDB(id)
     setItems(prev => prev.filter(i => i.id !== id))
   }
 
-  if (!mounted) return null
+  if (!mounted || authLoading) return null
+
+  // Not logged in
+  if (!user) {
+    return (
+      <section className="mx-auto px-4 sm:px-5 max-w-lg pt-16 pb-16 flex flex-col items-center text-center gap-5">
+        <div className="w-16 h-16 rounded-2xl bg-white/70 backdrop-blur-[20px] border border-white/50 flex items-center justify-center">
+          <svg className="w-8 h-8 text-[#c1c6d7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 01-8 0" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-[18px] font-bold text-[#1a1b1f] mb-1">Necesitas una cuenta</p>
+          <p className="text-[13px] text-[#717786]">
+            Crea una cuenta gratuita para guardar tu carrito y acceder a el desde cualquier dispositivo.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Link href="/register"
+            className="px-5 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[14px] font-semibold rounded-xl hover:opacity-90 transition-opacity">
+            Crear cuenta
+          </Link>
+          <Link href="/login"
+            className="px-5 py-2.5 bg-white/70 border border-white/50 text-[#414755] text-[14px] font-semibold rounded-xl hover:bg-white/90 transition-all">
+            Iniciar sesion
+          </Link>
+        </div>
+      </section>
+    )
+  }
+
+  if (dbLoading) {
+    return (
+      <div className="mx-auto px-4 sm:px-5 max-w-5xl pt-16 flex justify-center">
+        <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    )
+  }
 
   const total = items.reduce((s, i) => s + i.price, 0)
 
