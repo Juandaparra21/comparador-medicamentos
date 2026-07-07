@@ -14,6 +14,7 @@ export function CartButton({ result }: Props) {
   const [inCart,    setInCart]    = useState(false)
   const [pending,   setPending]   = useState(false)
   const [showHint,  setShowHint]  = useState(false)
+  const [errMsg,    setErrMsg]    = useState('')
 
   useEffect(() => {
     if (!user) { setInCart(false); return }
@@ -32,11 +33,18 @@ export function CartButton({ result }: Props) {
 
     if (pending) return
     setPending(true)
+    setErrMsg('')
     if (inCart) {
       await removeFromCartDB(result.id)
       setInCart(false)
     } else {
-      await addToCartDB(result)
+      const err = await addToCartDB(result)
+      if (err) {
+        setErrMsg(err)
+        setTimeout(() => setErrMsg(''), 6000)
+        setPending(false)
+        return
+      }
       setInCart(true)
     }
     window.dispatchEvent(new Event(CART_EVENT()))
@@ -75,6 +83,15 @@ export function CartButton({ result }: Props) {
             </button>
           </div>
           <div className="absolute top-full right-3 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#1a1b1f]" />
+        </div>
+      )}
+
+      {errMsg && (
+        <div className="absolute bottom-full right-0 mb-2 z-50 animate-in fade-in slide-in-from-bottom-1 duration-150">
+          <div className="bg-red-600 text-white text-[11px] font-semibold px-3 py-2 rounded-xl max-w-[240px] shadow-lg">
+            No se pudo guardar: {errMsg}
+          </div>
+          <div className="absolute top-full right-3 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-red-600" />
         </div>
       )}
     </div>

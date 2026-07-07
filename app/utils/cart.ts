@@ -70,13 +70,13 @@ export async function getCartDB(): Promise<CartItem[]> {
   }))
 }
 
-export async function addToCartDB(result: PharmacyResult): Promise<void> {
-  if (!isBrowserClientAvailable()) return
+export async function addToCartDB(result: PharmacyResult): Promise<string | null> {
+  if (!isBrowserClientAvailable()) return 'Sesion no disponible.'
   const sb = await getBrowserClient()
   const { data: { user } } = await sb.auth.getUser()
-  if (!user) return
+  if (!user) return 'No hay sesion activa. Inicia sesion de nuevo.'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (sb.from('carts') as any).upsert({
+  const { error } = await (sb.from('carts') as any).upsert({
     user_id:           user.id,
     product_id:        result.id,
     product_name:      result.productName,
@@ -89,6 +89,11 @@ export async function addToCartDB(result: PharmacyResult): Promise<void> {
     url:               result.url,
     image_url:         result.imageUrl ?? null,
   }, { onConflict: 'user_id,product_id' })
+  if (error) {
+    console.error('[addToCartDB]', error.message, error)
+    return error.message
+  }
+  return null
 }
 
 export async function removeFromCartDB(productId: string): Promise<void> {
