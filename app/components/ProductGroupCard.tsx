@@ -45,21 +45,23 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
       {/* Thumbnail */}
       <GroupThumbnail imageUrl={group.imageUrl} ingredient={group.activeIngredient} />
 
-      {/* Savings badge */}
-      {savings > 1000 && (
-        <span className="absolute top-2 left-2 bg-secondary text-white text-[12px] font-black px-2.5 py-1 rounded-lg shadow-sm z-10">
-          Ahorras {formatCOP(savings)}{savingsPct >= 5 ? ` (${savingsPct}%)` : ''}
-        </span>
-      )}
-
-      {/* "en X farmacias" badge */}
-      {hasMany && (
-        <span className="absolute top-2 right-2 text-[9px] font-bold bg-primary/90 text-white px-2 py-0.5 rounded-full z-10 whitespace-nowrap">
-          {avail.length} farmacias
-        </span>
-      )}
-
       <div className="flex flex-col gap-3 p-4 flex-1">
+
+        {/* Badges: ahorro + numero de farmacias (fila propia, no encima de la imagen) */}
+        {(savings > 1000 || hasMany) && (
+          <div className="flex items-center justify-between gap-2">
+            {savings > 1000 ? (
+              <span className="bg-secondary text-white text-[11px] font-black px-2.5 py-1 rounded-lg whitespace-nowrap">
+                Ahorras {formatCOP(savings)}{savingsPct >= 5 ? ` (${savingsPct}%)` : ''}
+              </span>
+            ) : <span />}
+            {hasMany && (
+              <span className="shrink-0 text-[9px] font-bold bg-primary/90 text-white px-2 py-0.5 rounded-full whitespace-nowrap">
+                {avail.length} farmacias
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Product info header */}
         <div className="flex items-start gap-2 flex-wrap">
