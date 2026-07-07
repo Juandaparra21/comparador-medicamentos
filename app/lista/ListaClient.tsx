@@ -5,7 +5,7 @@ import Link from 'next/link'
 import type { WishlistItem } from '@/app/types'
 import { useAuth } from '@/app/context/AuthContext'
 import {
-  getWishlistDB, removeFromWishlistDB,
+  getWishlistDB, removeFromWishlistDB, WISHLIST_EVENT,
 } from '@/app/utils/wishlist'
 import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
@@ -52,6 +52,7 @@ export default function ListaClient() {
   async function remove(id: string) {
     if (user) await removeFromWishlistDB(id)
     setItems(prev => prev.filter(i => i.id !== id))
+    window.dispatchEvent(new Event(WISHLIST_EVENT()))
   }
 
   if (!mounted || authLoading) return null

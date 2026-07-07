@@ -53,6 +53,7 @@ export default function CarritoClient() {
   async function remove(id: string) {
     if (user) await removeFromCartDB(id)
     setItems(prev => prev.filter(i => i.id !== id))
+    window.dispatchEvent(new Event(CART_EVENT()))
   }
 
   if (!mounted || authLoading) return null
