@@ -67,6 +67,7 @@ export default function BuscarClient() {
     setQtyFilter(null)
     setViewMode('grouped')
     setNearbyOnly(false)
+    setShowFilters(false)
     const controller = new AbortController()
     fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal })
       .then((r) => {
@@ -90,9 +91,10 @@ export default function BuscarClient() {
   }, [q, reloadKey])
 
   const { distances, stores, loading: locLoading, error: locError, hasDistances, request: requestLoc, searchByPlace: searchByAddress, clear: clearLoc } = useNearbyPharmacies()
-  const [showAddr,   setShowAddr]   = useState(false)
-  const [addr,       setAddr]       = useState('')
-  const [nearbyOnly, setNearbyOnly] = useState(false)
+  const [showAddr,    setShowAddr]    = useState(false)
+  const [addr,        setAddr]        = useState('')
+  const [nearbyOnly,  setNearbyOnly]  = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
 
   // Filtrar por cercania: mostrar solo cadenas con una sede fisica dentro del radio
   // cercano. Al activarlo, tambien ordena por cercania para que sea coherente.
@@ -148,6 +150,14 @@ export default function BuscarClient() {
     ? new Set(qtyFiltered.filter(r => r.pharmacy in distances).map(r => r.pharmacy)).size
     : 0
   const totalPharmacyCount = new Set(qtyFiltered.map(r => r.pharmacy)).size
+
+  // Resumen de los filtros activos (para el encabezado del panel colapsable).
+  const activeFilterChips = [
+    presentFilter,
+    concFilter,
+    qtyFilter ? formatQuantity(qtyFilter, presentFilter) : '',
+  ].filter(Boolean)
+  const filterSummary = activeFilterChips.length ? activeFilterChips.join(' · ') : 'Todas las opciones'
 
   // Setters that auto-reset downstream filters to prevent impossible combinations
   function changePresentation(v: string) {
@@ -370,41 +380,75 @@ export default function BuscarClient() {
               </div>
             </div>
 
-            {/* ── Filtros ── */}
+            {/* ── Filtros (colapsables: presentacion, concentracion, cantidad) ── */}
             {(presentations.length > 1 || concentrations.length > 1 || quantities.length > 1) && (
-              <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm divide-y divide-[#f0f1f5]">
-                {presentations.length > 1 && (
-                  <div className="p-5">
-                    <RadioFilter
-                      label="Presentacion"
-                      allLabel="Todas"
-                      active={presentFilter}
-                      options={presentations}
-                      onChange={changePresentation}
-                    />
+              <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm overflow-hidden">
+                <button
+                  onClick={() => setShowFilters((v) => !v)}
+                  aria-expanded={showFilters}
+                  className="w-full flex items-center justify-between gap-3 p-4 cursor-pointer hover:bg-white/40 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <svg className="w-5 h-5 text-primary shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 01.628.74v2.288a2.25 2.25 0 01-.659 1.59l-4.682 4.683a2.25 2.25 0 00-.659 1.59v3.037c0 .684-.31 1.33-.844 1.757l-1.937 1.55A.75.75 0 018 20.25v-7.087a2.25 2.25 0 00-.659-1.591L2.659 6.22A2.25 2.25 0 012 4.629V2.34a.75.75 0 01.628-.74z" clipRule="evenodd" />
+                    </svg>
+                    <div className="min-w-0 text-left">
+                      <p className="text-[14px] font-bold text-[#1a1b1f] leading-snug">Filtros</p>
+                      <p className="text-[12px] text-[#717786] truncate">{filterSummary}</p>
+                    </div>
                   </div>
-                )}
-                {concentrations.length > 1 && (
-                  <div className="p-5">
-                    <RadioFilter
-                      label="Concentracion"
-                      allLabel="Todas"
-                      active={concFilter}
-                      options={concentrationsAsc}
-                      highlight={mostCommonConc}
-                      onChange={changeConcentration}
-                    />
+                  <div className="flex items-center gap-2 shrink-0">
+                    {activeFilterChips.length > 0 && (
+                      <span className="text-[11px] font-bold text-primary bg-primary/10 rounded-full px-2 py-0.5 tabular-nums">
+                        {activeFilterChips.length}
+                      </span>
+                    )}
+                    <svg
+                      className="w-4 h-4 text-[#9ca3af] transition-transform duration-200"
+                      style={{ transform: showFilters ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                      viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"
+                    >
+                      <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                    </svg>
                   </div>
-                )}
-                {quantities.length > 1 && (
-                  <div className="p-5">
-                    <QuantitySlider
-                      title={isLiquidFilter ? 'Volumen' : 'Cantidad'}
-                      values={quantitiesAsc}
-                      active={qtyFilter}
-                      unitLabel={quantityUnit(presentFilter)}
-                      onChange={setQtyFilter}
-                    />
+                </button>
+
+                {showFilters && (
+                  <div className="divide-y divide-[#f0f1f5] border-t border-[#f0f1f5]">
+                    {presentations.length > 1 && (
+                      <div className="p-5">
+                        <RadioFilter
+                          label="Presentacion"
+                          allLabel="Todas"
+                          active={presentFilter}
+                          options={presentations}
+                          onChange={changePresentation}
+                        />
+                      </div>
+                    )}
+                    {concentrations.length > 1 && (
+                      <div className="p-5">
+                        <RadioFilter
+                          label="Concentracion"
+                          allLabel="Todas"
+                          active={concFilter}
+                          options={concentrationsAsc}
+                          highlight={mostCommonConc}
+                          onChange={changeConcentration}
+                        />
+                      </div>
+                    )}
+                    {quantities.length > 1 && (
+                      <div className="p-5">
+                        <QuantitySlider
+                          title={isLiquidFilter ? 'Volumen' : 'Cantidad'}
+                          values={quantitiesAsc}
+                          active={qtyFilter}
+                          unitLabel={quantityUnit(presentFilter)}
+                          onChange={setQtyFilter}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
