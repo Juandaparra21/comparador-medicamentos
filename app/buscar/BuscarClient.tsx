@@ -14,6 +14,7 @@ import ResultCard from '@/app/components/ResultCard'
 import { ProductGroupCard } from '@/app/components/ProductGroupCard'
 import { RadioFilter, QuantitySlider } from '@/app/components/FilterControls'
 import { PriceTracker } from '@/app/components/PriceTracker'
+import { AddressAutocomplete } from '@/app/components/AddressAutocomplete'
 import { PriceAlert } from '@/app/components/PriceAlert'
 import { ShareComparison } from '@/app/components/ShareComparison'
 import { RelativeTime } from '@/app/components/RelativeTime'
@@ -90,9 +91,7 @@ export default function BuscarClient() {
     return () => controller.abort()
   }, [q, reloadKey])
 
-  const { distances, stores, loading: locLoading, error: locError, hasDistances, request: requestLoc, searchByPlace: searchByAddress, clear: clearLoc } = useNearbyPharmacies()
-  const [showAddr,    setShowAddr]    = useState(false)
-  const [addr,        setAddr]        = useState('')
+  const { distances, stores, loading: locLoading, error: locError, hasDistances, request: requestLoc, searchByCoords, clear: clearLoc } = useNearbyPharmacies()
   const [nearbyOnly,  setNearbyOnly]  = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
@@ -104,13 +103,6 @@ export default function BuscarClient() {
       if (next) setSortKey('nearest')
       return next
     })
-  }
-
-  function submitAddress(e: React.FormEvent) {
-    e.preventDefault()
-    if (!addr.trim()) return
-    searchByAddress(addr)
-    setShowAddr(false)
   }
 
   // Cascading filter options: each layer's options come from results that pass all *other* active filters.
@@ -348,6 +340,111 @@ export default function BuscarClient() {
               )}
             </div>
 
+            {/* ── Ubicación: detectar GPS o escribir dirección + filtro por cercanía ── */}
+            <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm p-4 sm:p-5">
+              {!hasDistances ? (
+                <div className="flex items-start gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-secondary/12 flex items-center justify-center shrink-0">
+                    <svg className="w-6 h-6 text-secondary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] sm:text-[16px] font-bold text-[#1a1b1f]">¿Dónde estás?</p>
+                    <p className="text-[12px] sm:text-[13px] text-[#717786] mt-0.5 leading-relaxed">
+                      Detecta tu ubicación o escribe tu dirección para ver qué farmacias tienen sede cerca y filtrar por cercanía.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                      <button
+                        onClick={requestLoc}
+                        disabled={locLoading}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[13px] font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-opacity cursor-pointer shrink-0 shadow-[0_4px_16px_rgba(0,88,188,0.20)]"
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                        </svg>
+                        {locLoading ? 'Buscando...' : 'Usar mi ubicación'}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <AddressAutocomplete
+                          onSelect={(s) => searchByCoords(s.lat, s.lng)}
+                          placeholder="o escribe tu dirección o barrio"
+                          disabled={locLoading}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-secondary/12 flex items-center justify-center shrink-0">
+                        <svg className="w-5 h-5 text-secondary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <p className="text-[15px] font-bold text-[#1a1b1f] truncate">Farmacias cerca de ti</p>
+                    </div>
+                    <button
+                      onClick={() => { clearLoc(); setNearbyOnly(false) }}
+                      className="text-[12px] font-semibold text-[#717786] hover:text-primary transition-colors shrink-0 cursor-pointer"
+                    >
+                      Cambiar
+                    </button>
+                  </div>
+
+                  {/* Interruptor: filtrar solo cercanas */}
+                  <button
+                    onClick={toggleNearbyOnly}
+                    role="switch"
+                    aria-checked={nearbyOnly}
+                    className="w-full flex items-center justify-between gap-3 rounded-xl border border-[#e5e7eb] p-3 text-left cursor-pointer hover:bg-white/40 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-bold text-[#1a1b1f] leading-snug">
+                        Mostrar solo farmacias cerca de mí
+                      </p>
+                      <p className="text-[12px] text-[#717786] mt-0.5">
+                        {nearbyPharmacyCount > 0
+                          ? `${nearbyPharmacyCount} de ${totalPharmacyCount} con sede a menos de 2 km`
+                          : 'No hay sedes de estas cadenas a menos de 2 km de ti'}
+                      </p>
+                    </div>
+                    <span
+                      className={`relative shrink-0 w-[46px] h-[26px] rounded-full transition-colors duration-200 ${
+                        nearbyOnly ? 'bg-secondary' : 'bg-[#d1d5db]'
+                      }`}
+                      aria-hidden="true"
+                    >
+                      <span
+                        className="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-200"
+                        style={{ transform: nearbyOnly ? 'translateX(20px)' : 'translateX(0)' }}
+                      />
+                    </span>
+                  </button>
+
+                  {/* Aclaración de stock */}
+                  <div className="flex items-start gap-2 mt-2.5 px-3 py-2.5 bg-primary/[0.05] border border-primary/10 rounded-xl" role="note">
+                    <svg className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-[11px] text-[#414755] leading-snug">
+                      La cercanía es la sede más próxima de cada cadena. Aún no reflejamos el inventario
+                      real de cada droguería física: estamos en ese proceso. Confirma la disponibilidad
+                      en la sede antes de ir.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {locError && !locLoading && (
+                <p className="mt-3 text-[12px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2" role="status">
+                  {locError}
+                </p>
+              )}
+            </div>
+
             {/* ── Filtros (colapsables: presentacion, concentracion, cantidad) ── */}
             {(presentations.length > 1 || concentrations.length > 1 || quantities.length > 1) && (
               <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm overflow-hidden">
@@ -480,38 +577,6 @@ export default function BuscarClient() {
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                {/* Location button */}
-                <button
-                  onClick={hasDistances ? clearLoc : requestLoc}
-                  disabled={locLoading}
-                  className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-50 ${
-                    hasDistances
-                      ? 'bg-secondary/10 text-secondary border-secondary/30'
-                      : 'bg-white/70 text-[#717786] border-[#c1c6d7]/60 hover:text-primary hover:border-primary/30'
-                  }`}
-                  title={locError ?? undefined}
-                >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-                  </svg>
-                  {locLoading ? 'Buscando...' : hasDistances ? 'Ubicacion activa' : 'Mas cercano'}
-                </button>
-                {/* Address input toggle — alternative to GPS */}
-                <button
-                  onClick={() => setShowAddr((v) => !v)}
-                  className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
-                    showAddr
-                      ? 'bg-primary/10 text-primary border-primary/30'
-                      : 'bg-white/70 text-[#717786] border-[#c1c6d7]/60 hover:text-primary hover:border-primary/30'
-                  }`}
-                  aria-expanded={showAddr}
-                  title="Escribir una direccion o ciudad"
-                >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
-                  </svg>
-                  Direccion
-                </button>
                 <label htmlFor="sort" className="text-[11px] font-semibold tracking-[0.05em] uppercase text-[#717786] whitespace-nowrap">
                   Ordenar
                 </label>
@@ -527,92 +592,6 @@ export default function BuscarClient() {
                 </select>
               </div>
             </div>
-
-            {/* Address input — geocode a typed address/city instead of GPS */}
-            {showAddr && (
-              <form onSubmit={submitAddress} className="flex items-stretch gap-2 mb-4">
-                <input
-                  type="text"
-                  value={addr}
-                  onChange={(e) => setAddr(e.target.value)}
-                  placeholder="Escribe tu direccion, barrio o ciudad (ej: Calle 80 #20-30, Bogota)"
-                  aria-label="Direccion o ciudad"
-                  autoFocus
-                  className="flex-1 px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
-                />
-                <button
-                  type="submit"
-                  disabled={!addr.trim() || locLoading}
-                  className="px-4 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer whitespace-nowrap"
-                >
-                  {locLoading ? 'Buscando...' : 'Usar direccion'}
-                </button>
-              </form>
-            )}
-
-            {/* Aviso de geolocalizacion (permiso denegado / sin farmacias cercanas) */}
-            {locError && !locLoading && (
-              <div className="flex items-start gap-2 mb-4 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200" role="status">
-                <svg className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.515 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                </svg>
-                <p className="text-[12px] text-amber-800 leading-snug">{locError}</p>
-              </div>
-            )}
-
-            {/* Filtro por ubicacion explicito: interruptor grande + contador + aclaracion
-                de stock. Aparece cuando la ubicacion esta activa. */}
-            {hasDistances && (
-              <div className="mb-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm overflow-hidden">
-                <button
-                  onClick={toggleNearbyOnly}
-                  role="switch"
-                  aria-checked={nearbyOnly}
-                  className="w-full flex items-center justify-between gap-3 p-4 text-left cursor-pointer hover:bg-white/40 transition-colors"
-                >
-                  <div className="flex items-start gap-2.5 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-secondary/12 flex items-center justify-center shrink-0">
-                      <svg className="w-5 h-5 text-secondary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[14px] font-bold text-[#1a1b1f] leading-snug">
-                        Mostrar solo farmacias cerca de mi
-                      </p>
-                      <p className="text-[12px] text-[#717786] mt-0.5">
-                        {nearbyPharmacyCount > 0
-                          ? `${nearbyPharmacyCount} de ${totalPharmacyCount} con sede a menos de 2 km`
-                          : 'No hay sedes de estas cadenas a menos de 2 km de ti'}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Interruptor estilo iOS */}
-                  <span
-                    className={`relative shrink-0 w-[46px] h-[26px] rounded-full transition-colors duration-200 ${
-                      nearbyOnly ? 'bg-secondary' : 'bg-[#d1d5db]'
-                    }`}
-                    aria-hidden="true"
-                  >
-                    <span
-                      className="absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform duration-200"
-                      style={{ transform: nearbyOnly ? 'translateX(20px)' : 'translateX(0)' }}
-                    />
-                  </span>
-                </button>
-                {/* Aclaracion de stock */}
-                <div className="flex items-start gap-2 px-4 py-2.5 bg-primary/[0.05] border-t border-primary/10" role="note">
-                  <svg className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
-                  </svg>
-                  <p className="text-[11px] text-[#414755] leading-snug">
-                    La cercania es la sede mas proxima de cada cadena. Aun no reflejamos el inventario
-                    real de cada drogueria fisica: estamos en ese proceso. Confirma la disponibilidad
-                    en la sede antes de ir.
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Ahorro concreto, SOLO sobre el mismo producto exacto en 2+ farmacias */}
             {bestSaving && (

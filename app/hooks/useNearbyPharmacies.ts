@@ -95,6 +95,15 @@ export function useNearbyPharmacies() {
     setLoading(false)
   }
 
+  // Manual entry via the address autocomplete: it already returns coordinates,
+  // so we load nearby pharmacies straight from them (no re-geocoding needed).
+  async function searchByCoords(lat: number, lng: number) {
+    setLoading(true)
+    setError(null)
+    setPosition({ lat, lng })
+    await loadFrom(lat, lng)
+  }
+
   function clear() {
     setPosition(null)
     setStores({})
@@ -109,5 +118,5 @@ export function useNearbyPharmacies() {
 
   const hasDistances = Object.keys(stores).length > 0
 
-  return { position, distances, stores, loading, error, hasDistances, request, searchByPlace, clear }
+  return { position, distances, stores, loading, error, hasDistances, request, searchByPlace, searchByCoords, clear }
 }
