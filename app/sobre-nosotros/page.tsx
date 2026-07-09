@@ -63,8 +63,39 @@ export default function SobreNosotrosPage() {
         </p>
       </div>
 
+      {/* Fotos */}
+      <div className="grid grid-cols-2 gap-3 mb-10">
+        <img
+          src="/fotos/logo-farmi-celular.webp"
+          alt="Celular mostrando el logo de Farmi frente a una drogueria"
+          width={900}
+          height={1350}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-auto rounded-2xl border border-white/50 shadow-sm"
+        />
+        <img
+          src="/fotos/buscando-farmacias-cerca.webp"
+          alt="Persona usando Farmi en la calle para encontrar farmacias cercanas en el mapa"
+          width={900}
+          height={1350}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-auto rounded-2xl border border-white/50 shadow-sm"
+        />
+      </div>
+
       {/* Mision */}
       <div className="bg-primary/5 border border-primary/15 rounded-2xl p-5 sm:p-6 mb-8">
+        <img
+          src="/fotos/contando-monedas.webp"
+          alt="Persona contando monedas sobre una mesa junto a sus medicamentos"
+          width={900}
+          height={1350}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-44 sm:h-56 object-cover rounded-xl mb-4"
+        />
         <p className="text-[11px] font-bold tracking-widest uppercase text-primary mb-2">Nuestra mision</p>
         <p className="text-[15px] font-semibold text-[#1a1b1f] leading-relaxed">
           Hacer que el acceso a medicamentos asequibles sea simple, rapido y transparente para cualquier

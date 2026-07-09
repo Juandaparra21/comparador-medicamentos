@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# fotos originales de la sesion (~150MB; las versiones web viven en public/fotos)
+/fotos/
+
 # scraper debug/cache files (may contain API keys)
 scraper/debug_*.json
 scraper/__pycache__/

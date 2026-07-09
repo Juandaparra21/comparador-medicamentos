@@ -79,6 +79,17 @@ export function HowItWorks() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
       <SectionHeading title="Como funciona" subtitle="Encuentra el mejor precio en tres pasos." />
+      <div className={`${CARD} overflow-hidden mb-3 sm:mb-4`}>
+        <img
+          src="/fotos/tres-pasos.webp"
+          alt="Tres celulares mostrando los pasos de Farmi: buscar el medicamento, comparar precios y comprar en la farmacia"
+          width={1600}
+          height={1067}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-auto"
+        />
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {STEPS.map((s) => (
           <div key={s.n} className={`${CARD} p-5`}>
@@ -189,27 +200,78 @@ export function GenericVsBrand() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
       <SectionHeading title="Generico o de marca?" subtitle="Mismo efecto, distinto precio. Tu decides." />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        <div className={`${CARD} p-5`}>
-          <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/20 mb-3">
-            Generico
-          </span>
-          <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El mismo principio activo, mas barato</p>
-          <p className="text-[13px] text-[#6e6e73] leading-relaxed">
-            Tiene el mismo principio activo, dosis y forma que el de marca, y esta regulado por el INVIMA.
-            Suele costar entre 30% y 80% menos.
-          </p>
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.3fr] gap-3 sm:gap-4 items-stretch">
+        <div className={`${CARD} overflow-hidden max-w-xs mx-auto sm:max-w-none sm:mx-0`}>
+          <img
+            src="/fotos/comparacion-generico-marca.webp"
+            alt="Celular con Farmi comparando acetaminofen generico y de marca junto a una tableta de pastillas"
+            width={900}
+            height={1260}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover"
+          />
         </div>
-        <div className={`${CARD} p-5`}>
-          <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 mb-3">
-            Marca
-          </span>
-          <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El laboratorio que ya conoces</p>
-          <p className="text-[13px] text-[#6e6e73] leading-relaxed">
-            Es el producto original de un laboratorio reconocido. Cuesta mas, pero algunas personas
-            prefieren la marca de confianza. Farmi te muestra ambos para que compares.
-          </p>
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div className={`${CARD} p-5 flex-1`}>
+            <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/20 mb-3">
+              Generico
+            </span>
+            <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El mismo principio activo, mas barato</p>
+            <p className="text-[13px] text-[#6e6e73] leading-relaxed">
+              Tiene el mismo principio activo, dosis y forma que el de marca, y esta regulado por el INVIMA.
+              Suele costar entre 30% y 80% menos.
+            </p>
+          </div>
+          <div className={`${CARD} p-5 flex-1`}>
+            <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 mb-3">
+              Marca
+            </span>
+            <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El laboratorio que ya conoces</p>
+            <p className="text-[13px] text-[#6e6e73] leading-relaxed">
+              Es el producto original de un laboratorio reconocido. Cuesta mas, pero algunas personas
+              prefieren la marca de confianza. Farmi te muestra ambos para que compares.
+            </p>
+          </div>
         </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── App showcase (real search photos) ─────────────────────────────── */
+
+const SHOWCASE: { src: string; alt: string; label: string }[] = [
+  { src: '/fotos/busqueda-loratadina.webp',  alt: 'Farmi comparando precios de loratadina 10 mg entre farmacias',        label: 'Loratadina' },
+  { src: '/fotos/busqueda-suero.webp',       alt: 'Farmi mostrando el precio de suero rehidratante en varias farmacias', label: 'Suero rehidratante' },
+  { src: '/fotos/busqueda-vitamina-c.webp',  alt: 'Farmi comparando precios de vitamina C 500 mg',                       label: 'Vitamina C' },
+  { src: '/fotos/busqueda-condones.webp',    alt: 'Farmi comparando precios de condones entre farmacias',                label: 'Condones' },
+]
+
+export function AppShowcase() {
+  return (
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
+      <SectionHeading
+        title="Asi se ve Farmi"
+        subtitle="Busquedas reales: escribe el producto y compara el precio en las farmacias, en segundos."
+      />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {SHOWCASE.map((s) => (
+          <figure key={s.src} className={`${CARD} overflow-hidden`}>
+            <img
+              src={s.src}
+              alt={s.alt}
+              width={700}
+              height={875}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-auto"
+            />
+            <figcaption className="text-[12px] font-semibold text-[#414755] text-center py-2.5">
+              {s.label}
+            </figcaption>
+          </figure>
+        ))}
       </div>
     </section>
   )
@@ -251,22 +313,37 @@ export function HomeFaq() {
 export function HomeCta() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-28">
-      <div className="bg-gradient-to-br from-primary to-tertiary rounded-3xl shadow-sm p-10 sm:p-16 text-center">
-        <h2 className="text-[26px] sm:text-[40px] font-bold text-white tracking-[-0.02em] leading-tight">
-          Deja de pagar de mas por tus medicamentos
-        </h2>
-        <p className="text-[14px] sm:text-[15px] text-white/85 mt-2 max-w-xl mx-auto leading-relaxed">
-          Compara en segundos y encuentra el precio mas bajo entre las principales farmacias de Colombia.
-        </p>
-        <Link
-          href="/#search-input"
-          className="inline-flex items-center gap-2 mt-5 px-6 py-3 bg-white text-primary text-[15px] font-semibold rounded-xl hover:opacity-90 transition-opacity"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
-          </svg>
-          Buscar un medicamento
-        </Link>
+      <div className="bg-gradient-to-br from-primary to-tertiary rounded-3xl shadow-sm p-8 sm:p-14 overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 items-center">
+          <div className="text-center sm:text-left">
+            <h2 className="text-[26px] sm:text-[40px] font-bold text-white tracking-[-0.02em] leading-tight">
+              Deja de pagar de mas por tus medicamentos
+            </h2>
+            <p className="text-[14px] sm:text-[15px] text-white/85 mt-2 max-w-xl mx-auto sm:mx-0 leading-relaxed">
+              Compara en segundos y encuentra el precio mas bajo entre las principales farmacias de Colombia.
+            </p>
+            <Link
+              href="/#search-input"
+              className="inline-flex items-center gap-2 mt-5 px-6 py-3 bg-white text-primary text-[15px] font-semibold rounded-xl hover:opacity-90 transition-opacity"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+              </svg>
+              Buscar un medicamento
+            </Link>
+          </div>
+          <div className="max-w-[260px] sm:max-w-xs mx-auto w-full">
+            <img
+              src="/fotos/farmi-frente-drogueria.webp"
+              alt="Mano sosteniendo un celular con Farmi abierto frente a una drogueria en Colombia"
+              width={900}
+              height={1350}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-auto rounded-2xl shadow-lg ring-1 ring-white/20"
+            />
+          </div>
+        </div>
       </div>
     </section>
   )

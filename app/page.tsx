@@ -15,6 +15,7 @@ import {
   PharmacyStrip,
   PopularMeds,
   GenericVsBrand,
+  AppShowcase,
   HomeFaq,
   HomeCta,
 } from '@/app/components/HomeSections'
@@ -74,6 +75,7 @@ export default function Home() {
       </Suspense>
 
       <Reveal><HowItWorks /></Reveal>
+      <Reveal><AppShowcase /></Reveal>
       <Reveal><PharmacyStrip /></Reveal>
       <Reveal><PopularMeds /></Reveal>
       <Reveal><GenericVsBrand /></Reveal>
