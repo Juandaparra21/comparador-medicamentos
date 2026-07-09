@@ -16,20 +16,32 @@ export function NavAuth() {
     const name = (user.user_metadata?.full_name as string | undefined)?.split(' ')[0]
       ?? user.email?.split('@')[0]
       ?? 'Usuario'
+    const initial = name.charAt(0).toUpperCase()
 
     return (
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-1.5">
         <Link
           href="/lista"
-          className="hidden sm:flex items-center gap-1.5 text-[12px] font-semibold text-[#414755] hover:text-primary transition-colors"
+          title={`Hola, ${name}`}
+          className="flex items-center gap-2 pl-1 pr-1 sm:pr-2.5 py-1 rounded-full bg-white/70 border border-[#e5e7eb] hover:border-primary/40 hover:bg-white transition-colors"
         >
-          Hola, {name}
+          <span className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-tertiary text-white text-[12px] font-bold flex items-center justify-center shrink-0">
+            {initial}
+          </span>
+          <span className="hidden sm:block text-[12px] font-semibold text-[#414755] leading-none max-w-[90px] truncate">
+            <span className="text-[#9ca3af] font-medium">Hola,</span> {name}
+          </span>
         </Link>
         <button
           onClick={async () => { await signOut(); router.push('/') }}
-          className="text-[12px] font-semibold text-[#717786] hover:text-red-500 transition-colors cursor-pointer"
+          title="Cerrar sesión"
+          className="flex items-center gap-1.5 h-8 px-2 sm:px-2.5 rounded-full text-[#717786] hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+          aria-label="Salir"
         >
-          Salir
+          <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+          </svg>
+          <span className="hidden sm:inline text-[12px] font-semibold">Salir</span>
         </button>
       </div>
     )
