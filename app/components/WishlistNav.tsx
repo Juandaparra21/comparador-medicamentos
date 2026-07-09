@@ -34,21 +34,22 @@ export function WishlistNav() {
     <Link
       href="/lista"
       aria-label="Lista de deseos"
-      className="relative flex items-center text-[#717786] hover:text-primary transition-colors"
+      title="Lista de deseos"
+      className="relative flex items-center justify-center w-9 h-9 rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
     >
       <svg
-        className="w-[22px] h-[22px]"
+        className="w-[20px] h-[20px]"
         viewBox="0 0 24 24"
-        fill="none"
+        fill="currentColor"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
       {count > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center px-0.5">
+        <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-1 ring-2 ring-white">
           {count > 99 ? '99+' : count}
         </span>
       )}
