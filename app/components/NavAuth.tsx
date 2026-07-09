@@ -21,8 +21,8 @@ export function NavAuth() {
     return (
       <div className="flex items-center gap-1.5">
         <Link
-          href="/lista"
-          title={`Hola, ${name}`}
+          href="/cuenta"
+          title={`Mi cuenta · ${name}`}
           className="flex items-center gap-2 pl-1 pr-1 sm:pr-2.5 py-1 rounded-full bg-white/70 border border-[#e5e7eb] hover:border-primary/40 hover:bg-white transition-colors"
         >
           <span className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-tertiary text-white text-[12px] font-bold flex items-center justify-center shrink-0">
