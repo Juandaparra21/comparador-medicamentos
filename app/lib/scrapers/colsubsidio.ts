@@ -65,7 +65,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   return {
     pharmacyId:     'colsubsidio',
     productName:    name,
-    type:           classify(false, name),
+    type:           classify({ name }),
     activeIngredient: ingredient,
     concentration:  extractConcentration(name, presentation),
     presentation,

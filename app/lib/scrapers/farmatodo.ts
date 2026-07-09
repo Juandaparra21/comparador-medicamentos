@@ -83,7 +83,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   return {
     pharmacyId:       'farmatodo',
     productName:      name,
-    type:             classify(Boolean(hit.isGeneric || hit.generic), name),
+    type:             classify({ name, isGeneric: Boolean(hit.isGeneric || hit.generic) }),
     activeIngredient: ingredient,
     concentration:    extractConcentration(name, presentation),
     presentation,

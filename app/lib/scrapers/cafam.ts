@@ -51,7 +51,7 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   return {
     pharmacyId:       'cafam',
     productName:      name,
-    type:             classify(false, name),
+    type:             classify({ name }),
     activeIngredient: name.split(/\s/)[0] ?? '',
     concentration:    extractConcentration(name, presentation),
     presentation,

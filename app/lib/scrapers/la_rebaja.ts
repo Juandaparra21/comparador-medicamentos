@@ -71,14 +71,13 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     }
   }
 
-  const isRx = spec(p, 'Producto RX').toUpperCase() === 'SI'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const firstImage = (items[0] as any).images?.[0]?.imageUrl as string | undefined
 
   return {
     pharmacyId:     'la-rebaja',
     productName:    name,
-    type:           classify(!isRx, name),
+    type:           classify({ name }),
     activeIngredient: ingredient,
     concentration:  extractConcentration(name, presentation),
     presentation,

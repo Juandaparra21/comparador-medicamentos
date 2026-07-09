@@ -1,11 +1,18 @@
-// Vocabulary of common medications in Colombia (active ingredients + popular
-// brand names) used ONLY to power the "did you mean" spell corrector in search.
+// Vocabulary of common medications in Colombia used by the "did you mean" spell
+// corrector AND by the generic/brand classifier in the scrapers.
 // These are medication NAMES (reference data), never medical claims or advice.
 //
-// Stored lowercase with natural accents; the corrector strips accents itself for
-// comparison, and the UI capitalizes the first letter for display. Keep names as
-// people type/search them. Add more over time as the catalog grows.
-export const MEDICATION_TERMS: string[] = [
+// Stored lowercase with natural accents; consumers strip accents themselves for
+// comparison, and the UI capitalizes the first letter for display.
+//
+// Split in two on purpose:
+//   ACTIVE_INGREDIENTS — international names (INN). A product whose name starts
+//                        with one of these is sold under its generic name.
+//   POPULAR_BRANDS     — commercial brand names. Their presence marks "marca".
+// Keep them separate so the classifier can tell one from the other. Add more over
+// time as the catalog grows.
+
+export const ACTIVE_INGREDIENTS: string[] = [
   // ── Analgésicos / antiinflamatorios / fiebre ──
   'acetaminofén', 'paracetamol', 'ibuprofeno', 'naproxeno', 'diclofenaco',
   'aspirina', 'ácido acetilsalicílico', 'ketorolaco', 'ketoprofeno', 'dexketoprofeno',
@@ -59,9 +66,16 @@ export const MEDICATION_TERMS: string[] = [
   'vitamina c', 'ácido ascórbico', 'vitamina d', 'ácido fólico', 'complejo b',
   'sulfato ferroso', 'hierro', 'calcio', 'magnesio', 'zinc', 'omega 3',
   'sales de rehidratación',
-  // ── Marcas populares en Colombia ──
+]
+
+// Marcas comerciales populares en Colombia. Su presencia en el nombre indica "marca".
+export const POPULAR_BRANDS: string[] = [
   'dolex', 'winadol', 'noxpirin', 'sevedol', 'mejoral', 'advil', 'motrin',
   'apronax', 'flanax', 'voltaren', 'cataflam', 'buscapina', 'sal de frutas',
   'alka seltzer', 'milanta', 'zantac', 'clarityne', 'zyrtec', 'virlix', 'nasatapp',
   'histal', 'tabcin', 'vick vaporub', 'teraflu', 'dayvon', 'dolofen', 'acetamol',
 ]
+
+// Combined list for the spell corrector (search "did you mean"). Order preserved:
+// ingredients first, brands last — identical to the previous single list.
+export const MEDICATION_TERMS: string[] = [...ACTIVE_INGREDIENTS, ...POPULAR_BRANDS]

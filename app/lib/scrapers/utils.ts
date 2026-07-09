@@ -1,4 +1,5 @@
 import { VOLUME_PRESENTATIONS, ML_PER_ONZA } from '@/app/utils/units'
+import { ACTIVE_INGREDIENTS, POPULAR_BRANDS } from '@/app/utils/medicationVocabulary'
 
 export function normalize(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/\p{Mn}/gu, '')
@@ -178,17 +179,78 @@ export function extractPresentation(name: string): string {
   return ''
 }
 
-const GENERIC_HINTS = [
-  'genfar', ' mk', 'laproff', 'procaps', 'chalver',
+// ── Generic vs brand classification ──────────────────────────────────────────
+// Robust and data-driven. Combines several signals in priority order: explicit
+// pharmacy flag, the feed's brand field, known generic laboratories, known
+// commercial brands, and whether the product name starts with an international
+// active-ingredient name (INN). Generics are marketed under their INN
+// ("ACETAMINOFEN 500MG"); brands lead with a commercial word ("DOLEX 500MG").
+
+// Colombian laboratories that make generics/EQ. Their presence (in the product
+// name or the feed's brand field) marks the product as generic.
+const GENERIC_LABS = [
+  'genfar', 'mk', 'la sante', 'lasante', 'laproff', 'laprof', 'procaps', 'chalver',
   'bussie', 'coaspharma', 'tecnoquimicas', 'laboquimia', 'afidro', 'audifarma',
-  'memphis', 'colmed', 'colfarma', 'labder', 'recalcine',
+  'memphis', 'colmed', 'colfarma', 'labder', 'recalcine', 'american generics',
+  'americangenerics', 'humax', 'expofarma', 'ropsohn', 'vitalis', 'pharmayect',
+  'blaskov', 'siegfried', 'ecar', 'penta', 'closter', 'francol', 'genven',
 ]
 
-export function classify(isGeneric: boolean, name: string): 'generic' | 'brand' {
+// Whole-word matcher for a list of terms (accent-insensitive). Longer terms first
+// so multi-word entries ("la sante") win over any shorter overlap.
+function wordListRegex(terms: string[]): RegExp {
+  const alternatives = terms
+    .map((t) => normalize(t).trim())
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length)
+    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  return new RegExp(`\\b(?:${alternatives.join('|')})\\b`)
+}
+
+const GENERIC_LAB_RE = wordListRegex(GENERIC_LABS)
+const BRAND_RE       = wordListRegex(POPULAR_BRANDS)
+const INN_SORTED     = [...ACTIVE_INGREDIENTS].map((s) => normalize(s)).sort((a, b) => b.length - a.length)
+
+// True when the product name begins with a known active ingredient (INN), i.e. it
+// is sold under its international (generic) name rather than a commercial brand.
+function startsWithIngredient(n: string): boolean {
+  return INN_SORTED.some((ing) => n === ing || n.startsWith(`${ing} `))
+}
+
+export interface ClassifyInput {
+  name: string
+  /** Pharmacy feed explicitly says it is generic (most reliable when present). */
+  isGeneric?: boolean
+  /** Brand / manufacturer field from the feed, if any. */
+  brand?: string
+}
+
+export function classify(input: ClassifyInput): 'generic' | 'brand' {
+  const { name, isGeneric } = input
+  const n = normalize(name)
+  const brand = input.brand ? normalize(input.brand) : ''
+
+  // A registered-trademark mark denotes a commercial brand.
+  if (/[®™]/.test(name)) return 'brand'
+
+  // Explicit generic flag from the pharmacy feed — trust it first.
   if (isGeneric) return 'generic'
-  const lower = name.toLowerCase()
-  for (const hint of GENERIC_HINTS) {
-    if (lower.includes(hint)) return 'generic'
-  }
+
+  // Brand field points to a generic lab (or literally says "generico").
+  if (brand && (brand === 'generico' || GENERIC_LAB_RE.test(brand))) return 'generic'
+
+  // A known commercial brand name in the product name → marca.
+  if (BRAND_RE.test(n)) return 'brand'
+
+  // A generic laboratory named in the product name → generico.
+  if (GENERIC_LAB_RE.test(n)) return 'generic'
+
+  // The name literally says "generico".
+  if (/\bgeneric[oa]s?\b/.test(n)) return 'generic'
+
+  // The name starts with an international active-ingredient name → generico.
+  if (startsWithIngredient(n)) return 'generic'
+
+  // Nothing matched: default to brand (conservative, as before).
   return 'brand'
 }

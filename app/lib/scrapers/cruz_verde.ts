@@ -90,7 +90,7 @@ function mapHit(hit: Record<string, any>): ScrapedProduct | null {
   return {
     pharmacyId: 'cruz-verde',
     productName: name,
-    type: classify(false, name),
+    type: classify({ name, brand }),
     activeIngredient: extractIngredient(name, brand),
     concentration: extractConcentration(name, presentation),
     presentation,

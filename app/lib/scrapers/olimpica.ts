@@ -10,8 +10,6 @@ const BASE_HEADERS = {
   'Referer': 'https://www.olimpica.com/',
 }
 
-const GENERIC_BRANDS = new Set(['', 'GENERICO', 'MK', 'GENFAR', 'LAPROF', 'PROCAPS', 'COASPHARMA'])
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function spec(p: Record<string, any>, key: string): string {
   const values = p[key]
@@ -61,15 +59,14 @@ function mapProduct(p: Record<string, any>): ScrapedProduct | null {
     }
   }
 
-  const brand       = (String(p.brand ?? '')).trim().toUpperCase()
-  const isBrandName = Boolean(brand) && !GENERIC_BRANDS.has(brand)
+  const brand       = (String(p.brand ?? '')).trim()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const firstImage  = (items[0] as any).images?.[0]?.imageUrl as string | undefined
 
   return {
     pharmacyId:     'olimpica',
     productName:    name,
-    type:           classify(!isBrandName, name),
+    type:           classify({ name, brand }),
     activeIngredient: name.split(/\s/)[0] ?? '',
     concentration:  extractConcentration(name, presentation),
     presentation,
