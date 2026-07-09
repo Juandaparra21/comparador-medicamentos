@@ -94,7 +94,7 @@ export default function SobreNosotrosPage() {
           height={1350}
           loading="lazy"
           decoding="async"
-          className="w-full h-44 sm:h-56 object-cover rounded-xl mb-4"
+          className="w-full h-56 sm:h-64 object-cover object-[center_60%] rounded-xl mb-4"
         />
         <p className="text-[11px] font-bold tracking-widest uppercase text-primary mb-2">Nuestra misión</p>
         <p className="text-[15px] font-semibold text-[#1a1b1f] leading-relaxed">

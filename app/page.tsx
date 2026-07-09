@@ -16,6 +16,7 @@ import {
   PopularMeds,
   GenericVsBrand,
   AppShowcase,
+  CercanasPromo,
   MadeInColombia,
   HomeFaq,
   HomeCta,
@@ -79,6 +80,7 @@ export default function Home() {
       <Reveal><AppShowcase /></Reveal>
       <Reveal><PharmacyStrip /></Reveal>
       <Reveal><PopularMeds /></Reveal>
+      <Reveal><CercanasPromo /></Reveal>
       <Reveal><GenericVsBrand /></Reveal>
       <Reveal><MadeInColombia /></Reveal>
       <Reveal><HomeFaq /></Reveal>

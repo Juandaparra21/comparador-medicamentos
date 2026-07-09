@@ -107,7 +107,7 @@ export default function ContactoPage() {
           height={1165}
           loading="lazy"
           decoding="async"
-          className="w-full h-36 sm:h-44 object-cover object-[center_30%] rounded-xl mb-4"
+          className="w-full h-56 sm:h-64 object-cover object-[center_55%] rounded-xl mb-4"
         />
         <h2 className="text-[14px] font-bold text-primary mb-2">Reportar un precio incorrecto</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-3">

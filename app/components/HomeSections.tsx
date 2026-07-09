@@ -71,8 +71,8 @@ export function ValueProps() {
 
 const STEPS = [
   { n: 1, title: 'Entra a Farmi', desc: 'Abre farmi.com.co desde tu celular o computador. Gratis y sin registro.' },
-  { n: 2, title: 'Busca tu medicamento', desc: 'Escribe el nombre o el principio activo que necesitas: ibuprofeno, Advil, acetaminofen...' },
-  { n: 3, title: 'Compara y toma tu decision', desc: 'Revisa precios, disponibilidad y farmacias cercanas. Tu eliges donde comprar.' },
+  { n: 2, title: 'Busca tu medicamento', desc: 'Escribe el nombre o el principio activo que necesitas: ibuprofeno, Advil, acetaminofén...' },
+  { n: 3, title: 'Compara y toma tu decisión', desc: 'Revisa precios, disponibilidad y farmacias cercanas. Tú eliges dónde comprar.' },
 ]
 
 export function HowItWorks() {
@@ -272,6 +272,48 @@ export function AppShowcase() {
             </figcaption>
           </figure>
         ))}
+      </div>
+    </section>
+  )
+}
+
+/* ── Cercanas promo (lifestyle photo + link to /cercanas) ──────────── */
+
+export function CercanasPromo() {
+  return (
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
+      <div className={`${CARD} overflow-hidden`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 items-stretch">
+          <img
+            src="/fotos/farmi-donde-estes.webp"
+            alt="Persona caminando por un parque mientras consulta farmacias cercanas en Farmi"
+            width={900}
+            height={1350}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-[240px] sm:h-full object-cover object-[center_55%]"
+          />
+          <div className="p-6 sm:p-10 flex flex-col justify-center text-center sm:text-left">
+            <h2 className="text-[22px] sm:text-[30px] font-bold tracking-[-0.02em] text-[#1d1d1f] leading-tight">
+              Farmi va contigo a donde estés
+            </h2>
+            <p className="text-[14px] sm:text-[15px] text-[#6e6e73] mt-2.5 leading-relaxed">
+              ¿No sabes cuál farmacia te queda más cerca? Abre el mapa, mira cuáles están
+              abiertas a tu alrededor y llega con indicaciones paso a paso.
+            </p>
+            <div className="mt-5">
+              <Link
+                href="/cercanas"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white text-[14px] font-semibold rounded-xl hover:opacity-90 transition-opacity"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                </svg>
+                Ver farmacias cercanas
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )

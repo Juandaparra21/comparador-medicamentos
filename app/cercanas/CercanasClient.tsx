@@ -91,7 +91,7 @@ export default function CercanasClient() {
           height={1350}
           loading="lazy"
           decoding="async"
-          className="hidden sm:block w-full h-[150px] object-cover rounded-2xl border border-white/60 shadow-sm"
+          className="w-full h-40 sm:h-[150px] object-cover object-[center_45%] rounded-2xl border border-white/60 shadow-sm"
         />
       </header>
 
@@ -142,7 +142,7 @@ export default function CercanasClient() {
             height={1350}
             loading="lazy"
             decoding="async"
-            className="w-full h-[200px] sm:h-[260px] object-cover object-[center_35%]"
+            className="w-full h-[240px] sm:h-[300px] object-cover object-[center_55%]"
           />
           <p className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent text-white text-[13px] font-semibold px-4 pt-8 pb-3">
             Encuentra la farmacia más cercana y llega con indicaciones paso a paso

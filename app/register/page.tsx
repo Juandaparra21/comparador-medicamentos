@@ -30,7 +30,7 @@ export default function RegisterPage() {
           height={1350}
           loading="lazy"
           decoding="async"
-          className="w-full h-[140px] object-cover object-[center_60%] rounded-2xl shadow-sm mb-4"
+          className="w-full h-[190px] object-cover object-[center_55%] rounded-2xl shadow-sm mb-4"
         />
 
         <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-6 sm:p-7">
