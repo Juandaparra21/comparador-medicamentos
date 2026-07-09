@@ -101,13 +101,13 @@ export default function ContactoPage() {
       {/* Precio incorrecto */}
       <section className="bg-primary/5 border border-primary/15 rounded-2xl p-5 sm:p-6 mb-8">
         <img
-          src="/fotos/preocupado-precios.webp"
-          alt="Persona preocupada revisando los precios de sus medicamentos"
+          src="/fotos/verificando-precios.webp"
+          alt="Manos comparando el precio de un producto con las etiquetas del estante en una farmacia"
           width={900}
-          height={1165}
+          height={1200}
           loading="lazy"
           decoding="async"
-          className="w-full h-56 sm:h-64 object-cover object-[center_55%] rounded-xl mb-4"
+          className="w-full h-56 sm:h-64 object-cover rounded-xl mb-4"
         />
         <h2 className="text-[14px] font-bold text-primary mb-2">Reportar un precio incorrecto</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-3">

@@ -105,6 +105,15 @@ export default function SobreNosotrosPage() {
 
       {/* Qué hacemos */}
       <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
+        <img
+          src="/fotos/preocupado-precios.webp"
+          alt="Persona preocupada revisando los precios de sus medicamentos"
+          width={900}
+          height={1165}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-52 sm:h-60 object-cover object-[center_55%] rounded-xl mb-4"
+        />
         <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-3">Qué hacemos</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-3">
           Farmi compara los precios publicados por las principales farmacias y droguerías de Colombia
