@@ -10,6 +10,35 @@ const BASE_HEADERS = {
   'Referer': 'https://www.olimpica.com/',
 }
 
+// Olimpica es supermercado + drogueria y su buscador devuelve todo el catalogo
+// (mercado, tecnologia, hogar...). Solo dejamos pasar las categorias de drogueria
+// y las excepciones acordadas: alimentacion del bebe, snacks y bebidas.
+const ALLOWED_CATEGORY_PREFIXES = [
+  '/medicamentos/',
+  '/belleza/',
+  '/supermercado/para tu bebe/',
+  '/supermercado/pasabocas y helados/',
+  '/supermercado/bebidas/',
+  '/supermercado/cuidado personal y belleza/',
+  // Aqui archiva Olimpica los suplementos liquidos (Ensure, Pediasure) junto a
+  // bebidas tipo Milo; la leche corriente y en polvo viven en otras categorias.
+  '/supermercado/despensa/modificadores de leche/',
+]
+
+function normalizeCategory(c: string): string {
+  return c.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isDrugstoreCategory(p: Record<string, any>): boolean {
+  const cats = (p.categories ?? []) as string[]
+  // Sin dato de categoria no descartamos: mejor un falso positivo que ocultar un medicamento.
+  if (!Array.isArray(cats) || cats.length === 0) return true
+  return cats.some((c) =>
+    ALLOWED_CATEGORY_PREFIXES.some((a) => normalizeCategory(String(c)).startsWith(a))
+  )
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function spec(p: Record<string, any>, key: string): string {
   const values = p[key]
@@ -21,6 +50,7 @@ function spec(p: Record<string, any>, key: string): string {
 function mapProduct(p: Record<string, any>): ScrapedProduct | null {
   const name = (String(p.productName ?? '')).trim()
   if (!name) return null
+  if (!isDrugstoreCategory(p)) return null
 
   const items = (p.items ?? []) as Record<string, unknown>[]
   if (!items.length) return null
