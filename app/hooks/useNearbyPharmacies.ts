@@ -79,7 +79,7 @@ export function useNearbyPharmacies() {
     try {
       const res = await fetch(`/api/nearby?place=${encodeURIComponent(q)}`)
       if (res.status === 404) {
-        setError(`No encontramos "${q}". Prueba con otra direccion o ciudad.`)
+        setError(`No encontramos "${q}". Prueba con otra dirección o ciudad.`)
         setLoading(false)
         return
       }
@@ -87,10 +87,10 @@ export function useNearbyPharmacies() {
       const data = (await res.json()) as { origin?: { lat: number; lng: number }; pharmacies: NearbyPharmacy[] }
       if (data.origin) setPosition(data.origin)
       const s = nearestByChain(data.pharmacies ?? [])
-      if (Object.keys(s).length === 0) setError('No encontramos farmacias conocidas cerca de esa direccion')
+      if (Object.keys(s).length === 0) setError('No encontramos farmacias conocidas cerca de esa dirección')
       setStores(s)
     } catch {
-      setError('No se pudo buscar esa direccion')
+      setError('No se pudo buscar esa dirección')
     }
     setLoading(false)
   }

@@ -14,8 +14,8 @@ function analyzePassword(pwd: string): StrengthResult {
     { label: 'Al menos 8 caracteres',       met: pwd.length >= 8 },
     { label: 'Letra mayuscula (A-Z)',        met: /[A-Z]/.test(pwd) },
     { label: 'Letra minuscula (a-z)',        met: /[a-z]/.test(pwd) },
-    { label: 'Numero (0-9)',                 met: /[0-9]/.test(pwd) },
-    { label: 'Caracter especial (!@#$...)', met: /[^A-Za-z0-9]/.test(pwd) },
+    { label: 'Número (0-9)',                 met: /[0-9]/.test(pwd) },
+    { label: 'Carácter especial (!@#$...)', met: /[^A-Za-z0-9]/.test(pwd) },
   ]
   const score = pwd.length === 0 ? 0 : criteria.filter((c) => c.met).length
   const labels = ['', 'Muy debil', 'Debil', 'Regular', 'Fuerte', 'Muy fuerte']
@@ -44,9 +44,9 @@ export default function RegisterClient() {
     e.preventDefault()
     setError('')
     if (!name.trim())        return setError('Ingresa tu nombre.')
-    if (!email.trim())       return setError('Ingresa tu correo electronico.')
-    if (strength.score < 3)  return setError('La contrasena es demasiado debil.')
-    if (password !== confirm) return setError('Las contrasenas no coinciden.')
+    if (!email.trim())       return setError('Ingresa tu correo electrónico.')
+    if (strength.score < 3)  return setError('La contraseña es demasiado debil.')
+    if (password !== confirm) return setError('Las contraseñas no coinciden.')
     setLoading(true)
     const err = await signUp(email.trim(), password, name.trim())
     setLoading(false)
@@ -71,7 +71,7 @@ export default function RegisterClient() {
           onClick={() => router.push('/login')}
           className="mt-2 px-5 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[14px] font-semibold rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
         >
-          Ir a iniciar sesion
+          Ir a iniciar sesión
         </button>
       </div>
     )
@@ -108,7 +108,7 @@ export default function RegisterClient() {
       {/* Email */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-[12px] font-semibold text-[#414755] tracking-wide">
-          Correo electronico
+          Correo electrónico
         </label>
         <input
           id="email"
@@ -124,7 +124,7 @@ export default function RegisterClient() {
       {/* Password */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="password" className="text-[12px] font-semibold text-[#414755] tracking-wide">
-          Contrasena
+          Contraseña
         </label>
         <div className="relative">
           <input
@@ -178,7 +178,7 @@ export default function RegisterClient() {
       {/* Confirm password */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="confirm" className="text-[12px] font-semibold text-[#414755] tracking-wide">
-          Confirmar contrasena
+          Confirmar contraseña
         </label>
         <div className="relative">
           <input
@@ -202,7 +202,7 @@ export default function RegisterClient() {
           </button>
         </div>
         {confirm && confirm !== password && (
-          <p className="text-[11px] text-red-400 font-medium">Las contrasenas no coinciden</p>
+          <p className="text-[11px] text-red-400 font-medium">Las contraseñas no coinciden</p>
         )}
       </div>
 
@@ -216,7 +216,7 @@ export default function RegisterClient() {
       <p className="text-center text-[12px] text-[#717786] mt-1">
         Ya tienes cuenta?{' '}
         <Link href="/login" className="text-primary font-semibold hover:opacity-75 transition-opacity">
-          Inicia sesion
+          Inicia sesión
         </Link>
       </p>
       </form>

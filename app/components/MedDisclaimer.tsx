@@ -25,7 +25,7 @@ export function MedDisclaimer() {
   return (
     <div
       role="note"
-      aria-label="Aviso importante sobre informacion medica"
+      aria-label="Aviso importante sobre información médica"
       className="bg-amber-50 border-b border-amber-200"
     >
       <div className="mx-auto max-w-5xl px-4 sm:px-5 py-2.5 flex items-center gap-3">
@@ -33,7 +33,7 @@ export function MedDisclaimer() {
           <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
         </svg>
         <p className="text-[12px] text-amber-900 flex-1 leading-snug">
-          <strong>Esta plataforma no sustituye la asesoria medica profesional.</strong>{' '}
+          <strong>Esta plataforma no sustituye la asesoría médica profesional.</strong>{' '}
           Los precios son referenciales y pueden cambiar. Farmi no vende medicamentos.
         </p>
         <button

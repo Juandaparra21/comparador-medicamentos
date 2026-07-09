@@ -30,7 +30,7 @@ export async function DiscountsSection() {
   const discounts = await getFeaturedDiscounts()
   if (discounts.length === 0) return null
 
-  // Farmacia con mas descuentos entre los destacados
+  // Farmacia con más descuentos entre los destacados
   const counts: Record<string, number> = {}
   discounts.forEach((r) => { counts[r.pharmacy] = (counts[r.pharmacy] ?? 0) + 1 })
   const topEntry = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
@@ -100,7 +100,7 @@ export async function DiscountsSection() {
           <div className="flex flex-col justify-between bg-gradient-to-br from-primary/10 to-tertiary/10 border border-primary/20 rounded-xl p-4 shrink-0 w-[200px] sm:w-auto snap-start">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-primary mb-1.5">
-                Mas descuentos
+                Más descuentos
               </p>
               <PharmacyLogo name={topPharmacy.name} size={36} />
               <p className="text-[14px] font-bold text-[#1a1b1f] mt-2 leading-snug">

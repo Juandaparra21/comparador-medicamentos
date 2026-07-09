@@ -1,7 +1,7 @@
 ﻿import LoginClient from './LoginClient'
 
 export const metadata = {
-  title: 'Iniciar sesion - Farmi',
+  title: 'Iniciar sesión',
   robots: { index: false, follow: true },
 }
 
@@ -19,7 +19,7 @@ export default function LoginPage() {
             Bienvenido de nuevo
           </h1>
           <p className="text-[13px] text-[#717786] mt-1">
-            Inicia sesion para ver tu lista y seguimiento de precios
+            Inicia sesión para ver tu lista y seguimiento de precios
           </p>
         </div>
 

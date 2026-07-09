@@ -54,14 +54,14 @@ export function PriceTracker({ query, label }: Props) {
       const sb = await getBrowserClient()
       const { data: { session } } = await sb.auth.getSession()
       const token = session?.access_token
-      if (!token) { setError('Inicia sesion para rastrear precios.'); return }
+      if (!token) { setError('Inicia sesión para rastrear precios.'); return }
 
       const res = await fetch('/api/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ query, label }),
       })
-      if (res.status === 401) { setError('Inicia sesion para rastrear precios.'); return }
+      if (res.status === 401) { setError('Inicia sesión para rastrear precios.'); return }
       const json = await res.json()
       if (!json.ok) throw new Error(json.error ?? 'error')
       await load()
@@ -93,8 +93,8 @@ export function PriceTracker({ query, label }: Props) {
           <h2 className="text-[16px] font-bold text-[#1a1b1f]">Historial de precios</h2>
           <p className="text-[12px] text-[#717786] mt-0.5">
             {days > 0
-              ? `Datos reales · ${days} dia${days !== 1 ? 's' : ''} registrado${days !== 1 ? 's' : ''}`
-              : 'Construido con datos reales, dia a dia'}
+              ? `Datos reales · ${days} día${days !== 1 ? 's' : ''} registrado${days !== 1 ? 's' : ''}`
+              : 'Construido con datos reales, día a día'}
           </p>
         </div>
         {hasChart && allLow !== null && allHigh !== null && (
@@ -143,11 +143,11 @@ export function PriceTracker({ query, label }: Props) {
         </div>
       ) : (
         <div className="rounded-xl bg-[#f5f6fa] border border-white/40 p-5 text-center">
-          <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1">Aun no hay historial</p>
+          <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1">Aún no hay historial</p>
           <p className="text-[12px] text-[#717786]">
             {isTracked
-              ? 'Ya estamos rastreando este medicamento. El historial aparecera a medida que registremos el precio cada dia.'
-              : 'Rastrea este medicamento para empezar a guardar su precio cada dia y construir la grafica de evolucion.'}
+              ? 'Ya estamos rastreando este medicamento. El historial aparecera a medida que registremos el precio cada día.'
+              : 'Rastrea este medicamento para empezar a guardar su precio cada día y construir la grafica de evolucion.'}
           </p>
         </div>
       )}
@@ -155,16 +155,16 @@ export function PriceTracker({ query, label }: Props) {
       <div className="mt-4 pt-4 border-t border-white/40 flex items-center justify-between gap-3 flex-wrap">
         <p className="text-[12px] text-[#717786] flex items-center gap-1.5 max-w-[60%] min-w-[180px]">
           {!user ? (
-            'Inicia sesion para rastrear este medicamento y guardar su precio cada dia.'
+            'Inicia sesión para rastrear este medicamento y guardar su precio cada día.'
           ) : isTracked ? (
             <>
               <svg className="w-4 h-4 text-secondary shrink-0" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
               </svg>
-              <span className="font-semibold text-secondary">Rastreando.</span> Guardamos el precio cada dia.
+              <span className="font-semibold text-secondary">Rastreando.</span> Guardamos el precio cada día.
             </>
           ) : (
-            'Guardaremos el precio cada dia para construir el historial.'
+            'Guardaremos el precio cada día para construir el historial.'
           )}
         </p>
         {!user ? (
@@ -172,7 +172,7 @@ export function PriceTracker({ query, label }: Props) {
             href="/login"
             className="text-[12px] font-bold px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white hover:opacity-90 transition-opacity whitespace-nowrap"
           >
-            Inicia sesion para rastrear
+            Inicia sesión para rastrear
           </Link>
         ) : (
           <button

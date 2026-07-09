@@ -2,7 +2,7 @@
 import CarritoClient from './CarritoClient'
 
 export const metadata: Metadata = {
-  title: 'Carrito - Farmi',
+  title: 'Carrito',
   description: 'Medicamentos guardados en tu carrito de compra.',
   robots: { index: false, follow: true },
 }

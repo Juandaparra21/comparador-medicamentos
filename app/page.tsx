@@ -47,7 +47,7 @@ export default function Home() {
               <span className="text-primary">medicamentos</span> en Colombia
             </h1>
             <p className="text-[17px] sm:text-[22px] text-[#6e6e73] leading-relaxed max-w-xl mx-auto">
-              Busca por nombre generico o de marca y encuentra, en segundos, el mejor
+              Busca por nombre genérico o de marca y encuentra, en segundos, el mejor
               precio entre las principales farmacias de Colombia.
             </p>
           </div>
@@ -55,7 +55,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto">
             <SearchBar />
             <p className="mt-3 text-center text-[12px] sm:text-[13px] text-[#6e6e73]">
-              Precios consultados en el momento de tu busqueda.
+              Precios consultados en el momento de tu búsqueda.
             </p>
             <HeroPharmacies />
             <QuickChips />

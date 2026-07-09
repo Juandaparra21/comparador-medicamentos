@@ -22,8 +22,8 @@ export default function LoginClient() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!email.trim()) return setError('Ingresa tu correo electronico.')
-    if (!password)     return setError('Ingresa tu contrasena.')
+    if (!email.trim()) return setError('Ingresa tu correo electrónico.')
+    if (!password)     return setError('Ingresa tu contraseña.')
     setLoading(true)
     const err = await signIn(email.trim(), password)
     setLoading(false)
@@ -34,7 +34,7 @@ export default function LoginClient() {
   async function handleForgot(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!email.trim()) return setError('Ingresa tu correo electronico.')
+    if (!email.trim()) return setError('Ingresa tu correo electrónico.')
     setLoading(true)
     const err = await resetPassword(email.trim())
     setLoading(false)
@@ -52,13 +52,13 @@ export default function LoginClient() {
         </div>
         <p className="text-[16px] font-bold text-[#1a1b1f]">Revisa tu correo</p>
         <p className="text-[13px] text-[#717786] max-w-xs">
-          Enviamos un enlace a <strong>{email}</strong> para restablecer tu contrasena.
+          Enviamos un enlace a <strong>{email}</strong> para restablecer tu contraseña.
         </p>
         <button
           onClick={() => setView('login')}
           className="mt-2 text-[13px] font-semibold text-primary hover:opacity-75 transition-opacity cursor-pointer"
         >
-          Volver al inicio de sesion
+          Volver al inicio de sesión
         </button>
       </div>
     )
@@ -68,14 +68,14 @@ export default function LoginClient() {
     return (
       <form onSubmit={handleForgot} noValidate className="flex flex-col gap-4">
         <div className="mb-1">
-          <h3 className="text-[15px] font-bold text-[#1a1b1f]">Restablecer contrasena</h3>
+          <h3 className="text-[15px] font-bold text-[#1a1b1f]">Restablecer contraseña</h3>
           <p className="text-[12px] text-[#717786] mt-1">
             Ingresa tu correo y te enviaremos un enlace.
           </p>
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="email-forgot" className="text-[12px] font-semibold text-[#414755] tracking-wide">
-            Correo electronico
+            Correo electrónico
           </label>
           <input
             id="email-forgot"
@@ -97,7 +97,7 @@ export default function LoginClient() {
         </button>
         <button type="button" onClick={() => { setView('login'); setError('') }}
           className="text-[12px] text-[#717786] hover:text-primary transition-colors cursor-pointer text-center">
-          Volver al inicio de sesion
+          Volver al inicio de sesión
         </button>
       </form>
     )
@@ -118,7 +118,7 @@ export default function LoginClient() {
       {/* Email */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-[12px] font-semibold text-[#414755] tracking-wide">
-          Correo electronico
+          Correo electrónico
         </label>
         <input
           id="email"
@@ -135,11 +135,11 @@ export default function LoginClient() {
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <label htmlFor="password" className="text-[12px] font-semibold text-[#414755] tracking-wide">
-            Contrasena
+            Contraseña
           </label>
           <button type="button" onClick={() => { setView('forgot'); setError('') }}
             className="text-[11px] text-primary font-semibold hover:opacity-75 transition-opacity cursor-pointer">
-            Olvidaste tu contrasena?
+            Olvidaste tu contraseña?
           </button>
         </div>
         <div className="relative">
@@ -167,7 +167,7 @@ export default function LoginClient() {
 
       <button type="submit" disabled={loading}
         className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white text-[14px] font-bold hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-60 shadow-[0_4px_16px_rgba(0,88,188,0.25)]">
-        {loading ? 'Ingresando...' : 'Iniciar sesion'}
+        {loading ? 'Ingresando...' : 'Iniciar sesión'}
       </button>
 
       <p className="text-center text-[12px] text-[#717786] mt-1">

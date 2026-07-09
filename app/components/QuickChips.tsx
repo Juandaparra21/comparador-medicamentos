@@ -46,7 +46,7 @@ export function QuickChips() {
       {history.length > 0 && (
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#c1c6d7] text-center mb-2">
-            Busquedas recientes
+            Búsquedas recientes
           </p>
           <div className="flex flex-wrap justify-center gap-1.5">
             {history.map((term) => (
@@ -69,7 +69,7 @@ export function QuickChips() {
       <div>
         {history.length > 0 && (
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#c1c6d7] text-center mb-2">
-            Mas buscados
+            Más buscados
           </p>
         )}
         <div className="flex flex-wrap justify-center gap-2">

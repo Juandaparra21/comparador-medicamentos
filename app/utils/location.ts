@@ -27,8 +27,8 @@ export async function detectBrowserLocation(): Promise<DetectedLocation> {
       },
       (err) => {
         const messages: Record<number, string> = {
-          1: 'Permiso denegado. Activa la ubicacion en tu navegador.',
-          2: 'Ubicacion no disponible.',
+          1: 'Permiso denegado. Activa la ubicación en tu navegador.',
+          2: 'Ubicación no disponible.',
           3: 'Tiempo de espera agotado.',
         }
         reject(new Error(messages[err.code] ?? 'Error desconocido'))
@@ -47,7 +47,7 @@ function guessColombiancity(lat: number, lng: number): string {
   return 'Bogotá'
 }
 
-// Estructura preparada para busqueda de farmacias cercanas via Google Places
+// Estructura preparada para búsqueda de farmacias cercanas via Google Places
 // export async function findNearbyPharmacies(lat: number, lng: number, radiusMeters = 3000) {
 //   const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json')
 //   url.searchParams.set('location', `${lat},${lng}`)

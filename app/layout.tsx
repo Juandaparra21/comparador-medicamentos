@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: '%s | Farmi',
   },
   description:
-    'Compara precios de medicamentos en las principales farmacias de Colombia: La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y mas. Genericos y marcas.',
+    'Compara precios de medicamentos en las principales farmacias de Colombia: La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y más. Genéricos y marcas.',
   metadataBase: new URL(SITE_URL),
   openGraph: {
     type: 'website',
@@ -107,7 +107,7 @@ export default function RootLayout({
                 </span>
               </Link>
 
-              <nav aria-label="Navegacion principal" className="flex items-center gap-3">
+              <nav aria-label="Navegación principal" className="flex items-center gap-3">
                 <Link
                   href="/cercanas"
                   className="flex items-center gap-1.5 text-[12px] font-semibold text-[#717786] hover:text-primary transition-colors"
@@ -131,7 +131,7 @@ export default function RootLayout({
           <ChatAssistant />
 
           {/* Footer */}
-          <footer className="border-t border-[#c1c6d7]/30 py-8 px-4" aria-label="Pie de pagina">
+          <footer className="border-t border-[#c1c6d7]/30 py-8 px-4" aria-label="Pie de página">
             <div className="mx-auto max-w-5xl">
               {/* Top row: brand + nav links */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-6">
@@ -145,7 +145,7 @@ export default function RootLayout({
                   </p>
                 </div>
 
-                <nav aria-label="Enlaces del pie de pagina" className="flex flex-wrap gap-x-5 gap-y-2 text-[12px]">
+                <nav aria-label="Enlaces del pie de página" className="flex flex-wrap gap-x-5 gap-y-2 text-[12px]">
                   <Link href="/sobre-nosotros" className="text-[#717786] hover:text-primary transition-colors font-medium">
                     Sobre nosotros
                   </Link>
@@ -164,7 +164,7 @@ export default function RootLayout({
               {/* Disclaimer */}
               <div className="border-t border-[#c1c6d7]/30 pt-5">
                 <p className="text-[11px] text-[#717786] leading-relaxed">
-                  <strong className="text-[#414755]">Aviso legal:</strong> Farmi es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. Farmi no vende medicamentos ni interviene en ningun proceso de compra. Las marcas y logos de las farmacias pertenecen a sus respectivos titulares; Farmi es un comparador independiente y no esta afiliado ni patrocinado por ellas. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a farmicolombia@gmail.com.
+                  <strong className="text-[#414755]">Aviso legal:</strong> Farmi es una plataforma de comparación de precios y no sustituye la asesoría médica o farmacéutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes públicas, y pueden variar. Farmi no vende medicamentos ni interviene en ningún proceso de compra. Las marcas y logos de las farmacias pertenecen a sus respectivos titulares; Farmi es un comparador independiente y no está afiliado ni patrocinado por ellas. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a farmicolombia@gmail.com.
                 </p>
                 <p className="text-[11px] text-[#c1c6d7] mt-3">
                   &copy; {new Date().getFullYear()} Farmi. Colombia.

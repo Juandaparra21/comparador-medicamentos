@@ -9,7 +9,7 @@ interface RadioFilterProps {
   allLabel:     string
   active:       string                    // '' = all
   options:      string[]
-  highlight?:   string                    // value tagged "Mas comun"
+  highlight?:   string                    // value tagged "Más comun"
   renderLabel?: (v: string) => string
   onChange:     (v: string) => void
 }
@@ -48,7 +48,7 @@ export function RadioFilter({
                   {opt.l}
                 </span>
                 {highlight && opt.v === highlight && (
-                  <span className="text-[11px] font-semibold text-primary">Mas comun</span>
+                  <span className="text-[11px] font-semibold text-primary">Más comun</span>
                 )}
               </span>
             </button>
@@ -142,7 +142,7 @@ export function QuantitySlider({ title, values, active, unitLabel, onChange }: Q
             type="button"
             onClick={() => setIndex(activeIndex + 1)}
             disabled={activeIndex === max}
-            aria-label="Mas cantidad"
+            aria-label="Más cantidad"
             className="w-9 h-9 flex items-center justify-center text-[#414755] hover:bg-[#f5f6fa] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" /></svg>

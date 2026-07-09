@@ -39,14 +39,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
-    if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
+    if (!isBrowserClientAvailable()) return 'Autenticación no configurada.'
     const sb = await getBrowserClient()
     const { error } = await sb.auth.signInWithPassword({ email, password })
     return error ? translateError(error.message) : null
   }, [])
 
   const signUp = useCallback(async (email: string, password: string, name: string) => {
-    if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
+    if (!isBrowserClientAvailable()) return 'Autenticación no configurada.'
     const sb = await getBrowserClient()
     const { error } = await sb.auth.signUp({
       email,
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const resetPassword = useCallback(async (email: string) => {
-    if (!isBrowserClientAvailable()) return 'Autenticacion no configurada.'
+    if (!isBrowserClientAvailable()) return 'Autenticación no configurada.'
     const sb = await getBrowserClient()
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: `${location.origin}/auth/callback?next=/login`,
@@ -98,10 +98,10 @@ export function useAuth() {
 }
 
 function translateError(msg: string): string {
-  if (msg.includes('Invalid login credentials')) return 'Correo o contrasena incorrectos.'
+  if (msg.includes('Invalid login credentials')) return 'Correo o contraseña incorrectos.'
   if (msg.includes('Email not confirmed'))       return 'Confirma tu correo antes de ingresar.'
   if (msg.includes('User already registered'))   return 'Ya existe una cuenta con ese correo.'
-  if (msg.includes('Password should be'))        return 'La contrasena debe tener al menos 6 caracteres.'
+  if (msg.includes('Password should be'))        return 'La contraseña debe tener al menos 6 caracteres.'
   if (msg.includes('rate limit') || msg.includes('over_email_send_rate_limit'))
     return 'Demasiados intentos. Espera unos minutos.'
   if (msg.includes('signup_disabled'))           return 'El registro de nuevas cuentas esta desactivado temporalmente.'

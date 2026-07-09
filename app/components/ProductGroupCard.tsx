@@ -47,7 +47,7 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
 
       <div className="flex flex-col gap-3 p-4 flex-1">
 
-        {/* Badges: ahorro + numero de farmacias (fila propia, no encima de la imagen) */}
+        {/* Badges: ahorro + número de farmacias (fila propia, no encima de la imagen) */}
         {(savings > 1000 || hasMany) && (
           <div className="flex items-center justify-between gap-2">
             {savings > 1000 ? (
@@ -70,7 +70,7 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
               ? 'bg-secondary/10 text-secondary border border-secondary/20'
               : 'bg-primary/10 text-primary border border-primary/20'
           }`}>
-            {results[0]?.type === 'generic' ? 'Generico' : 'Marca'}
+            {results[0]?.type === 'generic' ? 'Genérico' : 'Marca'}
           </span>
           <p className="text-[11px] font-medium text-[#414755] leading-snug">
             {group.activeIngredient

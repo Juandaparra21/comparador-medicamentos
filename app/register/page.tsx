@@ -1,7 +1,7 @@
 ﻿import RegisterClient from './RegisterClient'
 
 export const metadata = {
-  title: 'Crear cuenta - Farmi',
+  title: 'Crear cuenta',
   robots: { index: false, follow: true },
 }
 
@@ -25,7 +25,7 @@ export default function RegisterPage() {
 
         <img
           src="/fotos/farmi-en-tu-mano.webp"
-          alt="Mano sosteniendo un celular con Farmi abierto frente a una drogueria"
+          alt="Mano sosteniendo un celular con Farmi abierto frente a una droguería"
           width={900}
           height={1350}
           loading="lazy"

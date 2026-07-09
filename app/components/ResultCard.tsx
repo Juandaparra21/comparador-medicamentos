@@ -146,7 +146,7 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
                 : 'bg-primary/10 text-primary border border-primary/20'
             }`}
           >
-            {result.type === 'generic' ? 'Generico' : 'Marca'}
+            {result.type === 'generic' ? 'Genérico' : 'Marca'}
           </span>
           <p className="text-[11px] font-medium text-[#414755] leading-snug">
             {result.activeIngredient}{result.concentration ? ` ${result.concentration}` : ''}

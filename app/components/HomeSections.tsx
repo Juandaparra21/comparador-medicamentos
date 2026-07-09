@@ -19,7 +19,7 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle?: string 
 
 const TRUST_SIGNALS = [
   'Precios en tiempo real',
-  '6 farmacias en una busqueda',
+  '6 farmacias en una búsqueda',
   '100% gratis, sin registro',
 ]
 
@@ -42,9 +42,9 @@ export function TrustStrip() {
 
 const VALUES: { title: string; desc: string; path: string }[] = [
   { title: '100% gratis',            desc: 'Sin registro ni costos. Solo busca y compara.', path: 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' },
-  { title: 'Precios en tiempo real', desc: 'Consultamos cada farmacia en el momento de tu busqueda.', path: 'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' },
+  { title: 'Precios en tiempo real', desc: 'Consultamos cada farmacia en el momento de tu búsqueda.', path: 'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' },
   { title: '6 farmacias a la vez',   desc: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olimpica.', path: 'M3.75 21h16.5M4.5 3h15l-.75 4.5h-13.5L4.5 3Zm.75 4.5V21m13.5-13.5V21M9 21v-6h6v6' },
-  { title: 'Generico o de marca',    desc: 'Compara equivalentes y elige segun tu presupuesto.', path: 'm21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9' },
+  { title: 'Genérico o de marca',    desc: 'Compara equivalentes y elige según tu presupuesto.', path: 'm21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9' },
 ]
 
 export function ValueProps() {
@@ -70,15 +70,15 @@ export function ValueProps() {
 /* ── How it works ──────────────────────────────────────────────────── */
 
 const STEPS = [
-  { n: 1, title: 'Busca tu medicamento', desc: 'Escribe el nombre generico (ibuprofeno) o de marca (Advil).' },
-  { n: 2, title: 'Compara los precios',  desc: 'Te mostramos las farmacias de menor a mayor precio, al instante.' },
-  { n: 3, title: 'Compra al mejor precio', desc: 'Vas directo a la farmacia con el precio mas bajo. Tu eliges.' },
+  { n: 1, title: 'Entra a Farmi', desc: 'Abre farmi.com.co desde tu celular o computador. Gratis y sin registro.' },
+  { n: 2, title: 'Busca tu medicamento', desc: 'Escribe el nombre o el principio activo que necesitas: ibuprofeno, Advil, acetaminofen...' },
+  { n: 3, title: 'Compara y toma tu decision', desc: 'Revisa precios, disponibilidad y farmacias cercanas. Tu eliges donde comprar.' },
 ]
 
 export function HowItWorks() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
-      <SectionHeading title="Como funciona" subtitle="Encuentra el mejor precio en tres pasos." />
+      <SectionHeading title="Cómo funciona" subtitle="Encuentra el mejor precio en tres pasos." />
       <div className={`${CARD} overflow-hidden mb-3 sm:mb-4`}>
         <img
           src="/fotos/tres-pasos.webp"
@@ -141,7 +141,7 @@ export function HeroPharmacies() {
 export function PharmacyStrip() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
-      <SectionHeading title="Comparamos estas farmacias" subtitle="Precios en tiempo real de las cadenas mas grandes de Colombia." />
+      <SectionHeading title="Comparamos estas farmacias" subtitle="Precios en tiempo real de las cadenas más grandes de Colombia." />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {PHARMACIES.map((p) => (
           <div key={p.key} className={`${CARD} p-4 flex flex-col items-center gap-2 text-center`}>
@@ -199,12 +199,12 @@ export function PopularMeds() {
 export function GenericVsBrand() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
-      <SectionHeading title="Generico o de marca?" subtitle="Mismo efecto, distinto precio. Tu decides." />
+      <SectionHeading title="Genérico o de marca?" subtitle="Mismo efecto, distinto precio. Tu decides." />
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.3fr] gap-3 sm:gap-4 items-stretch">
         <div className={`${CARD} overflow-hidden max-w-xs mx-auto sm:max-w-none sm:mx-0`}>
           <img
             src="/fotos/comparacion-generico-marca.webp"
-            alt="Celular con Farmi comparando acetaminofen generico y de marca junto a una tableta de pastillas"
+            alt="Celular con Farmi comparando acetaminofen genérico y de marca junto a una tableta de pastillas"
             width={900}
             height={1260}
             loading="lazy"
@@ -215,11 +215,11 @@ export function GenericVsBrand() {
         <div className="flex flex-col gap-3 sm:gap-4">
           <div className={`${CARD} p-5 flex-1`}>
             <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/20 mb-3">
-              Generico
+              Genérico
             </span>
-            <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El mismo principio activo, mas barato</p>
+            <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El mismo principio activo, más barato</p>
             <p className="text-[13px] text-[#6e6e73] leading-relaxed">
-              Tiene el mismo principio activo, dosis y forma que el de marca, y esta regulado por el INVIMA.
+              Tiene el mismo principio activo, dosis y forma que el de marca, y está regulado por el INVIMA.
               Suele costar entre 30% y 80% menos.
             </p>
           </div>
@@ -229,7 +229,7 @@ export function GenericVsBrand() {
             </span>
             <p className="text-[14px] font-semibold text-[#1d1d1f] mb-1.5">El laboratorio que ya conoces</p>
             <p className="text-[13px] text-[#6e6e73] leading-relaxed">
-              Es el producto original de un laboratorio reconocido. Cuesta mas, pero algunas personas
+              Es el producto original de un laboratorio reconocido. Cuesta más, pero algunas personas
               prefieren la marca de confianza. Farmi te muestra ambos para que compares.
             </p>
           </div>
@@ -252,8 +252,8 @@ export function AppShowcase() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
       <SectionHeading
-        title="Asi se ve Farmi"
-        subtitle="Busquedas reales: escribe el producto y compara el precio en las farmacias, en segundos."
+        title="Así se ve Farmi"
+        subtitle="Búsquedas reales: escribe el producto y compara el precio en las farmacias, en segundos."
       />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {SHOWCASE.map((s) => (
@@ -299,7 +299,7 @@ export function MadeInColombia() {
             </h2>
             <p className="text-[13px] sm:text-[15px] text-[#6e6e73] mt-2 leading-relaxed">
               Farmi es una plataforma colombiana e independiente. Comparamos los precios
-              reales de las farmacias del pais para que pagues menos por tus medicamentos.
+              reales de las farmacias del país para que pagues menos por tus medicamentos.
             </p>
           </div>
           <img
@@ -320,11 +320,11 @@ export function MadeInColombia() {
 /* ── FAQ (native details, no JS) ───────────────────────────────────── */
 
 const FAQS: { q: string; a: string }[] = [
-  { q: 'Farmi vende medicamentos?', a: 'No. Farmi compara precios y te lleva a la pagina de la farmacia para que compres directamente con ella. No vendemos ni intervenimos en la compra.' },
+  { q: 'Farmi vende medicamentos?', a: 'No. Farmi compara precios y te lleva a la página de la farmacia para que compres directamente con ella. No vendemos ni intervenimos en la compra.' },
   { q: 'Los precios son exactos?',  a: 'Son referenciales y se obtienen en tiempo real de cada farmacia. Pueden variar por sede, disponibilidad o promociones. Confirma siempre el precio final en la farmacia.' },
   { q: 'Necesito registrarme?',     a: 'No. Puedes buscar y comparar sin crear cuenta. El registro solo sirve para guardar tu lista de favoritos.' },
-  { q: 'Que farmacias comparan?',   a: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olimpica. Consultamos sus precios cuando haces una busqueda.' },
-  { q: 'Tiene algun costo?',        a: 'No. Farmi es 100% gratis para los usuarios.' },
+  { q: 'Qué farmacias comparan?',   a: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olimpica. Consultamos sus precios cuando haces una búsqueda.' },
+  { q: 'Tiene algún costo?',        a: 'No. Farmi es 100% gratis para los usuarios.' },
 ]
 
 export function HomeFaq() {
@@ -357,10 +357,10 @@ export function HomeCta() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 items-center">
           <div className="text-center sm:text-left">
             <h2 className="text-[26px] sm:text-[40px] font-bold text-white tracking-[-0.02em] leading-tight">
-              Deja de pagar de mas por tus medicamentos
+              Deja de pagar de más por tus medicamentos
             </h2>
             <p className="text-[14px] sm:text-[15px] text-white/85 mt-2 max-w-xl mx-auto sm:mx-0 leading-relaxed">
-              Compara en segundos y encuentra el precio mas bajo entre las principales farmacias de Colombia.
+              Compara en segundos y encuentra el precio más bajo entre las principales farmacias de Colombia.
             </p>
             <Link
               href="/#search-input"
@@ -375,7 +375,7 @@ export function HomeCta() {
           <div className="max-w-[260px] sm:max-w-xs mx-auto w-full">
             <img
               src="/fotos/farmi-frente-drogueria.webp"
-              alt="Mano sosteniendo un celular con Farmi abierto frente a una drogueria en Colombia"
+              alt="Mano sosteniendo un celular con Farmi abierto frente a una droguería en Colombia"
               width={900}
               height={1350}
               loading="lazy"

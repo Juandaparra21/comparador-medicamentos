@@ -19,7 +19,7 @@ export function formatRelativeTime(iso: string): string {
   const hours = Math.round(mins / 60)
   if (hours < 24) return `hace ${hours} hora${hours !== 1 ? 's' : ''}`
   const days = Math.round(hours / 24)
-  return `hace ${days} dia${days !== 1 ? 's' : ''}`
+  return `hace ${days} día${days !== 1 ? 's' : ''}`
 }
 
 // Compact relative time for tight spaces (cards on mobile): "hace un momento",

@@ -2,15 +2,15 @@
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Contacto - Farmi',
+  title: 'Contacto',
   description:
     'Contacta al equipo de Farmi para reportar precios incorrectos, sugerir farmacias o resolver dudas sobre la plataforma.',
 }
 
 const TOPICS = [
   { icon: '⚠', label: 'Precio incorrecto', desc: 'El precio que ves en nuestra app no coincide con el de la farmacia.' },
-  { icon: '🏥', label: 'Sugerir farmacia', desc: 'Quieres que agreguemos una farmacia o drogueria que no esta en la lista.' },
-  { icon: '🔒', label: 'Privacidad y datos', desc: 'Solicitud de eliminacion de datos, Habeas Data (Ley 1581/2012).' },
+  { icon: '🏥', label: 'Sugerir farmacia', desc: 'Quieres que agreguemos una farmacia o droguería que no está en la lista.' },
+  { icon: '🔒', label: 'Privacidad y datos', desc: 'Solicitud de eliminación de datos, Habeas Data (Ley 1581/2012).' },
   { icon: '💡', label: 'Sugerencia general', desc: 'Mejoras, errores en la interfaz o cualquier otra inquietud.' },
 ]
 
@@ -31,7 +31,7 @@ export default function ContactoPage() {
           Contacto
         </h1>
         <p className="text-[15px] text-[#414755] leading-relaxed">
-          Respondemos todos los mensajes en un plazo de 1 a 3 dias habiles.
+          Respondemos todos los mensajes en un plazo de 1 a 3 días hábiles.
         </p>
       </div>
 
@@ -46,18 +46,18 @@ export default function ContactoPage() {
         className="w-full h-40 sm:h-52 object-cover rounded-2xl border border-white/60 shadow-sm mb-8"
       />
 
-      {/* Aviso medico */}
+      {/* Aviso médico */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-8">
         <p className="text-[12px] text-amber-900 leading-relaxed">
-          <strong>Aviso:</strong> No brindamos asesorıa medica ni farmaceutica. Si tienes preguntas
-          sobre un medicamento, consulta a un medico o farmaceutico licenciado.
+          <strong>Aviso:</strong> No brindamos asesorıa médica ni farmacéutica. Si tienes preguntas
+          sobre un medicamento, consulta a un médico o farmacéutico licenciado.
         </p>
       </div>
 
       {/* Temas */}
       <section className="mb-8">
         <p className="text-[11px] font-bold tracking-widest uppercase text-[#717786] mb-4">
-          Para que podemos ayudarte
+          En qué podemos ayudarte
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {TOPICS.map((t) => (
@@ -74,27 +74,27 @@ export default function ContactoPage() {
 
       {/* Email */}
       <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
-        <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-4">Escribenos</h2>
+        <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-4">Escríbenos</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-5">
           Envıa tu mensaje directamente a nuestro correo. Incluye el nombre del medicamento y la
           farmacia si tu consulta es sobre un precio especıfico.
         </p>
 
         <a
-          href="mailto:farmiya001@gmail.com?subject=Consulta%20Farmi"
+          href="mailto:farmicolombia@gmail.com?subject=Consulta%20Farmi"
           className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"
         >
           <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
             <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
           </svg>
-          farmiya001@gmail.com
+          farmicolombia@gmail.com
         </a>
 
         <p className="text-[11px] text-[#717786] mt-4 leading-relaxed">
-          Para solicitudes de Habeas Data (eliminacion de datos personales) conforme a la
+          Para solicitudes de Habeas Data (eliminación de datos personales) conforme a la
           Ley 1581 de 2012, incluye en el asunto: <em>Habeas Data - [tu nombre]</em>.
-          Atendemos estas solicitudes en un maximo de 10 dias habiles.
+          Atendemos estas solicitudes en un máximo de 10 días hábiles.
         </p>
       </section>
 
@@ -140,7 +140,7 @@ export default function ContactoPage() {
           href="/privacidad"
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#c1c6d7]/50 bg-white/60 text-[13px] font-semibold text-[#414755] hover:bg-white/80 transition-all"
         >
-          Politica de privacidad
+          Política de privacidad
         </Link>
       </div>
     </div>

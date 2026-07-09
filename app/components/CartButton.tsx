@@ -74,7 +74,7 @@ export function CartButton({ result }: Props) {
       {showHint && (
         <div className="absolute bottom-full right-0 mb-2 z-50 animate-in fade-in slide-in-from-bottom-1 duration-150">
           <div className="bg-[#1a1b1f] text-white text-[11px] font-semibold px-3 py-2 rounded-xl whitespace-nowrap shadow-lg">
-            Inicia sesion para agregar
+            Inicia sesión para agregar
             <button
               onClick={(e) => { e.stopPropagation(); router.push('/login') }}
               className="ml-2 text-primary-300 underline cursor-pointer"

@@ -59,7 +59,7 @@ export function useNearbyList() {
     navigator.geolocation.getCurrentPosition(
       (pos) => { loadFromUrl(`/api/nearby?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}`, '') },
       () => {
-        setError('Permiso de ubicacion denegado. Escribe tu ciudad o barrio para continuar.')
+        setError('Permiso de ubicación denegado. Escribe tu ciudad o barrio para continuar.')
         setStatus('error')
       },
       { timeout: 10_000, maximumAge: 300_000 },

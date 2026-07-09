@@ -105,8 +105,8 @@ export function AddressAutocomplete({ onSelect, placeholder, disabled }: Props) 
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={onKeyDown}
         onFocus={() => { if (suggestions.length) setOpen(true) }}
-        placeholder={placeholder ?? 'Escribe tu direccion'}
-        aria-label="Direccion"
+        placeholder={placeholder ?? 'Escribe tu dirección'}
+        aria-label="Dirección"
         autoComplete="off"
         className="w-full px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0 disabled:opacity-60"
       />

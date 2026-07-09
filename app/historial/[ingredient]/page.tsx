@@ -13,7 +13,7 @@ function toLabel(slug: string): string {
 
 export async function generateMetadata({ params }: Props) {
   const { ingredient } = await params
-  return { title: `Historial de ${toLabel(ingredient)} - Farmi` }
+  return { title: `Historial de ${toLabel(ingredient)}` }
 }
 
 export default async function HistorialPage({ params }: Props) {

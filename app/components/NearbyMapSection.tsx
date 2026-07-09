@@ -65,12 +65,12 @@ export function NearbyMapSection() {
               <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
               </svg>
-              Usar mi ubicacion
+              Usar mi ubicación
             </button>
             <div className="flex-1">
               <AddressAutocomplete
                 onSelect={(s) => goTo(s.lat, s.lng)}
-                placeholder="O escribe tu direccion o barrio"
+                placeholder="O escribe tu dirección o barrio"
               />
             </div>
           </div>
@@ -79,7 +79,7 @@ export function NearbyMapSection() {
         {busy && (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-[#717786]">
             <div className="w-9 h-9 border-4 border-white/50 border-t-primary rounded-full animate-spin" />
-            <p className="text-[14px]">{status === 'locating' ? 'Obteniendo tu ubicacion...' : 'Buscando farmacias...'}</p>
+            <p className="text-[14px]">{status === 'locating' ? 'Obteniendo tu ubicación...' : 'Buscando farmacias...'}</p>
           </div>
         )}
 
@@ -90,7 +90,7 @@ export function NearbyMapSection() {
             </p>
             <AddressAutocomplete
               onSelect={(s) => searchByCoords(s.lat, s.lng)}
-              placeholder="Escribe tu direccion o barrio (ej: Calle 53 # 25-10, Bogota)"
+              placeholder="Escribe tu dirección o barrio (ej: Calle 53 # 25-10, Bogotá)"
             />
           </div>
         )}
@@ -98,7 +98,7 @@ export function NearbyMapSection() {
         {status === 'ready' && pharmacies.length === 0 && (
           <div className="text-center py-16 px-5">
             <p className="text-[15px] font-semibold text-[#1a1b1f] mb-1">Sin resultados confiables</p>
-            <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 2 km. Prueba con otra direccion.</p>
+            <p className="text-[13px] text-[#717786]">No encontramos farmacias en OpenStreetMap dentro de 2 km. Prueba con otra dirección.</p>
           </div>
         )}
 
@@ -108,7 +108,7 @@ export function NearbyMapSection() {
             <div className="px-5 pt-4">
               <AddressAutocomplete
                 onSelect={(s) => goTo(s.lat, s.lng)}
-                placeholder="Cambiar ubicacion: escribe tu direccion"
+                placeholder="Cambiar ubicación: escribe tu dirección"
               />
             </div>
 
@@ -137,7 +137,7 @@ export function NearbyMapSection() {
 
             <p className="flex items-center gap-1.5 px-5 pt-3 text-[11px] font-semibold text-primary">
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
-              Arrastra el punto azul del mapa para fijar tu direccion
+              Arrastra el punto azul del mapa para fijar tu dirección
             </p>
             <div className="relative h-[340px] sm:h-[440px] w-full mt-1">
               <PharmacyMap origin={origin} pharmacies={shown} onPinDrag={(lat, lng) => setPendingPin({ lat, lng })} />
@@ -149,7 +149,7 @@ export function NearbyMapSection() {
                   <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
                   </svg>
-                  Buscar farmacias aqui
+                  Buscar farmacias aquí
                 </button>
               )}
             </div>

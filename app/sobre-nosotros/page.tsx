@@ -2,9 +2,9 @@
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Sobre nosotros - Farmi',
+  title: 'Sobre nosotros',
   description:
-    'Farmi es una plataforma gratuita que compara precios de medicamentos en las principales farmacias de Colombia. Conoce nuestra mision y como funcionamos.',
+    'Farmi es una plataforma gratuita que compara precios de medicamentos en las principales farmacias de Colombia. Conoce nuestra misión y como funcionamos.',
 }
 
 const PHARMACIES = [
@@ -19,24 +19,24 @@ const PHARMACIES = [
 const HOW_STEPS = [
   {
     n: '01',
-    title: 'Consulta publica',
+    title: 'Consulta pública',
     body: 'Accedemos a los precios directamente desde las APIs y sitios web oficiales de cada farmacia, igual que lo haria cualquier usuario.',
   },
   {
     n: '02',
     title: 'Normalizacion',
-    body: 'Procesamos los datos para identificar el principio activo, concentracion, presentacion y cantidad de cada producto y hacer comparaciones justas.',
+    body: 'Procesamos los datos para identificar el principio activo, concentracion, presentación y cantidad de cada producto y hacer comparaciones justas.',
   },
   {
     n: '03',
-    title: 'Presentacion',
-    body: 'Te mostramos los resultados ordenados por precio con el ahorro potencial, para que puedas decidir de forma rapida e informada.',
+    title: 'Presentación',
+    body: 'Te mostramos los resultados ordenados por precio con el ahorro potencial, para que puedas decidir de forma rápida e informada.',
   },
 ]
 
 const VALUES = [
   { title: 'Transparencia', body: 'Nunca ocultamos de donde viene cada precio. Cada resultado tiene un enlace directo a la farmacia.' },
-  { title: 'Gratuidad', body: 'La plataforma es completamente gratuita para los usuarios. No cobramos comision por ninguna compra.' },
+  { title: 'Gratuidad', body: 'La plataforma es completamente gratuita para los usuarios. No cobramos comisión por ninguna compra.' },
   { title: 'Neutralidad', body: 'No favorecemos ninguna farmacia. Mostramos todos los resultados disponibles sin patrocinios que alteren el orden.' },
   { title: 'Privacidad', body: 'No vendemos tus datos. El registro es opcional y solo sirve para guardar favoritos y listas.' },
 ]
@@ -67,7 +67,7 @@ export default function SobreNosotrosPage() {
       <div className="grid grid-cols-2 gap-3 mb-10">
         <img
           src="/fotos/logo-farmi-celular.webp"
-          alt="Celular mostrando el logo de Farmi frente a una drogueria"
+          alt="Celular mostrando el logo de Farmi frente a una droguería"
           width={900}
           height={1350}
           loading="lazy"
@@ -85,7 +85,7 @@ export default function SobreNosotrosPage() {
         />
       </div>
 
-      {/* Mision */}
+      {/* Misión */}
       <div className="bg-primary/5 border border-primary/15 rounded-2xl p-5 sm:p-6 mb-8">
         <img
           src="/fotos/contando-monedas.webp"
@@ -96,24 +96,24 @@ export default function SobreNosotrosPage() {
           decoding="async"
           className="w-full h-44 sm:h-56 object-cover rounded-xl mb-4"
         />
-        <p className="text-[11px] font-bold tracking-widest uppercase text-primary mb-2">Nuestra mision</p>
+        <p className="text-[11px] font-bold tracking-widest uppercase text-primary mb-2">Nuestra misión</p>
         <p className="text-[15px] font-semibold text-[#1a1b1f] leading-relaxed">
-          Hacer que el acceso a medicamentos asequibles sea simple, rapido y transparente para cualquier
+          Hacer que el acceso a medicamentos asequibles sea simple, rápido y transparente para cualquier
           persona en Colombia, sin importar donde viva o cuanto tiempo tenga.
         </p>
       </div>
 
-      {/* Que hacemos */}
+      {/* Qué hacemos */}
       <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
-        <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-3">Que hacemos</h2>
+        <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-3">Qué hacemos</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-3">
-          Farmi compara los precios publicados por las principales farmacias y droguerias de Colombia
-          en tiempo casi real. Buscamos por nombre generico o de marca y agrupamos los resultados
+          Farmi compara los precios publicados por las principales farmacias y droguerías de Colombia
+          en tiempo casi real. Buscamos por nombre genérico o de marca y agrupamos los resultados
           equivalentes para que puedas ver de un vistazo cuanto puedes ahorrar.
         </p>
         <p className="text-[13px] text-[#414755] leading-relaxed">
           <strong className="text-[#1a1b1f]">No somos una farmacia.</strong> No vendemos medicamentos,
-          no gestionamos inventarios y no procesamos ninguna transaccion. Simplemente te mostramos donde
+          no gestionamos inventarios y no procesamos ninguna transacción. Simplemente te mostramos donde
           esta el mejor precio y te llevamos al sitio oficial de la farmacia.
         </p>
       </section>
@@ -136,9 +136,9 @@ export default function SobreNosotrosPage() {
         </p>
       </section>
 
-      {/* Como funciona */}
+      {/* Cómo funciona */}
       <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
-        <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-5">Como obtenemos los precios</h2>
+        <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-5">Cómo obtenemos los precios</h2>
         <div className="flex flex-col gap-5">
           {HOW_STEPS.map((s) => (
             <div key={s.n} className="flex gap-4">
@@ -152,7 +152,7 @@ export default function SobreNosotrosPage() {
         </div>
         <div className="mt-5 pt-4 border-t border-[#e5e7eb]">
           <p className="text-[12px] text-[#717786] leading-relaxed">
-            Los precios se consultan en el momento de cada busqueda. Pueden existir diferencias con el
+            Los precios se consultan en el momento de cada búsqueda. Pueden existir diferencias con el
             precio final en tienda por cambios de la farmacia, disponibilidad de stock o precios
             diferenciados por ciudad o canal. Siempre verifica el precio definitivo en el sitio de la
             farmacia antes de comprar.
@@ -173,13 +173,13 @@ export default function SobreNosotrosPage() {
         </div>
       </section>
 
-      {/* Aviso medico */}
+      {/* Aviso médico */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 sm:p-6 mb-8">
         <p className="text-[12px] font-bold text-amber-700 uppercase tracking-widest mb-2">Aviso importante</p>
         <p className="text-[13px] text-amber-900 leading-relaxed">
-          La informacion publicada en Farmi tiene caracter exclusivamente informativo y de
-          orientacion de precios. <strong>No sustituye la asesorıa medica o farmaceutica profesional.</strong>{' '}
-          Consulta siempre a un medico o farmaceutico antes de iniciar, modificar o suspender cualquier
+          La información publicada en Farmi tiene carácter exclusivamente informativo y de
+          orientación de precios. <strong>No sustituye la asesorıa médica o farmacéutica profesional.</strong>{' '}
+          Consulta siempre a un médico o farmacéutico antes de iniciar, modificar o suspender cualquier
           tratamiento.
         </p>
       </div>

@@ -59,7 +59,7 @@ function popupHtml(p: NearbyPharmacyView): string {
     <p style="font-weight:700;font-size:13px;margin:0 0 2px;color:#1a1b1f">${escapeHtml(p.name)}</p>
     <p style="font-size:12px;margin:0 0 2px;color:#006e28;font-weight:600">a ${formatDistance(p.distanceKm)} &middot; ${formatTripShort(p.distanceKm)}</p>
     <p style="font-size:11px;margin:0 0 6px;color:#717786">${open}</p>
-    <a href="${directionsUrl(p.lat, p.lng)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;font-weight:600;color:#0058bc;text-decoration:none">Como llegar &rarr;</a>
+    <a href="${directionsUrl(p.lat, p.lng)}" target="_blank" rel="noopener noreferrer" style="font-size:12px;font-weight:600;color:#0058bc;text-decoration:none">Cómo llegar &rarr;</a>
   </div>`
 }
 
@@ -98,7 +98,7 @@ export default function PharmacyMap({ origin, pharmacies, onPinDrag }: Props) {
           onPinDragRef.current?.(lat, lng)
         })
     } else {
-      userMarker.bindPopup('Tu ubicacion')
+      userMarker.bindPopup('Tu ubicación')
     }
 
     const group = L.featureGroup()
