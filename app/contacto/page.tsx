@@ -35,6 +35,17 @@ export default function ContactoPage() {
         </p>
       </div>
 
+      {/* Foto */}
+      <img
+        src="/fotos/loratadina-monedas.webp"
+        alt="Caja de loratadina 10 mg junto a monedas colombianas"
+        width={1200}
+        height={800}
+        loading="lazy"
+        decoding="async"
+        className="w-full h-40 sm:h-52 object-cover rounded-2xl border border-white/60 shadow-sm mb-8"
+      />
+
       {/* Aviso medico */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-8">
         <p className="text-[12px] text-amber-900 leading-relaxed">
@@ -89,6 +100,15 @@ export default function ContactoPage() {
 
       {/* Precio incorrecto */}
       <section className="bg-primary/5 border border-primary/15 rounded-2xl p-5 sm:p-6 mb-8">
+        <img
+          src="/fotos/preocupado-precios.webp"
+          alt="Persona preocupada revisando los precios de sus medicamentos"
+          width={900}
+          height={1165}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-36 sm:h-44 object-cover object-[center_30%] rounded-xl mb-4"
+        />
         <h2 className="text-[14px] font-bold text-primary mb-2">Reportar un precio incorrecto</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-3">
           Si el precio que ves en Farmi no coincide con el que muestra la farmacia, escribenos con:

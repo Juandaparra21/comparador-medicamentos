@@ -73,14 +73,25 @@ export default function CercanasClient() {
 
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-3xl py-8 sm:py-12 w-full">
-      <header className="mb-6">
-        <h1 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[#1a1b1f]">
-          Farmacias cercanas
-        </h1>
-        <p className="text-[14px] text-[#717786] mt-1.5 leading-relaxed">
-          Farmacias a 2 km a la redonda, en tiempo real desde OpenStreetMap. Usa tu ubicacion o
-          escribe tu direccion. Los precios, cuando existen, vienen de las farmacias en linea que comparamos.
-        </p>
+      <header className="mb-6 grid grid-cols-1 sm:grid-cols-[1fr_200px] gap-4 items-center">
+        <div>
+          <h1 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[#1a1b1f]">
+            Farmacias cercanas
+          </h1>
+          <p className="text-[14px] text-[#717786] mt-1.5 leading-relaxed">
+            Farmacias a 2 km a la redonda, en tiempo real desde OpenStreetMap. Usa tu ubicacion o
+            escribe tu direccion. Los precios, cuando existen, vienen de las farmacias en linea que comparamos.
+          </p>
+        </div>
+        <img
+          src="/fotos/usando-farmi-calle.webp"
+          alt="Persona usando Farmi en la calle para ver farmacias cercanas en el mapa"
+          width={900}
+          height={1350}
+          loading="lazy"
+          decoding="async"
+          className="hidden sm:block w-full h-[150px] object-cover rounded-2xl border border-white/60 shadow-sm"
+        />
       </header>
 
       {/* Location controls */}
@@ -119,6 +130,24 @@ export default function CercanasClient() {
           </p>
         )}
       </div>
+
+      {/* Foto ilustrativa mientras el usuario aun no ha buscado */}
+      {status === 'idle' && (
+        <div className="relative rounded-2xl overflow-hidden border border-white/60 shadow-sm mb-5">
+          <img
+            src="/fotos/explorando-mapa.webp"
+            alt="Persona explorando el mapa de farmacias cercanas de Farmi desde su celular"
+            width={900}
+            height={1350}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-[200px] sm:h-[260px] object-cover object-[center_35%]"
+          />
+          <p className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent text-white text-[13px] font-semibold px-4 pt-8 pb-3">
+            Encuentra la farmacia mas cercana y llega con indicaciones paso a paso
+          </p>
+        </div>
+      )}
 
       {/* Medication price cross-reference */}
       {status === 'ready' && pharmacies.length > 0 && (

@@ -121,14 +121,16 @@ export default function CarritoClient() {
       </div>
 
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-white/70 backdrop-blur-[20px] border border-white/50 flex items-center justify-center">
-            <svg className="w-8 h-8 text-[#c1c6d7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 01-8 0" />
-            </svg>
-          </div>
+        <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-5">
+          <img
+            src="/fotos/productos-y-monedas.webp"
+            alt="Suero rehidratante, loratadina y condones junto a monedas colombianas"
+            width={800}
+            height={800}
+            loading="lazy"
+            decoding="async"
+            className="w-44 h-44 object-cover rounded-2xl border border-white/50 shadow-sm"
+          />
           <div className="text-center">
             <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">Tu carrito esta vacio</p>
             <p className="text-[13px] text-[#717786]">

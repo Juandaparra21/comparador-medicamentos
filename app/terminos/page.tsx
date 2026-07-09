@@ -93,7 +93,7 @@ El diseño, codigo y contenido propio de Farmi son propiedad de sus desarrollado
     title: '10. Privacidad de datos',
     body: `Farmi no solicita datos personales sensibles para el uso basico de la plataforma. En caso de registro voluntario, los datos proporcionados se utilizan unicamente para funcionalidades como guardar favoritos o historial de busquedas, y no son compartidos con terceros con fines comerciales.
 
-En desarrollo: politica de privacidad completa conforme a la Ley 1581 de 2012 (Habeas Data, Colombia).`,
+El tratamiento de datos personales se rige por nuestra Politica de privacidad, disponible en farmi.com.co/privacidad, conforme a la Ley 1581 de 2012 (Habeas Data, Colombia).`,
   },
   {
     title: '11. Ley aplicable y resolucion de controversias',

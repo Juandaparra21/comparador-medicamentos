@@ -184,6 +184,17 @@ export default function SobreNosotrosPage() {
         </p>
       </div>
 
+      {/* Hecho en Colombia */}
+      <img
+        src="/fotos/hecho-en-colombia.webp"
+        alt="Sello Hecho en Colombia con la bandera y el skyline de una ciudad colombiana"
+        width={800}
+        height={800}
+        loading="lazy"
+        decoding="async"
+        className="w-full max-w-[280px] mx-auto h-auto rounded-2xl shadow-sm mb-8"
+      />
+
       {/* CTA */}
       <div className="flex flex-wrap gap-3">
         <Link

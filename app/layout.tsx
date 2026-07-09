@@ -32,14 +32,12 @@ export const metadata: Metadata = {
       'Encuentra el mejor precio en medicamentos en las farmacias de Colombia. Gratis, sin registro y en tiempo real.',
     url: SITE_URL,
     locale: 'es_CO',
-    images: [{ url: '/farmi_logo.png', width: 1254, height: 1254, alt: 'Farmi' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Farmi - Comparador de medicamentos en Colombia',
     description:
-      'Compara precios de medicamentos en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo y mas.',
-    images: ['/farmi_logo.png'],
+      'Compara precios de medicamentos en La Rebaja, Cruz Verde, Colsubsidio, Farmatodo y más.',
   },
   robots: {
     index: true,
@@ -166,7 +164,7 @@ export default function RootLayout({
               {/* Disclaimer */}
               <div className="border-t border-[#c1c6d7]/30 pt-5">
                 <p className="text-[11px] text-[#717786] leading-relaxed">
-                  <strong className="text-[#414755]">Aviso legal:</strong> Farmi es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. Farmi no vende medicamentos ni interviene en ningun proceso de compra. Las marcas y logos de las farmacias pertenecen a sus respectivos titulares; Farmi es un comparador independiente y no esta afiliado ni patrocinado por ellas. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a farmiya001@gmail.com.
+                  <strong className="text-[#414755]">Aviso legal:</strong> Farmi es una plataforma de comparacion de precios y no sustituye la asesoria medica o farmaceutica profesional. Los precios mostrados son referenciales, obtenidos de fuentes publicas, y pueden variar. Farmi no vende medicamentos ni interviene en ningun proceso de compra. Las marcas y logos de las farmacias pertenecen a sus respectivos titulares; Farmi es un comparador independiente y no esta afiliado ni patrocinado por ellas. Conforme a la Ley 1581 de 2012 puedes ejercer tus derechos de Habeas Data escribiendo a farmicolombia@gmail.com.
                 </p>
                 <p className="text-[11px] text-[#c1c6d7] mt-3">
                   &copy; {new Date().getFullYear()} Farmi. Colombia.

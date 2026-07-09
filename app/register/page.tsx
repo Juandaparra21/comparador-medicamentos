@@ -23,6 +23,16 @@ export default function RegisterPage() {
           </p>
         </div>
 
+        <img
+          src="/fotos/farmi-en-tu-mano.webp"
+          alt="Mano sosteniendo un celular con Farmi abierto frente a una drogueria"
+          width={900}
+          height={1350}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-[140px] object-cover object-[center_60%] rounded-2xl shadow-sm mb-4"
+        />
+
         <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-6 sm:p-7">
           <RegisterClient />
         </div>

@@ -277,6 +277,46 @@ export function AppShowcase() {
   )
 }
 
+/* ── Made in Colombia (brand strip) ────────────────────────────────── */
+
+export function MadeInColombia() {
+  return (
+    <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-32">
+      <div className={`${CARD} p-5 sm:p-8`}>
+        <div className="grid grid-cols-2 sm:grid-cols-[220px_1fr_220px] gap-4 sm:gap-8 items-center">
+          <img
+            src="/fotos/hecho-en-colombia.webp"
+            alt="Sello Hecho en Colombia con la bandera y el skyline de una ciudad colombiana"
+            width={800}
+            height={800}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-auto rounded-2xl"
+          />
+          <div className="col-span-2 sm:col-span-1 order-last sm:order-none text-center">
+            <h2 className="text-[20px] sm:text-[26px] font-bold tracking-[-0.02em] text-[#1d1d1f] leading-tight">
+              Hecho en Colombia, para los colombianos
+            </h2>
+            <p className="text-[13px] sm:text-[15px] text-[#6e6e73] mt-2 leading-relaxed">
+              Farmi es una plataforma colombiana e independiente. Comparamos los precios
+              reales de las farmacias del pais para que pagues menos por tus medicamentos.
+            </p>
+          </div>
+          <img
+            src="/fotos/logo-farmi-app.webp"
+            alt="Logo de Farmi en la pantalla de un celular"
+            width={800}
+            height={800}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-auto rounded-2xl"
+          />
+        </div>
+      </div>
+    </section>
+  )
+}
+
 /* ── FAQ (native details, no JS) ───────────────────────────────────── */
 
 const FAQS: { q: string; a: string }[] = [

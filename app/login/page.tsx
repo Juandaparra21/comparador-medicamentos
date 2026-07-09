@@ -23,6 +23,16 @@ export default function LoginPage() {
           </p>
         </div>
 
+        <img
+          src="/fotos/logo-farmi-app.webp"
+          alt="Logo de Farmi en la pantalla de un celular"
+          width={800}
+          height={800}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-[140px] object-cover rounded-2xl shadow-sm mb-4"
+        />
+
         <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-6 sm:p-7">
           <LoginClient />
         </div>
