@@ -48,7 +48,7 @@ export function RadioFilter({
                   {opt.l}
                 </span>
                 {highlight && opt.v === highlight && (
-                  <span className="text-[11px] font-semibold text-primary">Más comun</span>
+                  <span className="text-[11px] font-semibold text-primary">Más común</span>
                 )}
               </span>
             </button>

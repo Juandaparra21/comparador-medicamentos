@@ -15,66 +15,67 @@ interface QuickReply {
 }
 
 const INITIAL_REPLIES: QuickReply[] = [
-  { label: 'Algo para el dolor de cabeza?', value: 'sintoma'   },
-  { label: 'Que es un generico?',           value: 'generico'  },
-  { label: 'Como funciona Farmi?',          value: 'como'      },
-  { label: 'Que farmacias comparan?',       value: 'farmacias' },
+  { label: '¿Algo para el dolor de cabeza?', value: 'sintoma'   },
+  { label: '¿Qué es un genérico?',           value: 'generico'  },
+  { label: '¿Cómo funciona Farmi?',          value: 'como'      },
+  { label: '¿Qué farmacias comparan?',       value: 'farmacias' },
 ]
 
 const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
   generico: {
-    text: 'Un medicamento generico tiene exactamente el mismo principio activo, dosis y forma farmaceutica que el de marca. Son equivalentes terapeuticamente y en Colombia estan regulados por el INVIMA. La unica diferencia es el precio: los genericos suelen costar entre 30% y 80% menos.',
+    text: 'Un medicamento genérico tiene exactamente el mismo principio activo, dosis y forma farmacéutica que el de marca. Son equivalentes terapéuticamente y en Colombia están regulados por el INVIMA. La única diferencia es el precio: los genéricos suelen costar entre 30% y 80% menos.',
     replies: [
-      { label: 'Como funciona Farmi?',     value: 'como'   },
+      { label: '¿Cómo funciona Farmi?',    value: 'como'   },
       { label: 'Ver medicamentos baratos', value: 'buscar' },
     ],
   },
   como: {
-    text: 'Escribe el nombre del medicamento en el buscador: puedes usar el nombre generico (ej: ibuprofeno) o el de marca (ej: Advil). Farmi consulta en tiempo real 6 farmacias y muestra los precios de menor a mayor. Si activas tu ubicacion, tambien te mostramos cual farmacia tienes mas cerca.',
+    text: 'Escribe el nombre del medicamento en el buscador: puedes usar el nombre genérico (ej: ibuprofeno) o el de marca (ej: Advil). Farmi consulta en tiempo real 6 farmacias y muestra los precios de menor a mayor. Si activas tu ubicación, también te mostramos cuál farmacia tienes más cerca.',
     replies: [
-      { label: 'Que farmacias comparan?', value: 'farmacias' },
-      { label: 'Buscar un medicamento',   value: 'buscar'    },
+      { label: '¿Qué farmacias comparan?', value: 'farmacias' },
+      { label: 'Buscar un medicamento',    value: 'buscar'    },
     ],
   },
   farmacias: {
     text: 'Comparamos precios en tiempo real en 6 farmacias colombianas:\n\n• Drogas La Rebaja\n• Cruz Verde\n• Cafam\n• Colsubsidio\n• Olimpica Drogueria\n• Farmatodo\n\nLos precios se consultan directamente desde cada farmacia cuando buscas.',
     replies: [
-      { label: 'El precio es exacto?', value: 'precio' },
-      { label: 'Como funciona Farmi?', value: 'como'   },
+      { label: '¿El precio es exacto?', value: 'precio' },
+      { label: '¿Cómo funciona Farmi?', value: 'como'   },
     ],
   },
   precio: {
-    text: 'Los precios son referenciales y se obtienen en tiempo real desde el sitio web de cada farmacia. Pueden variar segun la sede, disponibilidad y promociones del dia. Siempre te recomendamos confirmar el precio final en la farmacia antes de comprar.',
+    text: 'Los precios son referenciales y se obtienen en tiempo real desde el sitio web de cada farmacia. Pueden variar según la sede, disponibilidad y promociones del día. Siempre te recomendamos confirmar el precio final en la farmacia antes de comprar.',
     replies: [
-      { label: 'Que es un generico?',     value: 'generico'  },
-      { label: 'Que farmacias comparan?', value: 'farmacias' },
+      { label: '¿Qué es un genérico?',     value: 'generico'  },
+      { label: '¿Qué farmacias comparan?', value: 'farmacias' },
     ],
   },
   buscar: {
-    text: 'Usa el buscador arriba e intenta con el nombre del principio activo (ej: metformina, losartan, atorvastatina). Si no encuentras resultados, prueba con el nombre de marca o verifica la ortografia.',
+    text: 'Usa el buscador arriba e intenta con el nombre del principio activo (ej: metformina, losartan, atorvastatina). Si no encuentras resultados, prueba con el nombre de marca o verifica la ortografía.',
     replies: [
-      { label: 'El precio es exacto?', value: 'precio' },
-      { label: 'Como funciona Farmi?', value: 'como'   },
+      { label: '¿El precio es exacto?', value: 'precio' },
+      { label: '¿Cómo funciona Farmi?', value: 'como'   },
     ],
   },
   ubicacion: {
-    text: 'Puedes activar tu ubicacion con el boton "Mas cercano" en la pagina de resultados, o ver el mapa de farmacias cercanas en la pagina principal. Tu ubicacion nunca se guarda en nuestros servidores.',
+    text: 'Puedes activar tu ubicación con el botón "Más cercano" en la página de resultados, o ver el mapa de farmacias cercanas en la página principal. Tu ubicación nunca se guarda en nuestros servidores.',
     replies: [
-      { label: 'Que farmacias comparan?', value: 'farmacias' },
+      { label: '¿Qué farmacias comparan?', value: 'farmacias' },
     ],
   },
   sintoma: {
-    text: 'Para molestias leves y comunes hay opciones de venta libre. Por ejemplo, para dolor de cabeza o fiebre leve se suele usar acetaminofen, y para dolor o inflamacion, ibuprofeno. Lee siempre la etiqueta y respeta la dosis maxima.\n\nEsto es solo orientativo: soy una IA, no reemplaza la consulta con un medico o quimico farmaceutico y Farmi no se hace responsable. Si los sintomas son fuertes o duran mas de 3 dias, consulta a un medico.',
+    text: 'Para molestias leves y comunes hay opciones de venta libre. Por ejemplo, para dolor de cabeza o fiebre leve se suele usar acetaminofén, y para dolor o inflamación, ibuprofeno. Lee siempre la etiqueta y respeta la dosis máxima.\n\nEsto es solo orientativo: soy una IA, no reemplaza la consulta con un médico o químico farmacéutico y Farmi no se hace responsable. Si los síntomas son fuertes o duran más de 3 días, consulta a un médico.',
     replies: [
-      { label: 'Buscar un medicamento',   value: 'buscar'    },
-      { label: 'Que es un generico?',     value: 'generico'  },
+      { label: 'Buscar un medicamento', value: 'buscar'   },
+      { label: '¿Qué es un genérico?',  value: 'generico' },
     ],
   },
 }
 
 // Keyword fallback used in FAQ mode and when an AI call fails.
+// Accents are stripped so "genérico" and "generico" match the same keywords.
 function faqAnswer(text: string): string {
-  const t = text.toLowerCase()
+  const t = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   if (t.includes('generic'))                          return RESPONSES.generico.text
   if (t.includes('farmacia') || t.includes('compar')) return RESPONSES.farmacias.text
   if (t.includes('precio')   || t.includes('exact'))  return RESPONSES.precio.text
@@ -83,7 +84,7 @@ function faqAnswer(text: string): string {
   if (t.includes('funciona') || t.includes('usar') || t.includes('como')) return RESPONSES.como.text
   if (/(dolor|fiebre|gripa|gripe|tos|alergia|acidez|congesti|malestar|sintoma|tomar para|que me tomo|recomienda)/.test(t))
     return RESPONSES.sintoma.text
-  return 'Puedo ayudarte a buscar medicamentos, comparar precios entre farmacias, encontrar las mas cercanas y orientarte sobre medicamentos de venta libre para molestias leves. Preguntame algo concreto.'
+  return 'Puedo ayudarte a buscar medicamentos, comparar precios entre farmacias, encontrar las más cercanas y orientarte sobre medicamentos de venta libre para molestias leves. Pregúntame algo concreto.'
 }
 
 function nl2br(text: string) {
@@ -103,7 +104,7 @@ function mkMsg(from: Message['from'], text: string): Message {
 export function ChatAssistant() {
   const [open,      setOpen]      = useState(false)
   const [messages,  setMessages]  = useState<Message[]>([
-    mkMsg('bot', 'Hola, soy Farmi. Te ayudo a encontrar el medicamento mas barato en Colombia y puedo orientarte sobre medicamentos de venta libre para molestias leves.'),
+    mkMsg('bot', 'Hola, soy Farmi. Te ayudo a encontrar el medicamento más barato en Colombia y puedo orientarte sobre medicamentos de venta libre para molestias leves.'),
   ])
   const [replies,   setReplies]   = useState<QuickReply[]>(INITIAL_REPLIES)
   const [bubble,    setBubble]    = useState(true)
@@ -201,7 +202,7 @@ export function ChatAssistant() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-bold leading-tight">Farmi Asistente</p>
-              <p className="text-[11px] text-white/75 leading-tight">{aiEnabled ? 'Asistente con IA' : 'En linea ahora'}</p>
+              <p className="text-[11px] text-white/75 leading-tight">{aiEnabled ? 'Asistente con IA' : 'En línea ahora'}</p>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -296,7 +297,7 @@ export function ChatAssistant() {
           {/* Disclaimer — siempre visible */}
           <div className="px-4 py-2 border-t border-[#f0f1f5] bg-white shrink-0">
             <p className="text-[10px] text-[#9ca3af] text-center leading-snug">
-              Asistente con IA, solo orientativo y para medicamentos de venta libre. No reemplaza al medico ni al quimico farmaceutico; Farmi no se hace responsable del uso de esta informacion.
+              Asistente con IA, solo orientativo y para medicamentos de venta libre. No reemplaza al médico ni al químico farmacéutico; Farmi no se hace responsable del uso de esta información.
             </p>
           </div>
         </div>
@@ -306,7 +307,7 @@ export function ChatAssistant() {
       <div className="fixed bottom-4 right-4 sm:right-6 z-50 flex flex-col items-end gap-2">
         {bubble && !open && (
           <div className="bg-white text-[#1a1b1f] text-[13px] font-semibold px-4 py-2.5 rounded-2xl rounded-br-sm shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-[#e5e7eb] max-w-[220px] leading-snug animate-[fadeInUp_0.4s_ease]">
-            Encuentra el medicamento mas barato
+            Encuentra el medicamento más barato
             <span className="block text-[11px] text-[#717786] font-normal mt-0.5">Te ayudo en segundos</span>
           </div>
         )}

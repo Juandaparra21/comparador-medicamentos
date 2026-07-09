@@ -178,7 +178,7 @@ export default function PrivacidadPage() {
           farmicolombia@gmail.com
         </a>
         <p className="text-[11px] text-[#717786] mt-2">
-          Asunto del correo: "Habeas Data - [tu nombre]" · Plazo de respuesta: 10 días hábiles.
+          Asunto del correo: &quot;Habeas Data - [tu nombre]&quot; · Plazo de respuesta: 10 días hábiles.
         </p>
       </div>
 

@@ -108,7 +108,7 @@ function CallbackInner() {
           subscription.unsubscribe()
           // No code, no hash tokens, no session materialized: the redirect never
           // carried a valid credential. Show why instead of bouncing to home.
-          setErrorDetail('No se recibio ningún código de acceso valido en el enlace de retorno.')
+          setErrorDetail('No se recibió ningún código de acceso válido en el enlace de retorno.')
         }
       }, 3_000)
     }

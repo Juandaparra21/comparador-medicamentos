@@ -282,7 +282,7 @@ export function PriceHistoryChart({ histories }: Props) {
         {allLowHistory && (
           <div className="ml-auto">
             <span className="text-[10px] font-bold text-secondary bg-secondary/10 border border-secondary/20 px-2 py-0.5 rounded-full whitespace-nowrap">
-              Min. historico: {formatCOP(allLow)} · {allLowHistory.pharmacy}
+              Mín. histórico: {formatCOP(allLow)} · {allLowHistory.pharmacy}
             </span>
           </div>
         )}

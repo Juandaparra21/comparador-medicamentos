@@ -104,10 +104,10 @@ function translateError(msg: string): string {
   if (msg.includes('Password should be'))        return 'La contraseña debe tener al menos 6 caracteres.'
   if (msg.includes('rate limit') || msg.includes('over_email_send_rate_limit'))
     return 'Demasiados intentos. Espera unos minutos.'
-  if (msg.includes('signup_disabled'))           return 'El registro de nuevas cuentas esta desactivado temporalmente.'
+  if (msg.includes('signup_disabled'))           return 'El registro de nuevas cuentas está desactivado temporalmente.'
   if (msg.includes('Database error'))            return 'Error interno. Intenta de nuevo en unos minutos.'
-  if (msg.includes('invalid format'))            return 'El formato del correo no es valido.'
+  if (msg.includes('invalid format'))            return 'El formato del correo no es válido.'
   if (msg.includes('network') || msg.includes('fetch'))
-    return 'Error de conexion. Verifica tu internet.'
-  return `Ocurrio un error. Intenta de nuevo. (${msg})`
+    return 'Error de conexión. Verifica tu internet.'
+  return `Ocurrió un error. Intenta de nuevo. (${msg})`
 }

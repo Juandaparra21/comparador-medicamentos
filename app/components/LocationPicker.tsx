@@ -40,7 +40,7 @@ export function LocationPicker() {
               Mostrando farmacias en {location.city}
             </p>
             <p className="text-[11px] text-secondary/70 mt-0.5">
-              Ubicación detectada automaticamente
+              Ubicación detectada automáticamente
             </p>
           </div>
           <button

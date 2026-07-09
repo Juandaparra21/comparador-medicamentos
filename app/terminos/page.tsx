@@ -23,7 +23,7 @@ Farmi no anuncia ni promociona medicamentos de venta bajo fórmula médica. Resp
   },
   {
     title: '3. Naturaleza de la información de precios',
-    body: `Los precios mostrados en Farmi corresponden a los precios de lista (precios públicos) que cada farmacia o droguería pública en sus canales oficiales. Se obtienen de fuentes públicas (sitios web, APIs oficiales y fuentes equivalentes) con fines estrictamente informativos.
+    body: `Los precios mostrados en Farmi corresponden a los precios de lista (precios públicos) que cada farmacia o droguería publica en sus canales oficiales. Se obtienen de fuentes públicas (sitios web, APIs oficiales y fuentes equivalentes) con fines estrictamente informativos.
 
 Estos precios son propiedad de cada farmacia y NO son fijados, definidos ni controlados por Farmi. Farmi únicamente los recopila y los muestra para facilitar la comparación; no son precios nuestros.
 
@@ -62,7 +62,7 @@ Antes de iniciar, modificar o suspender cualquier tratamiento farmacológico, co
     title: '6. Limitación de responsabilidad',
     body: `El servicio se presta "tal cual" y "según disponibilidad", sin garantías de ningún tipo sobre la exactitud, vigencia, completitud o disponibilidad de la información.
 
-En la máxima medida permitida por la ley aplicable, Farmi y sus desarrolladores no serán responsables por danos o perjuicios directos, indirectos, incidentales o consecuenciales derivados de:
+En la máxima medida permitida por la ley aplicable, Farmi y sus desarrolladores no serán responsables por daños o perjuicios directos, indirectos, incidentales o consecuenciales derivados de:
 
 - El uso o la imposibilidad de uso de la plataforma.
 - Diferencias entre los precios mostrados y los precios reales en la farmacia.
@@ -103,7 +103,7 @@ Cualquier controversia derivada del uso de la plataforma se procurará resolver 
   },
   {
     title: '12. Modificaciones',
-    body: `Farmi se reserva el derecho de modificar estas condiciones en cualquier momento. Los cambios se publicarán en esta misma página. El uso continuado de la plataforma después de una modificación implica la aceptacion de los nuevos términos.`,
+    body: `Farmi se reserva el derecho de modificar estas condiciones en cualquier momento. Los cambios se publicarán en esta misma página. El uso continuado de la plataforma después de una modificación implica la aceptación de los nuevos términos.`,
   },
 ]
 

@@ -12,13 +12,13 @@ interface StrengthResult { score: number; label: string; color: string; criteria
 function analyzePassword(pwd: string): StrengthResult {
   const criteria: Criterion[] = [
     { label: 'Al menos 8 caracteres',       met: pwd.length >= 8 },
-    { label: 'Letra mayuscula (A-Z)',        met: /[A-Z]/.test(pwd) },
-    { label: 'Letra minuscula (a-z)',        met: /[a-z]/.test(pwd) },
+    { label: 'Letra mayúscula (A-Z)',        met: /[A-Z]/.test(pwd) },
+    { label: 'Letra minúscula (a-z)',        met: /[a-z]/.test(pwd) },
     { label: 'Número (0-9)',                 met: /[0-9]/.test(pwd) },
     { label: 'Carácter especial (!@#$...)', met: /[^A-Za-z0-9]/.test(pwd) },
   ]
   const score = pwd.length === 0 ? 0 : criteria.filter((c) => c.met).length
-  const labels = ['', 'Muy debil', 'Debil', 'Regular', 'Fuerte', 'Muy fuerte']
+  const labels = ['', 'Muy débil', 'Débil', 'Regular', 'Fuerte', 'Muy fuerte']
   const colors = ['', '#ef4444', '#f97316', '#eab308', '#22c55e', '#16a34a']
   return { score, label: labels[score] ?? '', color: colors[score] ?? '', criteria }
 }
@@ -45,7 +45,7 @@ export default function RegisterClient() {
     setError('')
     if (!name.trim())        return setError('Ingresa tu nombre.')
     if (!email.trim())       return setError('Ingresa tu correo electrónico.')
-    if (strength.score < 3)  return setError('La contraseña es demasiado debil.')
+    if (strength.score < 3)  return setError('La contraseña es demasiado débil.')
     if (password !== confirm) return setError('Las contraseñas no coinciden.')
     setLoading(true)
     const err = await signUp(email.trim(), password, name.trim())
