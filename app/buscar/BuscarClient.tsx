@@ -15,6 +15,7 @@ import { ProductGroupCard } from '@/app/components/ProductGroupCard'
 import { RadioFilter, QuantitySlider } from '@/app/components/FilterControls'
 import { PriceTracker } from '@/app/components/PriceTracker'
 import { AddressAutocomplete } from '@/app/components/AddressAutocomplete'
+import { BrandLoader } from '@/app/components/BrandLoader'
 import { PriceAlert } from '@/app/components/PriceAlert'
 import { ShareComparison } from '@/app/components/ShareComparison'
 import { RelativeTime } from '@/app/components/RelativeTime'
@@ -95,8 +96,8 @@ export default function BuscarClient() {
   const [nearbyOnly,  setNearbyOnly]  = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
-  // Filtrar por cercania: mostrar solo cadenas con una sede fisica dentro del radio
-  // cercano. Al activarlo, tambien ordena por cercania para que sea coherente.
+  // Filtrar por cercanía: mostrar solo cadenas con una sede fisica dentro del radio
+  // cercano. Al activarlo, también ordena por cercanía para que sea coherente.
   function toggleNearbyOnly() {
     setNearbyOnly((v) => {
       const next = !v
@@ -131,8 +132,8 @@ export default function BuscarClient() {
   const quantitiesAsc     = [...quantities].sort((a, b) => a - b)
 
   const qtyFiltered = qtyFilter ? afterConc.filter(r => r.quantity === qtyFilter) : afterConc
-  // Filtro por cercania: solo farmacias con sede fisica dentro del radio cercano
-  // (las que el lookup de OSM devolvio; por eso estan en `distances`).
+  // Filtro por cercanía: solo farmacias con sede fisica dentro del radio cercano
+  // (las que el lookup de OSM devolvio; por eso están en `distances`).
   const filtered = nearbyOnly && hasDistances
     ? qtyFiltered.filter(r => r.pharmacy in distances)
     : qtyFiltered
@@ -174,8 +175,8 @@ export default function BuscarClient() {
     ? Math.max(...availableFiltered.map(basisVal))
     : null
 
-  // Precio actual mas bajo disponible (para la alerta "hoy lo mas barato esta en $X").
-  // Es un minimo informativo, no una comparacion entre productos distintos.
+  // Precio actual más bajo disponible (para la alerta "hoy lo más barato esta en $X").
+  // Es un mínimo informativo, no una comparación entre productos distintos.
   const currentBestPrice = availableFiltered.length
     ? Math.min(...availableFiltered.map((r) => r.price))
     : null
@@ -194,7 +195,7 @@ export default function BuscarClient() {
   )
 
   // Ahorro real y comparable: SOLO entre el mismo producto exacto (mismos principio
-  // activo, concentracion, presentacion y cantidad) vendido en 2+ farmacias. Asi
+  // activo, concentracion, presentación y cantidad) vendido en 2+ farmacias. Así
   // nunca comparamos productos distintos entre si. Tomamos el grupo con mayor ahorro
   // y descartamos diferencias absurdas (> 3x), que casi siempre son errores de dato.
   const bestSaving = comparisons
@@ -238,9 +239,8 @@ export default function BuscarClient() {
 
       <section className="mx-auto px-4 sm:px-5 max-w-5xl pt-5 pb-16 w-full">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-28 gap-4 text-[#717786]">
-            <div className="w-10 h-10 border-4 border-white/50 border-t-primary rounded-full animate-spin" />
-            <p className="text-[15px]">Buscando precios...</p>
+          <div className="flex justify-center py-28">
+            <BrandLoader label="Buscando precios..." />
           </div>
         ) : !q ? (
           <div className="text-center py-28">
@@ -281,7 +281,7 @@ export default function BuscarClient() {
               </p>
             ) : (
               <p className="text-[15px] text-[#717786]">
-                Intenta con el nombre generico o el principio activo del medicamento
+                Intenta con el nombre genérico o el principio activo del medicamento
               </p>
             )}
           </div>
@@ -445,7 +445,7 @@ export default function BuscarClient() {
               )}
             </div>
 
-            {/* ── Filtros (colapsables: presentacion, concentracion, cantidad) ── */}
+            {/* ── Filtros (colapsables: presentación, concentracion, cantidad) ── */}
             {(presentations.length > 1 || concentrations.length > 1 || quantities.length > 1) && (
               <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm overflow-hidden">
                 <button
@@ -483,7 +483,7 @@ export default function BuscarClient() {
                     {presentations.length > 1 && (
                       <div className="p-5">
                         <RadioFilter
-                          label="Presentacion"
+                          label="Presentación"
                           allLabel="Todas"
                           active={presentFilter}
                           options={presentations}
@@ -527,7 +527,7 @@ export default function BuscarClient() {
                   resultado{filtered.length !== 1 ? 's' : ''}
                   {viewMode === 'grouped' && comparisons.length > 0 && (
                     <span className="text-secondary font-semibold">
-                      {' '}· {comparisons.length} comparacion{comparisons.length !== 1 ? 'es' : ''}
+                      {' '}· {comparisons.length} comparación{comparisons.length !== 1 ? 'es' : ''}
                     </span>
                   )}
                 </p>
@@ -616,7 +616,7 @@ export default function BuscarClient() {
               </div>
             )}
 
-            {/* Precios min / max — segun la base (total o por unidad) */}
+            {/* Precios min / max — según la base (total o por unidad) */}
             {minPrice !== null && maxPrice !== null && (
               <div className="flex flex-wrap gap-2 mb-4">
                 <span className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">

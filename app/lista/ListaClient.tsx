@@ -11,6 +11,7 @@ import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { MedicationImage } from '@/app/components/MedicationImage'
 import { ListComparison } from '@/app/components/ListComparison'
+import { BrandLoader } from '@/app/components/BrandLoader'
 
 function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -79,7 +80,7 @@ export default function ListaClient() {
           </Link>
           <Link href="/login"
             className="px-5 py-2.5 bg-white/70 border border-white/50 text-[#414755] text-[14px] font-semibold rounded-xl hover:bg-white/90 transition-all">
-            Iniciar sesion
+            Iniciar sesión
           </Link>
         </div>
       </section>
@@ -89,7 +90,7 @@ export default function ListaClient() {
   if (dbLoading) {
     return (
       <div className="mx-auto px-4 sm:px-5 max-w-5xl pt-16 flex justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <BrandLoader />
       </div>
     )
   }
@@ -115,7 +116,7 @@ export default function ListaClient() {
         {items.length > 0 && (
           <Link href="/"
             className="text-[13px] font-semibold text-primary hover:opacity-75 transition-opacity whitespace-nowrap">
-            + Agregar mas
+            + Agregar más
           </Link>
         )}
       </div>
@@ -134,7 +135,7 @@ export default function ListaClient() {
           <div className="text-center">
             <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">Tu lista esta vacia</p>
             <p className="text-[13px] text-[#717786]">
-              Busca un medicamento y toca el corazon para guardarlo aqui
+              Busca un medicamento y toca el corazon para guardarlo aquí
             </p>
           </div>
           <Link href="/"
@@ -161,7 +162,7 @@ export default function ListaClient() {
                           ? 'bg-secondary/10 text-secondary border border-secondary/20'
                           : 'bg-primary/10 text-primary border border-primary/20'
                       }`}>
-                        {item.type === 'generic' ? 'Generico' : 'Marca'}
+                        {item.type === 'generic' ? 'Genérico' : 'Marca'}
                       </span>
                       <button onClick={() => remove(item.id)}
                         className="w-6 h-6 flex items-center justify-center rounded-full text-[#c1c6d7] hover:text-red-400 hover:bg-red-50/60 transition-all cursor-pointer shrink-0"
@@ -235,7 +236,7 @@ export default function ListaClient() {
                   {formatCOP(savings)}
                 </p>
                 <p className="text-[10px] text-secondary/70 mt-0.5">
-                  al elegir el precio mas bajo frente al precio de referencia
+                  al elegir el precio más bajo frente al precio de referencia
                 </p>
               </div>
             )}

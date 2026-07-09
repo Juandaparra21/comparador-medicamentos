@@ -4,12 +4,12 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { getBrowserClient } from '@/app/lib/supabase/browser'
+import { BrandLoader } from '@/app/components/BrandLoader'
 
 function Spinner() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-[#717786]">
-      <div className="w-10 h-10 border-4 border-white/50 border-t-primary rounded-full animate-spin" />
-      <p className="text-[14px]">Verificando cuenta...</p>
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <BrandLoader label="Verificando cuenta..." />
     </div>
   )
 }
@@ -33,7 +33,7 @@ function ErrorView({ detail }: { detail: string }) {
         href="/login"
         className="mt-2 px-5 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[14px] font-semibold rounded-xl hover:opacity-90 transition-opacity"
       >
-        Volver a iniciar sesion
+        Volver a iniciar sesión
       </Link>
     </div>
   )
@@ -108,7 +108,7 @@ function CallbackInner() {
           subscription.unsubscribe()
           // No code, no hash tokens, no session materialized: the redirect never
           // carried a valid credential. Show why instead of bouncing to home.
-          setErrorDetail('No se recibio ningun codigo de acceso valido en el enlace de retorno.')
+          setErrorDetail('No se recibio ningún código de acceso valido en el enlace de retorno.')
         }
       }, 3_000)
     }

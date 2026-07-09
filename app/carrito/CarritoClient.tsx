@@ -8,6 +8,7 @@ import { useAuth } from '@/app/context/AuthContext'
 import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { MedicationImage } from '@/app/components/MedicationImage'
+import { BrandLoader } from '@/app/components/BrandLoader'
 
 function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -82,7 +83,7 @@ export default function CarritoClient() {
           </Link>
           <Link href="/login"
             className="px-5 py-2.5 bg-white/70 border border-white/50 text-[#414755] text-[14px] font-semibold rounded-xl hover:bg-white/90 transition-all">
-            Iniciar sesion
+            Iniciar sesión
           </Link>
         </div>
       </section>
@@ -92,7 +93,7 @@ export default function CarritoClient() {
   if (dbLoading) {
     return (
       <div className="mx-auto px-4 sm:px-5 max-w-5xl pt-16 flex justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <BrandLoader />
       </div>
     )
   }
@@ -115,7 +116,7 @@ export default function CarritoClient() {
         {items.length > 0 && (
           <Link href="/"
             className="text-[13px] font-semibold text-primary hover:opacity-75 transition-opacity whitespace-nowrap">
-            + Agregar mas
+            + Agregar más
           </Link>
         )}
       </div>
@@ -134,7 +135,7 @@ export default function CarritoClient() {
           <div className="text-center">
             <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">Tu carrito esta vacio</p>
             <p className="text-[13px] text-[#717786]">
-              Busca un medicamento y toca el icono del carrito para agregarlo aqui
+              Busca un medicamento y toca el icono del carrito para agregarlo aquí
             </p>
           </div>
           <Link href="/"
@@ -160,7 +161,7 @@ export default function CarritoClient() {
                           ? 'bg-secondary/10 text-secondary border border-secondary/20'
                           : 'bg-primary/10 text-primary border border-primary/20'
                       }`}>
-                        {item.type === 'generic' ? 'Generico' : 'Marca'}
+                        {item.type === 'generic' ? 'Genérico' : 'Marca'}
                       </span>
                       <button onClick={() => remove(item.id)}
                         className="w-6 h-6 flex items-center justify-center rounded-full text-[#c1c6d7] hover:text-red-400 hover:bg-red-50/60 transition-all cursor-pointer shrink-0"
