@@ -1,6 +1,8 @@
 import { searchAllPharmacies } from '@/app/lib/scrapers'
 import { getAdminClient } from '@/app/lib/supabase/admin'
+import { normalize } from '@/app/utils/search'
 import type { PharmacyHistory } from '@/app/utils/priceHistoryTypes'
+import type { PharmacyResult } from '@/app/types'
 
 // Stable colors per pharmacy so the history chart looks consistent across views.
 const PHARMACY_COLORS: Record<string, string> = {
@@ -33,8 +35,7 @@ export interface SnapshotRow {
 }
 
 // Cheapest available product per pharmacy for the query, as today's snapshot rows.
-async function buildSnapshotRows(query: string): Promise<SnapshotRow[]> {
-  const results = await searchAllPharmacies(query)
+function buildSnapshotRows(query: string, results: PharmacyResult[]): SnapshotRow[] {
   const day = bogotaDay()
   const cheapest = new Map<string, SnapshotRow>()
 
@@ -65,12 +66,16 @@ export async function registerTracked(query: string, label: string): Promise<boo
 }
 
 // Scrapes current prices and writes one snapshot row per pharmacy for today.
-// Idempotent within a day thanks to the (query, pharmacy, day) unique constraint.
-// Returns the number of pharmacy points written.
+// The same scrape also feeds the featured-discounts pool, so one search does
+// double duty. Idempotent within a day thanks to the (query, pharmacy, day)
+// unique constraint. Returns the number of pharmacy points written.
 export async function snapshotQuery(query: string): Promise<number> {
   const db = getAdminClient()
   if (!db) return 0
-  const rows = await buildSnapshotRows(query)
+  const results = await searchAllPharmacies(query)
+  await harvestDiscounts(results)
+
+  const rows = buildSnapshotRows(query, results)
   if (rows.length === 0) return 0
 
   const { error } = await db
@@ -83,6 +88,92 @@ export async function snapshotQuery(query: string): Promise<number> {
     .update({ last_snapshot_at: new Date().toISOString() })
     .eq('query', query)
   return rows.length
+}
+
+// ── Featured discounts pool (search_results table) ──────────────────────────
+// Every real scrape (live user search or daily cron) refreshes discounted items
+// from ALL pharmacies into search_results, so the home section always shows
+// recent, real offers instead of a one-off snapshot of a single source.
+
+export async function harvestDiscounts(results: PharmacyResult[]): Promise<number> {
+  const db = getAdminClient()
+  if (!db) return 0
+
+  const now = new Date().toISOString()
+  const byId = new Map<string, Record<string, unknown>>()
+  for (const r of results) {
+    if (!r.discount || r.discount <= 0) continue
+    if (r.availability !== 'available') continue
+    // A discount only counts with a real reference price above the sale price.
+    if (!r.referencePrice || r.referencePrice <= r.price) continue
+    // Stable id per pharmacy+product so re-scrapes update instead of duplicating.
+    const id = `${normalize(r.pharmacy)}::${normalize(r.productName)}`
+    byId.set(id, {
+      id,
+      pharmacy:         r.pharmacy,
+      productName:      r.productName,
+      type:             r.type,
+      activeIngredient: r.activeIngredient,
+      concentration:    r.concentration,
+      presentation:     r.presentation,
+      quantity:         r.quantity,
+      price:            r.price,
+      pricePerUnit:     r.pricePerUnit,
+      referencePrice:   r.referencePrice,
+      discount:         r.discount,
+      availability:     r.availability,
+      url:              r.url,
+      lastUpdated:      now,
+    })
+  }
+  if (byId.size === 0) return 0
+
+  const { error } = await db
+    .from('search_results')
+    .upsert([...byId.values()], { onConflict: 'id' })
+  return error ? 0 : byId.size
+}
+
+// Drops discount rows nobody has re-confirmed in 30 days (cron housekeeping).
+export async function purgeStaleDiscounts(): Promise<void> {
+  const db = getAdminClient()
+  if (!db) return
+  const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString()
+  await db.from('search_results').delete().lt('lastUpdated', cutoff)
+}
+
+// ── Latest snapshot for server-rendered price tables (/precio pages) ─────────
+
+export interface LatestSnapshot {
+  day: string // YYYY-MM-DD
+  rows: { pharmacy: string; price: number; productName: string }[]
+}
+
+// Most recent snapshot day for the query, cheapest-first. Lets the /precio
+// pages render real prices (with their date) in the server HTML that crawlers
+// see, while the client still refreshes live on load.
+export async function getLatestSnapshot(query: string): Promise<LatestSnapshot | null> {
+  const db = getAdminClient()
+  if (!db) return null
+
+  const { data } = await db
+    .from('price_snapshots')
+    .select('pharmacy, price, product_name, day')
+    .eq('query', query)
+    .order('day', { ascending: false })
+    .limit(30)
+
+  if (!data || data.length === 0) return null
+  const day = data[0].day as string
+  const rows = data
+    .filter((s) => s.day === day)
+    .map((s) => ({
+      pharmacy: s.pharmacy as string,
+      price: s.price as number,
+      productName: s.product_name as string,
+    }))
+    .sort((a, b) => a.price - b.price)
+  return { day, rows }
 }
 
 export interface MedicationHistoryResult {

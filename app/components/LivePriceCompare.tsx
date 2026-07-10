@@ -7,11 +7,19 @@ import { PharmacyLogo } from './PharmacyLogo'
 import { RelativeTime } from './RelativeTime'
 import { formatCOP } from '@/app/utils/format'
 
+export interface SnapshotInitial {
+  /** YYYY-MM-DD del último registro diario disponible */
+  day: string
+  rows: { pharmacy: string; price: number }[]
+}
+
 interface Props {
   /** normalized query (lowercase, no accents) */
   query: string
   /** human-readable medication name */
   ingredient: string
+  /** last daily snapshot, server-rendered so crawlers see real prices */
+  initial?: SnapshotInitial | null
 }
 
 interface Row {
@@ -20,15 +28,28 @@ interface Row {
   url: string
 }
 
-type State = 'loading' | 'ok' | 'empty' | 'error'
+type State = 'loading' | 'snapshot' | 'ok' | 'empty' | 'error'
 
-// Real, on-load price comparison for the SEO landing pages. Fetches live prices
-// from /api/search and shows the cheapest available option per pharmacy. Never
-// renders invented numbers: on empty/error it points the user to the full search.
-export function LivePriceCompare({ query, ingredient }: Props) {
-  const [rows, setRows] = useState<Row[]>([])
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+function formatDay(iso: string): string {
+  const [, m, d] = iso.split('-')
+  return `${parseInt(d, 10)} de ${MONTHS[parseInt(m, 10) - 1] ?? ''}`
+}
+
+// Real, on-load price comparison for the SEO landing pages. Starts from the
+// latest daily snapshot (rendered on the server, so crawlers index real prices
+// with their date), then refreshes with live prices from /api/search. Never
+// renders invented numbers: with no snapshot and no live data it points the
+// user to the full search.
+export function LivePriceCompare({ query, ingredient, initial }: Props) {
+  const hasSnapshot = Boolean(initial && initial.rows.length)
+  const [rows, setRows] = useState<Row[]>(
+    hasSnapshot ? initial!.rows.map((r) => ({ ...r, url: '' })) : [],
+  )
   const [fetchedAt, setFetchedAt] = useState<string | null>(null)
-  const [state, setState] = useState<State>('loading')
+  const [state, setState] = useState<State>(hasSnapshot ? 'snapshot' : 'loading')
+  const [liveFailed, setLiveFailed] = useState(false)
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -43,14 +64,25 @@ export function LivePriceCompare({ query, ingredient }: Props) {
           if (!cur || r.price < cur.price) best.set(r.pharmacy, { pharmacy: r.pharmacy, price: r.price, url: r.url })
         }
         const list = [...best.values()].sort((a, b) => a.price - b.price)
-        setRows(list)
-        setFetchedAt(data.fetchedAt ?? null)
-        setState(list.length ? 'ok' : 'empty')
+        if (list.length) {
+          setRows(list)
+          setFetchedAt(data.fetchedAt ?? null)
+          setState('ok')
+        } else {
+          // sin datos en vivo: conserva el snapshot si existe
+          setLiveFailed(true)
+          setState((prev) => (prev === 'snapshot' ? 'snapshot' : 'empty'))
+        }
       })
-      .catch((e) => { if (e?.name !== 'AbortError') setState('error') })
+      .catch((e) => {
+        if (e?.name === 'AbortError') return
+        setLiveFailed(true)
+        setState((prev) => (prev === 'snapshot' ? 'snapshot' : 'error'))
+      })
     return () => ctrl.abort()
   }, [query])
 
+  const showTable = state === 'ok' || state === 'snapshot'
   const cheapest = rows[0]?.price
 
   return (
@@ -61,12 +93,16 @@ export function LivePriceCompare({ query, ingredient }: Props) {
             Precio de {ingredient} hoy
           </h2>
           <p className="text-[12px] text-[#717786] mt-0.5">
-            {state === 'ok'
-              ? <>Precio más bajo por farmacia, consultado en vivo{fetchedAt ? <> · <RelativeTime iso={fetchedAt} prefix="actualizado" /></> : null}</>
-              : 'Consultamos el precio directamente en cada farmacia'}
+            {state === 'ok' && (
+              <>Precio más bajo por farmacia, consultado en vivo{fetchedAt ? <> · <RelativeTime iso={fetchedAt} prefix="actualizado" /></> : null}</>
+            )}
+            {state === 'snapshot' && initial && (
+              <>Precio más bajo por farmacia · registro del {formatDay(initial.day)}{!liveFailed ? ' · actualizando en vivo…' : ''}</>
+            )}
+            {state !== 'ok' && state !== 'snapshot' && 'Consultamos el precio directamente en cada farmacia'}
           </p>
         </div>
-        {state === 'ok' && cheapest !== undefined && (
+        {showTable && cheapest !== undefined && (
           <span className="text-[12px] font-bold px-3 py-1.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20 whitespace-nowrap">
             Desde {formatCOP(cheapest)}
           </span>
@@ -82,7 +118,7 @@ export function LivePriceCompare({ query, ingredient }: Props) {
         </div>
       )}
 
-      {state === 'ok' && (
+      {showTable && (
         <>
           <div className="rounded-xl border border-white/50 overflow-hidden divide-y divide-[#f0f1f5]">
             {rows.map((r, i) => (
@@ -115,7 +151,9 @@ export function LivePriceCompare({ query, ingredient }: Props) {
             ))}
           </div>
           <p className="text-[11px] text-[#c1c6d7] mt-2.5">
-            Precios de referencia tomados en tiempo real. Pueden variar por sede, presentación y promociones.
+            {state === 'ok'
+              ? 'Precios de referencia tomados en tiempo real. Pueden variar por sede, presentación y promociones.'
+              : `Precios de referencia de nuestro registro del ${initial ? formatDay(initial.day) : 'día'}. Pueden variar por sede, presentación y promociones.`}
           </p>
         </>
       )}
@@ -136,7 +174,7 @@ export function LivePriceCompare({ query, ingredient }: Props) {
         </div>
       )}
 
-      {state === 'ok' && (
+      {showTable && (
         <Link
           href={`/buscar?q=${encodeURIComponent(ingredient)}`}
           className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"

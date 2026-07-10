@@ -1,42 +1,89 @@
 import Link from 'next/link'
-import { createClient } from '@supabase/supabase-js'
 import { formatCOP } from '@/app/utils/format'
+import { getAdminClient } from '@/app/lib/supabase/admin'
 import { PharmacyLogo } from './PharmacyLogo'
 import { MedicationImage } from './MedicationImage'
 import type { PharmacyResult } from '@/app/types'
 
-async function getFeaturedDiscounts(): Promise<PharmacyResult[]> {
-  const url = process.env.SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_KEY
-  if (!url || !key) return []
+// Only offers re-confirmed by a real scrape in the last 7 days count as fresh.
+const FRESH_DAYS = 7
 
-  const supabase = createClient(url, key)
-  const { data } = await supabase
+interface DiscountsData {
+  featured: PharmacyResult[]
+  topPharmacy: { name: string; count: number } | null
+  updatedAt: string | null
+}
+
+// The pool (search_results) is refreshed by every live search and by the daily
+// cron, across ALL pharmacies. Here we take the freshest slice and diversify:
+// best offer of each pharmacy first, so one aggressive source (e.g. Farmatodo)
+// cannot monopolize the section.
+async function getFeaturedDiscounts(): Promise<DiscountsData> {
+  const empty: DiscountsData = { featured: [], topPharmacy: null, updatedAt: null }
+  const db = getAdminClient()
+  if (!db) return empty
+
+  const since = new Date(Date.now() - FRESH_DAYS * 86_400_000).toISOString()
+  const { data } = await db
     .from('search_results')
     .select('*')
-    .not('discount', 'is', null)
     .gt('discount', 0)
     .eq('availability', 'available')
+    .gte('lastUpdated', since)
     // Filtrar ingredientes que parecen nombres de producto, no principio activo
     .not('activeIngredient', 'ilike', 'oferta%')
     .not('activeIngredient', 'ilike', 'aranda%')
     .order('discount', { ascending: false })
-    .limit(8)
+    .limit(60)
 
-  return (data ?? []) as PharmacyResult[]
-}
+  const pool = (data ?? []) as (PharmacyResult & { lastUpdated?: string })[]
+  if (pool.length === 0) return empty
 
-export async function DiscountsSection() {
-  const discounts = await getFeaturedDiscounts()
-  if (discounts.length === 0) return null
+  // Best offer per pharmacy (pool is already discount-desc), then fill the
+  // remaining slots with the next highest discounts overall.
+  const bestPerPharmacy = new Map<string, PharmacyResult>()
+  for (const r of pool) {
+    if (!bestPerPharmacy.has(r.pharmacy)) bestPerPharmacy.set(r.pharmacy, r)
+  }
+  const featured = [...bestPerPharmacy.values()]
+    .sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0))
+    .slice(0, 4)
+  if (featured.length < 4) {
+    const chosen = new Set(featured.map((r) => r.id))
+    for (const r of pool) {
+      if (featured.length >= 4) break
+      if (!chosen.has(r.id)) { featured.push(r); chosen.add(r.id) }
+    }
+  }
 
-  // Farmacia con más descuentos entre los destacados
+  // Farmacia con más ofertas frescas en todo el pool
   const counts: Record<string, number> = {}
-  discounts.forEach((r) => { counts[r.pharmacy] = (counts[r.pharmacy] ?? 0) + 1 })
+  pool.forEach((r) => { counts[r.pharmacy] = (counts[r.pharmacy] ?? 0) + 1 })
   const topEntry = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
   const topPharmacy = topEntry ? { name: topEntry[0], count: topEntry[1] } : null
 
-  const featured = discounts.slice(0, 4)
+  const updatedAt = pool.reduce<string | null>(
+    (max, r) => (r.lastUpdated && (!max || r.lastUpdated > max) ? r.lastUpdated : max),
+    null,
+  )
+
+  return { featured, topPharmacy, updatedAt }
+}
+
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+// "hoy" si es del mismo día (hora Bogotá), si no "el 9 de julio".
+function freshnessLabel(iso: string): string {
+  const bogota = (d: Date) => new Date(d.getTime() - 5 * 3_600_000)
+  const then = bogota(new Date(iso))
+  const now = bogota(new Date())
+  if (then.toISOString().slice(0, 10) === now.toISOString().slice(0, 10)) return 'hoy'
+  return `el ${then.getUTCDate()} de ${MONTHS[then.getUTCMonth()]}`
+}
+
+export async function DiscountsSection() {
+  const { featured, topPharmacy, updatedAt } = await getFeaturedDiscounts()
+  if (featured.length === 0) return null
 
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl pb-12">
@@ -46,7 +93,8 @@ export async function DiscountsSection() {
             Descuentos destacados
           </h2>
           <p className="text-[13px] text-[#717786] mt-0.5">
-            Los mejores precios del mercado hoy
+            Detectados en las farmacias que comparamos
+            {updatedAt ? ` · actualizado ${freshnessLabel(updatedAt)}` : ''}
           </p>
         </div>
         <Link

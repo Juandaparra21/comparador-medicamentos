@@ -29,6 +29,10 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/` },
 }
 
+// La portada se regenera cada hora para que "Descuentos destacados" muestre el
+// fondo de ofertas fresco (lo alimentan las búsquedas en vivo y el cron diario).
+export const revalidate = 3600
+
 export default function Home() {
   return (
     <>

@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { getMedicineInfo, getAllMedicineSlugs } from '@/app/utils/medicineInfo'
 import { normalize } from '@/app/utils/search'
 import { LivePriceCompare } from '@/app/components/LivePriceCompare'
+import { getLatestSnapshot } from '@/app/lib/priceTracking'
 import { SITE_URL } from '@/app/lib/siteUrl'
 
 interface Props {
@@ -15,6 +16,10 @@ interface Props {
 export function generateStaticParams() {
   return getAllMedicineSlugs().map((slug) => ({ slug }))
 }
+
+// Regenera la página cada 6 horas: así el HTML estático que ve Google incluye
+// los precios del snapshot diario más reciente, con su fecha.
+export const revalidate = 21600
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -51,6 +56,10 @@ export default async function PrecioPage({ params }: Props) {
   // Lowercased for natural mid-sentence use ("el precio de acetaminofén...").
   const lc = ing.charAt(0).toLowerCase() + ing.slice(1)
   const otc = !info.requiresPrescription
+
+  // Último registro diario real: se renderiza en el servidor para que los
+  // buscadores indexen precios con fecha; el cliente luego actualiza en vivo.
+  const snapshot = await getLatestSnapshot(normalize(ing))
 
   const related = getAllMedicineSlugs()
     .filter((s) => s !== slug)
@@ -130,8 +139,8 @@ export default async function PrecioPage({ params }: Props) {
         </p>
       </header>
 
-      {/* Comparador en vivo (precios reales) */}
-      <LivePriceCompare query={normalize(ing)} ingredient={ing} />
+      {/* Comparador en vivo (precios reales), sembrado con el último snapshot */}
+      <LivePriceCompare query={normalize(ing)} ingredient={ing} initial={snapshot} />
 
       {/* ¿Cuánto cuesta? */}
       <section className={`${CARD} p-5 sm:p-6`}>

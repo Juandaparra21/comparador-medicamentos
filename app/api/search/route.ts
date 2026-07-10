@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { searchAllPharmacies } from '@/app/lib/scrapers'
 import { getAdminClient } from '@/app/lib/supabase/admin'
+import { harvestDiscounts } from '@/app/lib/priceTracking'
 import { normalize } from '@/app/utils/search'
 
 export const maxDuration = 30
@@ -26,6 +27,13 @@ export async function GET(req: NextRequest) {
   const fetchedAt = new Date().toISOString()
 
   await logSearch(q.trim())
+  // Same best-effort spirit: refresh the featured-discounts pool with any
+  // discounted items this search just saw, across all pharmacies.
+  try {
+    await harvestDiscounts(results)
+  } catch {
+    // discounts pool must never break search
+  }
 
   return NextResponse.json({ results, source: 'live', fetchedAt })
 }
