@@ -380,7 +380,7 @@ export function HomeFaq() {
         height={1200}
         loading="lazy"
         decoding="async"
-        className="w-full h-48 sm:h-64 object-cover object-[center_40%] rounded-3xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.05)] mb-4"
+        className="mx-auto h-56 sm:h-64 w-auto max-w-full object-contain rounded-3xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.05)] mb-6"
       />
       <div className="flex flex-col gap-2.5">
         {FAQS.map((f) => (
