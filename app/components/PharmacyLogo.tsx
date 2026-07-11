@@ -8,6 +8,8 @@ const PHARMACY_CONFIG: Record<string, Config> = {
   'Drogas La Rebaja': { bg: '#dc2626', abbr: 'DR', icon: 'pill' },
   'Cruz Verde':       { bg: '#15803d', abbr: 'CV', icon: 'cross' },
   'Drogueria Colsubsidio': { bg: '#1d4ed8', abbr: 'CS', icon: 'text' },
+  // La tabla pharmacies de la base usa el nombre corto "Colsubsidio"
+  'Colsubsidio':      { bg: '#1d4ed8', abbr: 'CS', icon: 'text' },
   'Cafam':            { bg: '#1e3a8a', abbr: 'CF', icon: 'text' },
   'Farmatodo':        { bg: '#ea580c', abbr: 'FT', icon: 'pill' },
   'Olimpica Drogueria':{ bg: '#6d28d9', abbr: 'OD', icon: 'text' },
@@ -39,6 +41,7 @@ function PillSvg({ s }: { s: number }) {
 const LOGO_FILES: Record<string, string> = {
   'Drogas La Rebaja':      'la-rebaja.png',
   'Drogueria Colsubsidio': 'colsubsidio.png',
+  'Colsubsidio':           'colsubsidio.png',
   'Cafam':                 'cafam.png',
   'Farmatodo':             'farmatodo.png',
   'Olimpica Drogueria':    'olimpica.png',

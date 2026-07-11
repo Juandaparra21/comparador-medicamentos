@@ -90,56 +90,62 @@ export async function snapshotQuery(query: string): Promise<number> {
   return rows.length
 }
 
-// ── Featured discounts pool (search_results table) ──────────────────────────
+// ── Featured discounts pool (products table) ────────────────────────────────
 // Every real scrape (live user search or daily cron) refreshes discounted items
-// from ALL pharmacies into search_results, so the home section always shows
-// recent, real offers instead of a one-off snapshot of a single source.
+// from ALL pharmacies into the products repository. The home section reads them
+// via the search_results view (products JOIN pharmacies) filtered by freshness.
+
+// La vista/tabla usa los ids de pharmacies; los resultados traen el nombre visible.
+const PHARMACY_NAME_TO_ID: Record<string, string> = {
+  'Farmatodo':             'farmatodo',
+  'Cruz Verde':            'cruz-verde',
+  'Drogas La Rebaja':      'la-rebaja',
+  'Olimpica Drogueria':    'olimpica',
+  'Drogueria Colsubsidio': 'colsubsidio',
+  'Colsubsidio':           'colsubsidio',
+  'Cafam':                 'cafam',
+}
 
 export async function harvestDiscounts(results: PharmacyResult[]): Promise<number> {
   const db = getAdminClient()
   if (!db) return 0
 
   const now = new Date().toISOString()
-  const byId = new Map<string, Record<string, unknown>>()
+  // Dedupe on the products unique key (pharmacy_id, product_name, concentration):
+  // Postgres rejects an upsert whose batch repeats the same conflict target.
+  const byKey = new Map<string, Record<string, unknown>>()
   for (const r of results) {
     if (!r.discount || r.discount <= 0) continue
     if (r.availability !== 'available') continue
     // A discount only counts with a real reference price above the sale price.
     if (!r.referencePrice || r.referencePrice <= r.price) continue
-    // Stable id per pharmacy+product so re-scrapes update instead of duplicating.
-    const id = `${normalize(r.pharmacy)}::${normalize(r.productName)}`
-    byId.set(id, {
-      id,
-      pharmacy:         r.pharmacy,
-      productName:      r.productName,
-      type:             r.type,
-      activeIngredient: r.activeIngredient,
-      concentration:    r.concentration,
-      presentation:     r.presentation,
-      quantity:         r.quantity,
-      price:            r.price,
-      pricePerUnit:     r.pricePerUnit,
-      referencePrice:   r.referencePrice,
-      discount:         r.discount,
-      availability:     r.availability,
-      url:              r.url,
-      lastUpdated:      now,
+    const pharmacyId = PHARMACY_NAME_TO_ID[r.pharmacy]
+    if (!pharmacyId) continue
+
+    const key = `${pharmacyId}::${normalize(r.productName)}::${r.concentration ?? ''}`
+    byKey.set(key, {
+      pharmacy_id:       pharmacyId,
+      product_name:      r.productName,
+      type:              r.type,
+      active_ingredient: r.activeIngredient,
+      concentration:     r.concentration,
+      presentation:      r.presentation,
+      quantity:          Math.round(r.quantity),
+      price:             Math.round(r.price),
+      price_per_unit:    Math.round(r.pricePerUnit),
+      reference_price:   Math.round(r.referencePrice),
+      discount_pct:      Math.round(r.discount),
+      availability:      r.availability,
+      url:               r.url,
+      last_updated:      now,
     })
   }
-  if (byId.size === 0) return 0
+  if (byKey.size === 0) return 0
 
   const { error } = await db
-    .from('search_results')
-    .upsert([...byId.values()], { onConflict: 'id' })
-  return error ? 0 : byId.size
-}
-
-// Drops discount rows nobody has re-confirmed in 30 days (cron housekeeping).
-export async function purgeStaleDiscounts(): Promise<void> {
-  const db = getAdminClient()
-  if (!db) return
-  const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString()
-  await db.from('search_results').delete().lt('lastUpdated', cutoff)
+    .from('products')
+    .upsert([...byKey.values()], { onConflict: 'pharmacy_id,product_name,concentration' })
+  return error ? 0 : byKey.size
 }
 
 // ── Latest snapshot for server-rendered price tables (/precio pages) ─────────

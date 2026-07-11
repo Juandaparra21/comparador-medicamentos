@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/app/lib/supabase/admin'
-import { snapshotQuery, purgeStaleDiscounts } from '@/app/lib/priceTracking'
+import { snapshotQuery } from '@/app/lib/priceTracking'
+import { searchAllPharmacies } from '@/app/lib/scrapers'
 import { getAllMedicineSlugs, getMedicineInfo } from '@/app/utils/medicineInfo'
 import { normalize } from '@/app/utils/search'
 
@@ -11,11 +12,12 @@ export const maxDuration = 60
 // Builds the price-history repository (and refreshes the discounts pool as a
 // side effect of each scrape). No simulation.
 //
-// Time budget: each query fans out to 6 scrapers (~5-10s). Queries run in
-// small parallel batches under a deadline; whatever doesn't fit is retried
-// first tomorrow thanks to the rotating start offset, and upserts make any
-// partial run safe to repeat.
-const BATCH_SIZE = 3
+// Time budget: each query fans out to 6 scrapers (~5-10s). Queries run ONE at
+// a time — same concurrency as a normal user search; parallel batches made the
+// sources throttle us and everything came back empty. Whatever doesn't fit in
+// the deadline is retried first tomorrow thanks to the rotating start offset,
+// and upserts make any partial run safe to repeat. Re-triggering within 10
+// minutes advances the frontier cheaply thanks to the scraper cache.
 const DEADLINE_MS = 45_000
 
 export async function GET(req: NextRequest) {
@@ -32,6 +34,22 @@ export async function GET(req: NextRequest) {
   if (!db) return NextResponse.json({ ok: false, error: 'db unavailable' }, { status: 503 })
 
   const started = Date.now()
+
+  // Diagnostico: ?debug=<consulta> corre UNA consulta en este mismo contexto y
+  // responde cuantos resultados devolvio cada farmacia, sin escribir nada.
+  const debugQuery = req.nextUrl.searchParams.get('debug')
+  if (debugQuery) {
+    const results = await searchAllPharmacies(normalize(debugQuery))
+    const byPharmacy: Record<string, number> = {}
+    for (const r of results) byPharmacy[r.pharmacy] = (byPharmacy[r.pharmacy] ?? 0) + 1
+    return NextResponse.json({
+      ok: true,
+      debug: debugQuery,
+      total: results.length,
+      byPharmacy,
+      ms: Date.now() - started,
+    })
+  }
 
   const { data: tracked, error } = await db.from('tracked_medications').select('query')
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
@@ -50,14 +68,11 @@ export async function GET(req: NextRequest) {
   const ordered = [...all.slice(offset), ...all.slice(0, offset)]
 
   const results: { query: string; points: number }[] = []
-  for (let i = 0; i < ordered.length; i += BATCH_SIZE) {
+  for (const query of ordered) {
     if (Date.now() - started > DEADLINE_MS) break
-    const batch = ordered.slice(i, i + BATCH_SIZE)
-    const points = await Promise.all(batch.map((q) => snapshotQuery(q)))
-    batch.forEach((q, j) => results.push({ query: q, points: points[j] }))
+    const points = await snapshotQuery(query)
+    results.push({ query, points })
   }
-
-  await purgeStaleDiscounts()
 
   return NextResponse.json({
     ok: true,
