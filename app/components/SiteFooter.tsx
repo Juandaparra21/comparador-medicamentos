@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useLang } from '@/app/i18n/LanguageProvider'
-import { LanguageSwitcher } from './LanguageSwitcher'
 
 export function SiteFooter() {
   const { t } = useLang()
@@ -32,12 +31,6 @@ export function SiteFooter() {
               {t('footer.privacy')}
             </Link>
           </nav>
-        </div>
-
-        {/* Language switcher */}
-        <div className="flex items-center gap-2 mb-6">
-          <span className="text-[12px] font-semibold text-[#717786]">{t('footer.language')}:</span>
-          <LanguageSwitcher />
         </div>
 
         {/* Disclaimer (legal — se mantiene en español; pendiente traducción revisada) */}
