@@ -143,6 +143,7 @@ export async function harvestDiscounts(results: PharmacyResult[]): Promise<numbe
       discount_pct:      Math.round(r.discount),
       availability:      r.availability,
       url:               r.url,
+      image_url:         r.imageUrl ?? null,
       last_updated:      now,
     })
   }

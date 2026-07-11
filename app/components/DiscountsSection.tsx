@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { formatCOP } from '@/app/utils/format'
 import { getAdminClient } from '@/app/lib/supabase/admin'
 import { PharmacyLogo } from './PharmacyLogo'
-import { MedicationImage } from './MedicationImage'
+import { ProductThumbnail } from './ProductThumbnail'
 import type { PharmacyResult } from '@/app/types'
 
 // Only offers re-confirmed by a real scrape in the last 7 days count as fresh.
@@ -113,7 +113,7 @@ export async function DiscountsSection() {
             className="group flex flex-col glass-card glass-card-hover rounded-2xl transition-all duration-300 overflow-hidden shrink-0 w-[200px] sm:w-auto snap-start"
           >
             <div className="relative">
-              <MedicationImage ingredient={item.activeIngredient} height={70} />
+              <ProductThumbnail imageUrl={item.imageUrl} ingredient={item.activeIngredient} height={96} />
               <span className="absolute top-2 left-2 bg-red-500 text-white text-[12px] font-black px-2 py-0.5 rounded-lg shadow-sm">
                 -{item.discount}%
               </span>

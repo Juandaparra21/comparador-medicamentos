@@ -87,7 +87,6 @@ Confirm against package.json before running; do not assume a script exists.
 
 ## Git workflow
 
-- Commit and push every change to GitHub.
 - Fill in: branch convention, commit message format, and whether PRs are required.
 
 ## graphify

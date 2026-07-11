@@ -1,18 +1,17 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import type { PharmacyResult } from '@/app/types'
 import { PharmacyLogo } from './PharmacyLogo'
-import { MedicationImage } from './MedicationImage'
+import { ProductThumbnail } from './ProductThumbnail'
 import { WishlistButton } from './WishlistButton'
 import { CartButton } from './CartButton'
 import { RelativeTime } from './RelativeTime'
 import { formatCOP } from '@/app/utils/format'
-import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
 import { formatQuantity, perUnitSuffix } from '@/app/utils/units'
+import { getMedicineInfo } from '@/app/utils/medicineInfo'
 import type { NearestStore } from '@/app/hooks/useNearbyPharmacies'
 
 // Quantity meaning + display come from the shared units module so the volume/unit
@@ -47,30 +46,10 @@ interface Props {
   fetchedAt?: string
 }
 
-function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
-  const [imgFailed, setImgFailed] = useState(false)
-
-  if (imageUrl && !imgFailed) {
-    return (
-      <div className="w-full h-[80px] relative overflow-hidden rounded-t-xl bg-white">
-        <img
-          src={thumbnailUrl(imageUrl, 120)}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          onError={() => setImgFailed(true)}
-          className="w-full h-full object-contain p-2"
-        />
-      </div>
-    )
-  }
-
-  return <MedicationImage ingredient={ingredient} height={80} />
-}
-
 export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor precio', distanceKm, store, fetchedAt }: Props) {
   const slug = normalize(result.activeIngredient)
   const perUnitHighlight = isCheapest && cheapestLabel !== 'Mejor precio'
+  const hasInfo = getMedicineInfo(slug) !== null
 
   function goToPharmacy(e: React.MouseEvent) {
     // Only follow the card click if not clicking an interactive child
@@ -228,7 +207,7 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
               Historial
             </Link>
             <Link
-              href={`/precio/${encodeURIComponent(slug)}`}
+              href={hasInfo ? `/precio/${encodeURIComponent(slug)}` : '/precio/no-disponible'}
               onClick={(e) => e.stopPropagation()}
               className="text-[11px] font-semibold text-[#717786] hover:text-primary transition-colors"
             >

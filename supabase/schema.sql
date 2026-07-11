@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS products (
   availability    TEXT        NOT NULL DEFAULT 'available'
                               CHECK (availability IN ('available', 'limited', 'unavailable')),
   url             TEXT,
+  image_url       TEXT,                    -- foto real del producto reportada por la farmacia
   last_updated    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (pharmacy_id, product_name, concentration)
 );
@@ -129,7 +130,8 @@ SELECT
   p.discount_pct        AS discount,
   p.availability,
   p.url,
-  p.last_updated        AS "lastUpdated"
+  p.last_updated        AS "lastUpdated",
+  p.image_url           AS "imageUrl"
 FROM products p
 JOIN pharmacies ph ON ph.id = p.pharmacy_id;
 
