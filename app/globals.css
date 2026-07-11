@@ -64,10 +64,36 @@ body {
   animation: breathe 9s ease-in-out infinite alternate;
 }
 
+/* ── Glassmorphism (portada) ─────────────────────────────────────────
+   Tarjeta de vidrio esmerilado: fondo translucido que difumina lo que
+   queda detras (las manchas de color del fondo). blur moderado a
+   proposito: valores altos castigan el scroll en Android de gama baja. */
+.glass-card {
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 32px rgba(24, 59, 124, 0.08);
+}
+/* Navegadores sin backdrop-filter: casi opaco para no perder contraste. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-card { background: rgba(255, 255, 255, 0.92); }
+}
+
+/* Flotacion suave de los adornos de vidrio del hero */
+@keyframes floaty {
+  from { transform: translateY(-7px); }
+  to   { transform: translateY(7px); }
+}
+.animate-floaty {
+  animation: floaty 5.5s ease-in-out infinite alternate;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .animate-breathe { animation: none; opacity: 0.7; }
+  .animate-floaty { animation: none; }
 }
 
 /* Quantity range slider — filled track driven by inline --pct, white thumb */

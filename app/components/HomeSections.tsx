@@ -4,7 +4,9 @@ import { getAllMedicineSlugs, getMedicineInfo } from '@/app/utils/medicineInfo'
 
 /* Static, server-rendered home sections (no client JS) to keep the page light. */
 
-const CARD = 'bg-white border border-black/[0.06] rounded-3xl shadow-[0_1px_3px_rgba(0,0,0,0.05)]'
+/* Todas las tarjetas de la portada comparten el estilo vidrio (glass-card
+   en globals.css): fondo translucido, blur y borde blanco. */
+const CARD = 'glass-card rounded-3xl'
 
 function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
@@ -380,7 +382,7 @@ export function HomeFaq() {
         height={1200}
         loading="lazy"
         decoding="async"
-        className="mx-auto h-56 sm:h-64 w-auto max-w-full object-contain rounded-3xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.05)] mb-6"
+        className="mx-auto h-56 sm:h-64 w-auto max-w-full object-contain rounded-3xl border border-white/70 shadow-[0_8px_32px_rgba(24,59,124,0.08)] mb-6"
       />
       <div className="flex flex-col gap-2.5">
         {FAQS.map((f) => (
@@ -404,7 +406,7 @@ export function HomeFaq() {
 export function HomeCta() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-20 sm:mb-28">
-      <div className="bg-gradient-to-br from-primary to-tertiary rounded-3xl shadow-sm p-8 sm:p-14 overflow-hidden">
+      <div className="bg-gradient-to-br from-primary to-tertiary rounded-3xl shadow-[0_8px_32px_rgba(24,59,124,0.18)] ring-1 ring-white/40 p-8 sm:p-14 overflow-hidden">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 items-center">
           <div className="text-center sm:text-left">
             <h2 className="text-[26px] sm:text-[40px] font-bold text-white tracking-[-0.02em] leading-tight">

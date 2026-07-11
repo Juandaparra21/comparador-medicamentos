@@ -78,7 +78,7 @@ export function QuickChips() {
               key={med}
               type="button"
               onClick={() => go(med)}
-              className="text-[12px] font-semibold tracking-wide px-3.5 py-1.5 rounded-full bg-white/60 backdrop-blur-sm border border-[#c1c6d7]/60 text-[#414755] hover:bg-white/80 hover:border-primary/40 hover:text-primary transition-all cursor-pointer"
+              className="text-[12px] font-semibold tracking-wide px-3.5 py-1.5 rounded-full bg-white/55 backdrop-blur-sm border border-white/80 shadow-[0_2px_12px_rgba(24,59,124,0.06)] text-[#414755] hover:bg-white/85 hover:border-primary/40 hover:text-primary transition-all cursor-pointer"
             >
               {med}
             </button>
