@@ -23,7 +23,7 @@ export function BrandLoader({ label, size = 84, className = '' }: Props) {
         playsInline
         aria-hidden="true"
         style={{ width: size, height: size }}
-        className="object-contain"
+        className="object-contain brand-loader-video"
       />
       {label && <p className="text-[14px]">{label}</p>}
     </div>

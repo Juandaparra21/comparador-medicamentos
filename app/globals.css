@@ -245,6 +245,21 @@ body {
    del header lo cambia y lo persiste.
    ═══════════════════════════════════════════════════════════════════ */
 
+/* El video del loader trae su propio fondo claro "quemado" en el archivo.
+   mix-blend-mode: multiply vuelve transparente ese blanco sobre fondos
+   claros; en modo noche eso ensuciaria el video, asi que ahi se muestra
+   normal dentro de una placa clara redondeada. */
+.brand-loader-video {
+  mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] .brand-loader-video {
+  mix-blend-mode: normal;
+  background: #f2f4fb;
+  border-radius: 9999px;
+  padding: 6px;
+}
+
 :root[data-theme="dark"] {
   color-scheme: dark;
 }
@@ -387,9 +402,15 @@ body {
 
 /* Chat: las barras y burbujas blancas dentro de la ventana de vidrio
    pasan a paneles oscuros; el globo flotante (bg-white + tinta oscura)
-   tambien. Los demas bg-white solidos (logos de farmacia, fotos de
-   producto, botones tipo Google) se quedan blancos a proposito. */
+   tambien. Los demas bg-white solidos (logos de farmacia, botones tipo
+   Google) se quedan blancos a proposito. */
 [data-theme="dark"] .glass-card-opaque .bg-white { background-color: #10163a; }
+
+/* Fondo de la foto real de producto: gris muy claro en modo dia (no blanco
+   puro, para que no rompa contra el glass-card), y superficie oscura suave
+   en modo noche para que la foto no quede recortada sobre blanco. */
+.product-thumb-bg { background-color: #f3f4f7; }
+[data-theme="dark"] .product-thumb-bg { background-color: #1c2242; }
 [data-theme="dark"] .bg-white.text-\[\#1a1b1f\] { background-color: #141a3a; }
 
 /* Superficies que SI se quedan blancas en modo noche: recuperan su

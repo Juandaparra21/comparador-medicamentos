@@ -18,7 +18,7 @@ export function ProductThumbnail({ imageUrl, ingredient, height = 140 }: Props) 
 
   if (imageUrl && !imgFailed) {
     return (
-      <div className="w-full relative overflow-hidden rounded-t-xl bg-white" style={{ height }}>
+      <div className="w-full relative overflow-hidden rounded-t-xl product-thumb-bg" style={{ height }}>
         <img
           src={thumbnailUrl(imageUrl, 120)}
           alt=""
