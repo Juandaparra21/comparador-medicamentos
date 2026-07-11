@@ -125,7 +125,7 @@ export async function DiscountsSection() {
         {featured.map((item) => (
           <Link
             key={item.id}
-            href={`/buscar?q=${encodeURIComponent(item.activeIngredient)}`}
+            href={`/buscar?q=${encodeURIComponent(item.activeIngredient.toLowerCase())}`}
             className="group flex flex-col glass-card glass-card-hover rounded-2xl transition-all duration-300 overflow-hidden shrink-0 w-[200px] sm:w-auto snap-start"
           >
             <div className="relative">
