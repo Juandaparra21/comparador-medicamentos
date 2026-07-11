@@ -14,7 +14,6 @@ import {
   ValueProps,
   HowItWorks,
   PharmacyStrip,
-  PopularMeds,
   GenericVsBrand,
   AppShowcase,
   CercanasPromo,
@@ -22,6 +21,7 @@ import {
   HomeFaq,
   HomeCta,
 } from '@/app/components/HomeSections'
+import { PopularMeds } from '@/app/components/PopularMeds'
 import { SITE_URL } from '@/app/lib/siteUrl'
 
 // Self-canonical for the homepage so Google fija la raíz como versión oficial.
