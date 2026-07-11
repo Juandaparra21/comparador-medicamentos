@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/context/AuthContext'
 import { useLang } from '@/app/i18n/LanguageProvider'
+import { ThemeToggle } from '@/app/components/ThemeToggle'
 
 export function NavAuth() {
   const { user, loading, signOut } = useAuth()
@@ -89,6 +90,12 @@ export function NavAuth() {
                 icon={<><path strokeLinecap="round" strokeLinejoin="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M16 10a4 4 0 01-8 0" /></>} />
               <MenuLink href="/lista" onClick={() => setOpen(false)} label={t('menu.wishlist')}
                 icon={<path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />} />
+            </div>
+
+            {/* Apariencia */}
+            <div className="border-t border-[#f0f1f5] px-4 py-3 flex items-center justify-between gap-3">
+              <span className="text-[13px] font-semibold text-[#414755]">{t('menu.appearance')}</span>
+              <ThemeToggle />
             </div>
 
             <div className="border-t border-[#f0f1f5] py-1.5">

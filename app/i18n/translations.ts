@@ -28,6 +28,26 @@ export const TRANSLATIONS: Record<string, TranslationEntry> = {
   'nav.hello': {
     es: 'Hola,', en: 'Hi,', fr: 'Salut,', it: 'Ciao,', de: 'Hallo,', pt: 'Olá,',
   },
+  'options.title': {
+    es: 'Opciones', en: 'Options', fr: 'Options', it: 'Opzioni', de: 'Optionen', pt: 'Opções',
+  },
+  'options.appearance': {
+    es: 'Apariencia', en: 'Appearance', fr: 'Apparence', it: 'Aspetto', de: 'Erscheinungsbild', pt: 'Aparência',
+  },
+  'options.language': {
+    es: 'Idioma', en: 'Language', fr: 'Langue', it: 'Lingua', de: 'Sprache', pt: 'Idioma',
+  },
+  'options.hint': {
+    es: 'Aquí puedes cambiar el idioma y el tema (claro/noche).',
+    en: 'You can change the language and the theme (light/dark) here.',
+    fr: 'Vous pouvez changer la langue et le thème (clair/sombre) ici.',
+    it: 'Qui puoi cambiare la lingua e il tema (chiaro/scuro).',
+    de: 'Hier kannst du die Sprache und das Design (hell/dunkel) ändern.',
+    pt: 'Aqui você pode mudar o idioma e o tema (claro/escuro).',
+  },
+  'options.hintClose': {
+    es: 'Cerrar aviso', en: 'Close hint', fr: 'Fermer l’astuce', it: 'Chiudi suggerimento', de: 'Hinweis schließen', pt: 'Fechar aviso',
+  },
 
   // ── Barra de navegación inferior (móvil) ──
   'bottomNav.search': {
@@ -52,6 +72,9 @@ export const TRANSLATIONS: Record<string, TranslationEntry> = {
   },
   'menu.logout': {
     es: 'Cerrar sesión', en: 'Sign out', fr: 'Se déconnecter', it: 'Esci', de: 'Abmelden', pt: 'Sair',
+  },
+  'menu.appearance': {
+    es: 'Apariencia', en: 'Appearance', fr: 'Apparence', it: 'Aspetto', de: 'Erscheinungsbild', pt: 'Aparência',
   },
 
   // ── Buscador ──

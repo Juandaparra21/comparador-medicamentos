@@ -7,8 +7,7 @@ import { NavAuth } from '@/app/components/NavAuth'
 import { WishlistNav } from '@/app/components/WishlistNav'
 import { CartNav } from '@/app/components/CartNav'
 import { CercanasNavLink } from '@/app/components/CercanasNavLink'
-import { ThemeToggle } from '@/app/components/ThemeToggle'
-import { LanguageSwitcher } from '@/app/components/LanguageSwitcher'
+import { UserOptionsMenu } from '@/app/components/UserOptionsMenu'
 import { BottomNav } from '@/app/components/BottomNav'
 import { SiteFooter } from '@/app/components/SiteFooter'
 import { ChatAssistant } from '@/app/components/ChatAssistant'
@@ -93,13 +92,14 @@ export default function RootLayout({
     <html lang="es" className={`${hanken.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col relative bg-[#faf9fe]">
         {/* Tema (claro/noche): se aplica ANTES del primer pintado para que no
-           haya parpadeo. Lee localStorage (clave farmi_theme); tambien acepta
-           ?theme=dark|light en la URL solo para esa carga (util para probar).
-           El modo claro es el default y no pone atributo. */}
+           haya parpadeo. Prioridad: ?theme=dark|light en la URL (solo para
+           esa carga, util para probar) > eleccion manual guardada en
+           localStorage (farmi_theme) > preferencia del sistema operativo
+           (prefers-color-scheme). Sin eleccion manual, sigue al dispositivo. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('farmi_theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark')}}catch(e){}})()",
+              "(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('farmi_theme');if(!t){t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}if(t==='dark'){document.documentElement.setAttribute('data-theme','dark')}}catch(e){}})()",
           }}
         />
         <script
@@ -131,8 +131,7 @@ export default function RootLayout({
               </Link>
 
               <nav aria-label="Navegación principal" className="flex items-center gap-2 sm:gap-2.5">
-                <ThemeToggle />
-                <LanguageSwitcher dropDirection="down" compact />
+                <UserOptionsMenu />
                 <CercanasNavLink />
                 <NavAuth />
                 <div className="hidden md:flex items-center gap-2 sm:gap-2.5">

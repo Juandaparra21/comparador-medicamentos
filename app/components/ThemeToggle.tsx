@@ -1,35 +1,40 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getEffectiveDark, hasManualTheme, setManualTheme, THEME_EVENT } from '@/app/lib/theme'
 
-const THEME_KEY = 'farmi_theme'
-
-/* Deslizador claro/noche del header. El tema vive como data-theme="dark"
-   en <html>: lo pone antes del primer pintado el script inline del layout
-   (leyendo localStorage) y aqui solo se lee el estado inicial y se cambia.
-   En modo claro no hay atributo y aplica el diseno base. */
+/* Deslizador claro/noche. El tema vive como data-theme="dark" en <html>:
+   lo pone antes del primer pintado el script inline del layout, siguiendo
+   el tema del sistema operativo si el usuario no eligio uno a mano. Aqui
+   solo se lee el estado inicial, se sigue el cambio de sistema en vivo
+   (mientras no haya eleccion manual) y se permite forzar un tema. */
 export function ThemeToggle() {
   const [dark, setDark] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setDark(document.documentElement.getAttribute('data-theme') === 'dark')
+    setDark(getEffectiveDark())
     setMounted(true)
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    function onSystemChange(e: MediaQueryListEvent) {
+      if (!hasManualTheme()) setDark(e.matches)
+    }
+    function onManualChange(e: Event) {
+      setDark((e as CustomEvent<{ dark: boolean }>).detail.dark)
+    }
+    media.addEventListener('change', onSystemChange)
+    window.addEventListener(THEME_EVENT, onManualChange)
+    return () => {
+      media.removeEventListener('change', onSystemChange)
+      window.removeEventListener(THEME_EVENT, onManualChange)
+    }
   }, [])
 
   function toggle() {
     const next = !dark
     setDark(next)
-    if (next) {
-      document.documentElement.setAttribute('data-theme', 'dark')
-    } else {
-      document.documentElement.removeAttribute('data-theme')
-    }
-    try {
-      localStorage.setItem(THEME_KEY, next ? 'dark' : 'light')
-    } catch {
-      // localStorage puede no estar disponible en navegacion privada
-    }
+    setManualTheme(next)
   }
 
   return (
