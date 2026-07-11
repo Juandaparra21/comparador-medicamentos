@@ -14,10 +14,25 @@ interface DiscountsData {
   updatedAt: string | null
 }
 
+// Formas farmaceuticas (medicamentos) o cuidado personal/maquillaje: lo unico
+// que queremos destacar. Excluye mercancia de bazar que la farmacia tambien
+// vende (papeleria, accesorios) aunque traiga descuento.
+const DOSAGE_FORM_RE =
+  /\b(\d+\s?(mg|mcg|ml|g)\b|tableta|c[aá]psula|jarabe|comprimido|gotas|suspensi[oó]n|crema|gel|ung[uü]ento|soluci[oó]n|parche|inyectable|polvo|spray|aerosol)/i
+const PERSONAL_CARE_RE =
+  /\b(maquillaje|labial|r[ií]mel|base de maquillaje|protector solar|bloqueador|shampoo|champ[uú]|jab[oó]n|perfume|colonia|esmalte|delineador|rubor|sombra|corrector|polvo compacto|desodorante)/i
+const NON_HEALTH_RE = /\b(papel|hoja|rice paper|toalla|cepillo|peine|bater[ií]a|pila|juguete)/i
+
+function isRelevantDiscount(r: { activeIngredient: string; productName: string }): boolean {
+  const text = `${r.activeIngredient} ${r.productName}`
+  if (NON_HEALTH_RE.test(text)) return false
+  return DOSAGE_FORM_RE.test(text) || PERSONAL_CARE_RE.test(text)
+}
+
 // The pool (search_results) is refreshed by every live search and by the daily
-// cron, across ALL pharmacies. Here we take the freshest slice and diversify:
-// best offer of each pharmacy first, so one aggressive source (e.g. Farmatodo)
-// cannot monopolize the section.
+// cron, across ALL pharmacies. Here we take the freshest slice, keep only
+// medication/personal-care items, and diversify: best offer of each pharmacy
+// first, so one aggressive source (e.g. Farmatodo) cannot monopolize the section.
 async function getFeaturedDiscounts(): Promise<DiscountsData> {
   const empty: DiscountsData = { featured: [], topPharmacy: null, updatedAt: null }
   const db = getAdminClient()
@@ -34,9 +49,10 @@ async function getFeaturedDiscounts(): Promise<DiscountsData> {
     .not('activeIngredient', 'ilike', 'oferta%')
     .not('activeIngredient', 'ilike', 'aranda%')
     .order('discount', { ascending: false })
-    .limit(60)
+    .limit(120)
 
-  const pool = (data ?? []) as (PharmacyResult & { lastUpdated?: string })[]
+  const raw = (data ?? []) as (PharmacyResult & { lastUpdated?: string })[]
+  const pool = raw.filter(isRelevantDiscount)
   if (pool.length === 0) return empty
 
   // Best offer per pharmacy (pool is already discount-desc), then fill the
