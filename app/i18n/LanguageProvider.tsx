@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { DEFAULT_LOCALE, STORAGE_KEY, resolveLocale, type Locale } from './config'
 import { TRANSLATIONS } from './translations'
+import { AutomaticTranslator } from './AutomaticTranslator'
 
 interface LangCtx {
   locale: Locale
@@ -45,7 +46,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     [locale],
   )
 
-  return <Ctx.Provider value={{ locale, setLocale, t }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ locale, setLocale, t }}><AutomaticTranslator locale={locale} />{children}</Ctx.Provider>
 }
 
 export function useLang(): LangCtx {

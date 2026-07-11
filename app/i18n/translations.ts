@@ -4,9 +4,9 @@ import type { Locale } from './config'
 // Add keys here as more of the app is internationalized. Keep Spanish (es) as the
 // source of truth. Dynamic data (medication names, prices, pharmacies) is never
 // translated — it comes from the sources.
-type Entry = Record<Locale, string>
+export type TranslationEntry = Record<Locale, string>
 
-export const TRANSLATIONS: Record<string, Entry> = {
+export const TRANSLATIONS: Record<string, TranslationEntry> = {
   // ── Barra superior / navegación ──
   'nav.cercanas': {
     es: '¡Busca tu droguería más cercana!',
