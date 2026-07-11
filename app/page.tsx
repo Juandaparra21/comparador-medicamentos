@@ -100,12 +100,12 @@ export default function Home() {
       {/* Banner promocional (se oculta solo si aún no está la imagen) */}
       <Reveal><HomeBanner /></Reveal>
 
-      <Reveal><ValueProps /></Reveal>
-      <Reveal><NearbyMapSection /></Reveal>
-
       <Suspense fallback={null}>
         <Reveal><DiscountsSection /></Reveal>
       </Suspense>
+
+      <Reveal><ValueProps /></Reveal>
+      <Reveal><NearbyMapSection /></Reveal>
 
       <Reveal><HowItWorks /></Reveal>
       <Reveal><AppShowcase /></Reveal>

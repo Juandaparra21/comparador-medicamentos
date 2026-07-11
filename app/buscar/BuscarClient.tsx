@@ -22,7 +22,6 @@ import { RelativeTime } from '@/app/components/RelativeTime'
 import { groupResults } from '@/app/utils/groupResults'
 
 type TypeFilter = 'all' | MedicationType
-type ViewMode   = 'grouped' | 'all'
 
 const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
   { value: 'all',     label: 'Todos' },
@@ -48,7 +47,6 @@ export default function BuscarClient() {
   const [concFilter,     setConcFilter]     = useState<string>('')
   const [presentFilter,  setPresentFilter]  = useState<string>('')
   const [qtyFilter,      setQtyFilter]      = useState<number | null>(null)
-  const [viewMode,       setViewMode]       = useState<ViewMode>('grouped')
   const [loadError,      setLoadError]      = useState(false)
   const [reloadKey,      setReloadKey]      = useState(0)
 
@@ -67,7 +65,6 @@ export default function BuscarClient() {
     setConcFilter('')
     setPresentFilter('')
     setQtyFilter(null)
-    setViewMode('grouped')
     setNearbyOnly(false)
     setShowFilters(false)
     const controller = new AbortController()
@@ -181,7 +178,6 @@ export default function BuscarClient() {
     ? Math.min(...availableFiltered.map((r) => r.price))
     : null
 
-  const sorted = sortResults(filtered, sortKey, distances)
   const { comparisons, singles } = groupResults(filtered)
 
   // Re-rank comparison groups by the chosen basis (groupResults orders by
@@ -525,7 +521,7 @@ export default function BuscarClient() {
                 <p className="text-[13px] text-[#717786]">
                   <span className="font-semibold text-[#1a1b1f]">{filtered.length}</span>{' '}
                   resultado{filtered.length !== 1 ? 's' : ''}
-                  {viewMode === 'grouped' && comparisons.length > 0 && (
+                  {comparisons.length > 0 && (
                     <span className="text-secondary font-semibold">
                       {' '}· {comparisons.length} comparación{comparisons.length !== 1 ? 'es' : ''}
                     </span>
@@ -540,21 +536,6 @@ export default function BuscarClient() {
                     <RelativeTime iso={fetchedAt} prefix="Actualizado" />
                   </span>
                 )}
-                <div className="flex bg-black/[0.05] rounded-lg p-0.5">
-                  <button
-                    onClick={() => setViewMode('grouped')}
-                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all cursor-pointer ${viewMode === 'grouped' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'}`}
-                  >
-                    Comparar
-                  </button>
-                  <button
-                    onClick={() => setViewMode('all')}
-                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all cursor-pointer ${viewMode === 'all' ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'}`}
-                  >
-                    Todos
-                  </button>
-                </div>
-
                 {/* Best-price basis: total vs per unit */}
                 <div className="flex items-center gap-1.5">
                   <span className="text-[11px] font-semibold text-[#717786] whitespace-nowrap">Mejor precio:</span>
@@ -633,7 +614,6 @@ export default function BuscarClient() {
 
             {/* Tarjetas */}
             {filtered.length > 0 ? (
-              viewMode === 'grouped' ? (
                 <div className="flex flex-col gap-6 mb-8">
                   {/* Comparison groups — same product in 2+ pharmacies */}
                   {comparisons.length > 0 && (
@@ -672,21 +652,6 @@ export default function BuscarClient() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                  {sorted.map((result) => (
-                    <ResultCard
-                      key={result.id}
-                      result={result}
-                      isCheapest={result.availability !== 'unavailable' && basisVal(result) === minPrice}
-                      cheapestLabel={priceBasis === 'unit' ? 'Mejor x unidad' : 'Mejor precio'}
-                      distanceKm={distances[result.pharmacy]}
-                      store={stores[result.pharmacy]}
-                      fetchedAt={fetchedAt ?? undefined}
-                    />
-                  ))}
-                </div>
-              )
             ) : (
               <div className="text-center py-16">
                 <p className="text-[16px] font-semibold text-[#1a1b1f] mb-1">

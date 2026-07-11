@@ -1,21 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { formatCOP } from '@/app/utils/format'
 import type { StatsResponse } from '@/app/api/stats/route'
 
 // Minimum real data before we show the bar. Below this we hide it entirely
 // (never show zeros or thin numbers that would read as invented).
 const MIN_SEARCHES = 100
-const MIN_MEDICATIONS = 8
 
 function formatCount(n: number): string {
   return new Intl.NumberFormat('es-CO').format(n)
 }
 
-// Social-proof bar built only from our own real data (searches run, medications
-// tracked, average detected savings). Self-hides while loading, on error, or
-// when the numbers are still too low to be meaningful.
+// Social-proof bar built only from our own real data (searches run). Self-hides
+// while loading, on error, or when the number is still too low to be meaningful.
 export function HeroStats() {
   const [stats, setStats] = useState<StatsResponse | null>(null)
 
@@ -30,21 +27,16 @@ export function HeroStats() {
 
   if (!stats) return null
 
-  const { totalSearches, totalMedications, avgSavingsCOP } = stats
+  const { totalSearches } = stats
   const enoughSearches = typeof totalSearches === 'number' && totalSearches >= MIN_SEARCHES
-  const enoughMeds = typeof totalMedications === 'number' && totalMedications >= MIN_MEDICATIONS
-  if (!enoughSearches || !enoughMeds) return null
+  if (!enoughSearches) return null
 
   const cells: { value: string; label: string }[] = [
     { value: formatCount(totalSearches), label: 'búsquedas realizadas' },
-    { value: formatCount(totalMedications), label: 'medicamentos en seguimiento' },
   ]
-  if (typeof avgSavingsCOP === 'number' && avgSavingsCOP > 0) {
-    cells.push({ value: formatCOP(avgSavingsCOP), label: 'ahorro promedio detectado' })
-  }
 
   return (
-    <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-3">
+    <div className="mt-8 grid grid-cols-1 gap-2 sm:gap-3">
       {cells.map((c) => (
         <div
           key={c.label}
