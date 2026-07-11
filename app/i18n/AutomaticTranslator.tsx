@@ -43,8 +43,15 @@ export function AutomaticTranslator({ locale }: { locale: Locale }) {
       }
       for (const node of Array.from(element.childNodes)) {
         if (node.nodeType !== Node.TEXT_NODE || !node.textContent?.trim()) continue
-        const translated = translate(node.textContent)
-        if (translated !== node.textContent) node.textContent = translated
+        const original = node.textContent
+        const translated = translate(original)
+        if (translated === original) continue
+        // Preserve leading/trailing whitespace: it's what keeps this text node
+        // from running into a neighboring <span> (e.g. "comprando en " + <span>Farmatodo</span>).
+        // Replacing textContent outright drops that whitespace and glues the words together.
+        const leading = original.match(/^\s*/)?.[0] ?? ''
+        const trailing = original.match(/\s*$/)?.[0] ?? ''
+        node.textContent = leading + translated + trailing
       }
     }
 
