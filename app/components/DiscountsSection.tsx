@@ -63,11 +63,11 @@ async function getFeaturedDiscounts(): Promise<DiscountsData> {
   }
   const featured = [...bestPerPharmacy.values()]
     .sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0))
-    .slice(0, 4)
-  if (featured.length < 4) {
+    .slice(0, 8)
+  if (featured.length < 8) {
     const chosen = new Set(featured.map((r) => r.id))
     for (const r of pool) {
-      if (featured.length >= 4) break
+      if (featured.length >= 8) break
       if (!chosen.has(r.id)) { featured.push(r); chosen.add(r.id) }
     }
   }
