@@ -55,10 +55,18 @@ export async function GET(req: NextRequest) {
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
 
   // Catalog ingredients (the /precio pages) + user-tracked queries, deduped.
-  const catalog = getAllMedicineSlugs()
+  const catalogMeds = getAllMedicineSlugs()
     .map((slug) => getMedicineInfo(slug))
     .filter((m): m is NonNullable<typeof m> => m !== null)
-    .map((m) => normalize(m.activeIngredient))
+
+  // price_snapshots.query tiene FK hacia tracked_medications(query): sin este
+  // registro previo, el upsert del snapshot falla para todo el catalogo.
+  await db.from('tracked_medications').upsert(
+    catalogMeds.map((m) => ({ query: normalize(m.activeIngredient), label: m.activeIngredient })),
+    { onConflict: 'query', ignoreDuplicates: true },
+  )
+
+  const catalog = catalogMeds.map((m) => normalize(m.activeIngredient))
   const trackedQueries = (tracked ?? []).map((r) => r.query as string)
   const all = [...new Set([...catalog, ...trackedQueries])]
 
@@ -67,11 +75,11 @@ export async function GET(req: NextRequest) {
   const offset = all.length ? dayNumber % all.length : 0
   const ordered = [...all.slice(offset), ...all.slice(0, offset)]
 
-  const results: { query: string; points: number }[] = []
+  const results: { query: string; points: number; error?: string }[] = []
   for (const query of ordered) {
     if (Date.now() - started > DEADLINE_MS) break
-    const points = await snapshotQuery(query)
-    results.push({ query, points })
+    const outcome = await snapshotQuery(query)
+    results.push({ query, ...outcome })
   }
 
   return NextResponse.json({

@@ -65,29 +65,35 @@ export async function registerTracked(query: string, label: string): Promise<boo
   return !error
 }
 
+export interface SnapshotOutcome {
+  points: number
+  /** por que quedo en 0: error de escritura o sin resultados */
+  error?: string
+}
+
 // Scrapes current prices and writes one snapshot row per pharmacy for today.
 // The same scrape also feeds the featured-discounts pool, so one search does
 // double duty. Idempotent within a day thanks to the (query, pharmacy, day)
-// unique constraint. Returns the number of pharmacy points written.
-export async function snapshotQuery(query: string): Promise<number> {
+// unique constraint. Returns points written and, if zero, the reason.
+export async function snapshotQuery(query: string): Promise<SnapshotOutcome> {
   const db = getAdminClient()
-  if (!db) return 0
+  if (!db) return { points: 0, error: 'db unavailable' }
   const results = await searchAllPharmacies(query)
   await harvestDiscounts(results)
 
   const rows = buildSnapshotRows(query, results)
-  if (rows.length === 0) return 0
+  if (rows.length === 0) return { points: 0, error: `sin resultados (${results.length} crudos)` }
 
   const { error } = await db
     .from('price_snapshots')
     .upsert(rows, { onConflict: 'query,pharmacy,day' })
-  if (error) return 0
+  if (error) return { points: 0, error: error.message }
 
   await db
     .from('tracked_medications')
     .update({ last_snapshot_at: new Date().toISOString() })
     .eq('query', query)
-  return rows.length
+  return { points: rows.length }
 }
 
 // ── Featured discounts pool (products table) ────────────────────────────────

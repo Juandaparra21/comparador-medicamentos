@@ -46,6 +46,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'tracking unavailable' }, { status: 503 })
   }
 
-  const points = await snapshotQuery(query)
+  const { points } = await snapshotQuery(query)
   return NextResponse.json({ ok: true, query, points })
 }
