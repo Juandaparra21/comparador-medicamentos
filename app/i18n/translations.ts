@@ -23,10 +23,21 @@ export const TRANSLATIONS: Record<string, Entry> = {
     es: 'Ingresar', en: 'Sign in', fr: 'Se connecter', it: 'Accedi', de: 'Anmelden', pt: 'Entrar',
   },
   'nav.register': {
-    es: 'Crear cuenta', en: 'Sign up', fr: 'Créer un compte', it: 'Crea account', de: 'Konto erstellen', pt: 'Criar conta',
+    es: 'Crear cuenta', en: 'Sign up', fr: 'Créer un compte', it: 'Crea un account', de: 'Konto erstellen', pt: 'Criar conta',
   },
   'nav.hello': {
     es: 'Hola,', en: 'Hi,', fr: 'Salut,', it: 'Ciao,', de: 'Hallo,', pt: 'Olá,',
+  },
+
+  // ── Barra de navegación inferior (móvil) ──
+  'bottomNav.search': {
+    es: 'Buscar', en: 'Search', fr: 'Rechercher', it: 'Cerca', de: 'Suchen', pt: 'Buscar',
+  },
+  'bottomNav.list': {
+    es: 'Lista', en: 'List', fr: 'Liste', it: 'Lista', de: 'Liste', pt: 'Lista',
+  },
+  'bottomNav.cart': {
+    es: 'Carrito', en: 'Cart', fr: 'Panier', it: 'Carrello', de: 'Warenkorb', pt: 'Carrinho',
   },
 
   // ── Menú de usuario ──
@@ -45,12 +56,12 @@ export const TRANSLATIONS: Record<string, Entry> = {
 
   // ── Buscador ──
   'search.placeholder': {
-    es: 'Ej: acetaminofén, Dolex, ibuprofeno...',
-    en: 'e.g. acetaminophen, Dolex, ibuprofen...',
-    fr: 'ex : paracétamol, Dolex, ibuprofène...',
-    it: 'es: paracetamolo, Dolex, ibuprofene...',
+    es: 'Ej.: acetaminofén, Dolex, ibuprofeno...',
+    en: 'e.g., acetaminophen, Dolex, ibuprofen...',
+    fr: 'Ex. : paracétamol, Dolex, ibuprofène...',
+    it: 'Es.: paracetamolo, Dolex, ibuprofene...',
     de: 'z. B. Paracetamol, Dolex, Ibuprofen...',
-    pt: 'ex: paracetamol, Dolex, ibuprofeno...',
+    pt: 'Ex.: paracetamol, Dolex, ibuprofeno...',
   },
   'search.placeholderCompact': {
     es: 'Buscar medicamento...', en: 'Search medication...', fr: 'Rechercher un médicament...', it: 'Cerca un farmaco...', de: 'Medikament suchen...', pt: 'Buscar medicamento...',
@@ -119,7 +130,7 @@ export const TRANSLATIONS: Record<string, Entry> = {
     es: 'Precios en tiempo real', en: 'Real-time prices', fr: 'Prix en temps réel', it: 'Prezzi in tempo reale', de: 'Preise in Echtzeit', pt: 'Preços em tempo real',
   },
   'home.trust2': {
-    es: '6 farmacias en una búsqueda', en: '6 pharmacies in one search', fr: '6 pharmacies en une recherche', it: '6 farmacie in una ricerca', de: '6 Apotheken in einer Suche', pt: '6 farmácias em uma busca',
+    es: '6 farmacias en una búsqueda', en: '6 pharmacies in one search', fr: '6 pharmacies en une seule recherche', it: '6 farmacie in una ricerca', de: '6 Apotheken mit einer Suche', pt: '6 farmácias em uma busca',
   },
   'home.trust3': {
     es: '100% gratis, sin registro', en: '100% free, no sign-up', fr: '100% gratuit, sans inscription', it: '100% gratis, senza registrazione', de: '100% kostenlos, ohne Anmeldung', pt: '100% grátis, sem cadastro',
@@ -214,11 +225,11 @@ export const TRANSLATIONS: Record<string, Entry> = {
   'showcase.subtitle': {
     es: 'Búsquedas reales: escribe el producto y compara el precio en las farmacias, en segundos.', en: 'Real searches: type the product and compare prices across pharmacies in seconds.', fr: 'Recherches réelles : saisissez le produit et comparez les prix des pharmacies en quelques secondes.', it: 'Ricerche reali: scrivi il prodotto e confronta i prezzi tra le farmacie in pochi secondi.', de: 'Echte Suchen: Produkt eingeben und Preise der Apotheken in Sekunden vergleichen.', pt: 'Buscas reais: digite o produto e compare o preço nas farmácias em segundos.',
   },
-  'showcase.suero': { es: 'Suero rehidratante', en: 'Rehydration salts', fr: 'Solution de réhydratation', it: 'Soluzione reidratante', de: 'Elektrolytlösung', pt: 'Soro reidratante' },
+  'showcase.suero': { es: 'Suero rehidratante', en: 'Oral rehydration solution', fr: 'Solution de réhydratation orale', it: 'Soluzione reidratante orale', de: 'Orale Rehydratationslösung', pt: 'Soro de reidratação oral' },
   'showcase.condones': { es: 'Condones', en: 'Condoms', fr: 'Préservatifs', it: 'Preservativi', de: 'Kondome', pt: 'Preservativos' },
 
   // ── Cercanas promo ──
-  'cercanasPromo.title': { es: 'Farmi va contigo a donde estés', en: 'Farmi goes with you wherever you are', fr: 'Farmi vous suit où que vous soyez', it: 'Farmi ti segue ovunque tu sia', de: 'Farmi begleitet dich, wo du auch bist', pt: 'A Farmi vai com você onde estiver' },
+  'cercanasPromo.title': { es: 'Farmi va contigo a donde estés', en: 'Farmi goes with you wherever you are', fr: 'Farmi vous accompagne où que vous soyez', it: 'Farmi è con te ovunque tu sia', de: 'Farmi begleitet dich, wo immer du bist', pt: 'A Farmi está com você onde estiver' },
   'cercanasPromo.desc': {
     es: '¿No sabes cuál farmacia te queda más cerca? Abre el mapa, mira cuáles están abiertas a tu alrededor y llega con indicaciones paso a paso.',
     en: 'Not sure which pharmacy is closest? Open the map, see which are open around you and get there with step-by-step directions.',
@@ -251,7 +262,7 @@ export const TRANSLATIONS: Record<string, Entry> = {
     de: 'Nein. Farmi vergleicht Preise und leitet dich zur Seite der Apotheke, um direkt dort zu kaufen. Wir verkaufen nicht und sind am Kauf nicht beteiligt.',
     pt: 'Não. A Farmi compara preços e leva você à página da farmácia para comprar diretamente com ela. Não vendemos nem intervimos na compra.',
   },
-  'faq2.q': { es: '¿Los precios son exactos?', en: 'Are the prices exact?', fr: 'Les prix sont-ils exacts ?', it: 'I prezzi sono esatti?', de: 'Sind die Preise genau?', pt: 'Os preços são exatos?' },
+  'faq2.q': { es: '¿Los precios son exactos?', en: 'Are the prices exact?', fr: 'Les prix sont-ils exacts ?', it: 'I prezzi sono esatti?', de: 'Sind die Preise aktuell?', pt: 'Os preços são exatos?' },
   'faq2.a': {
     es: 'Son referenciales y se obtienen en tiempo real de cada farmacia. Pueden variar por sede, disponibilidad o promociones. Confirma siempre el precio final en la farmacia.',
     en: 'They are for reference and pulled in real time from each pharmacy. They may vary by location, availability or promotions. Always confirm the final price at the pharmacy.',
