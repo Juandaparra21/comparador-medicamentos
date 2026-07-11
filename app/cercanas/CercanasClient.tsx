@@ -96,7 +96,7 @@ export default function CercanasClient() {
       </header>
 
       {/* Location controls */}
-      <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm p-5 mb-5">
+      <div className="glass-card rounded-2xl p-5 mb-5">
         <button
           onClick={locateMe}
           disabled={status === 'locating' || status === 'loading'}
@@ -159,7 +159,7 @@ export default function CercanasClient() {
             onChange={(e) => setMedQuery(e.target.value)}
             placeholder="Ver precio de un medicamento en estas farmacias"
             aria-label="Medicamento"
-            className="flex-1 px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
+            className="flex-1 px-3.5 py-2.5 bg-white/80 backdrop-blur-sm border border-white/60 rounded-xl text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
           />
           <button
             type="submit"
@@ -271,7 +271,7 @@ function PharmacyRow({
   const badge = OPEN_BADGE[p.openState]
 
   return (
-    <li className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-xl shadow-sm p-4">
+    <li className="glass-card rounded-xl p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">

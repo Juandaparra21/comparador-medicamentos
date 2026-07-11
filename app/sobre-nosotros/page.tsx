@@ -104,7 +104,7 @@ export default function SobreNosotrosPage() {
       </div>
 
       {/* Qué hacemos */}
-      <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
+      <section className="glass-card rounded-2xl p-5 sm:p-6 mb-6">
         <img
           src="/fotos/preocupado-precios.webp"
           alt="Persona preocupada revisando los precios de sus medicamentos"
@@ -128,7 +128,7 @@ export default function SobreNosotrosPage() {
       </section>
 
       {/* Farmacias */}
-      <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
+      <section className="glass-card rounded-2xl p-5 sm:p-6 mb-6">
         <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-4">Farmacias que comparamos</h2>
         <div className="flex flex-wrap gap-2">
           {PHARMACIES.map((name) => (
@@ -146,7 +146,7 @@ export default function SobreNosotrosPage() {
       </section>
 
       {/* Cómo funciona */}
-      <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
+      <section className="glass-card rounded-2xl p-5 sm:p-6 mb-6">
         <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-5">Cómo obtenemos los precios</h2>
         <div className="flex flex-col gap-5">
           {HOW_STEPS.map((s) => (
@@ -170,7 +170,7 @@ export default function SobreNosotrosPage() {
       </section>
 
       {/* Valores */}
-      <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
+      <section className="glass-card rounded-2xl p-5 sm:p-6 mb-6">
         <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-5">Nuestros valores</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {VALUES.map((v) => (

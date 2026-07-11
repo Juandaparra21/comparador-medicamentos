@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-const CARD = 'bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm'
+const CARD = 'glass-card rounded-2xl'
 
 export default async function PrecioPage({ params }: Props) {
   const { slug } = await params
@@ -231,7 +231,7 @@ export default async function PrecioPage({ params }: Props) {
       <section className={`${CARD} p-5 sm:p-6`}>
         <h2 className="text-[16px] font-bold text-[#1a1b1f] mb-3">Sigue explorando</h2>
         <div className="flex flex-wrap gap-2.5">
-          <Link href={`/buscar?q=${encodeURIComponent(ing)}`} className="text-[13px] font-semibold px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white hover:opacity-90 transition-opacity">
+          <Link href={`/buscar?q=${encodeURIComponent(ing)}`} className="text-[13px] font-semibold px-4 py-2 rounded-xl vitality-gradient text-white hover:opacity-90 transition-opacity">
             Comparar precios de {ing}
           </Link>
           <Link href={`/historial/${slug}`} className="text-[13px] font-semibold px-4 py-2 rounded-lg border border-[#c1c6d7]/60 bg-white/60 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">

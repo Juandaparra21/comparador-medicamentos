@@ -11,6 +11,8 @@
   --color-tertiary: #4c4aca;
   --color-tertiary-container: #6664e4;
   --color-on-tertiary: #ffffff;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
 
   /* Border radius — design system tokens */
   --radius-sm: 0.25rem;
@@ -33,12 +35,42 @@ html {
 }
 
 body {
-  background-color: #fbfbfd; /* clean near-white, Apple-style */
-  color: #1d1d1f;
+  background-color: #faf9fe; /* surface del sistema Luminous Health */
+  color: #1a1b1f;
   -webkit-font-smoothing: antialiased;
   /* No usamos text-rendering: optimizeLegibility a proposito: en moviles lentos
      obliga a calcular kerning/ligaduras antes de pintar el texto y retrasa el LCP
      (el H1 del hero). El valor por defecto (auto) pinta el texto antes. */
+}
+
+/* ── Fondo mesh global (Luminous Health) ─────────────────────────────
+   Gradientes radiales fijos detras de todo el sitio. Son pintados una
+   sola vez (position: fixed, sin animacion) para no castigar el scroll
+   en Android de gama baja. */
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(at 0% 0%, #e2dfff 0%, transparent 50%),
+    radial-gradient(at 100% 0%, #d8e2ff 0%, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(111, 251, 133, 0.45) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, #fefcff 0%, transparent 50%);
+  background-color: #faf9fe;
+}
+
+/* Manchas de luz ambiental: circulos difuminados que "se cuelan" por
+   detras de las tarjetas de vidrio, como en el diseno de referencia. */
+.ambient-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  filter: blur(100px);
+  border-radius: 9999px;
+  opacity: 0.35;
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* Scroll-reveal: hidden until the Reveal component marks it in-view.
@@ -64,20 +96,63 @@ body {
   animation: breathe 9s ease-in-out infinite alternate;
 }
 
-/* ── Glassmorphism (portada) ─────────────────────────────────────────
-   Tarjeta de vidrio esmerilado: fondo translucido que difumina lo que
-   queda detras (las manchas de color del fondo). blur moderado a
-   proposito: valores altos castigan el scroll en Android de gama baja. */
+/* ── Glassmorphism (sistema Luminous Health, todo el sitio) ──────────
+   Tarjeta de vidrio esmerilado nivel 1: blanco 70%, blur 20px y borde
+   blanco 30%, exactamente como el sistema de diseno de referencia. */
 .glass-card {
-  background: rgba(255, 255, 255, 0.55);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
-  backdrop-filter: blur(14px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 32px rgba(24, 59, 124, 0.08);
+}
+/* Nivel 2 (activo/flotante): mas opaco, para sub-capas dentro de una
+   tarjeta (el bloque de precio) o elementos que flotan sobre otros. */
+.glass-card-opaque {
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+/* Fila de vidrio (listas de farmacias): mas transparente y blur suave. */
+.glass-row {
+  background: rgba(255, 255, 255, 0.4);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 /* Navegadores sin backdrop-filter: casi opaco para no perder contraste. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-card { background: rgba(255, 255, 255, 0.92); }
+  .glass-card-opaque { background: rgba(255, 255, 255, 0.96); }
+  .glass-row { background: rgba(255, 255, 255, 0.88); }
+}
+
+/* Hover de tarjeta de vidrio: levita con sombra azul suave (sin negro). */
+.glass-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 40px -10px rgba(0, 88, 188, 0.15);
+}
+
+/* Texto de marca con gradiente azul → morado del sistema. */
+.brand-gradient-text {
+  background-image: linear-gradient(90deg, var(--color-primary), var(--color-tertiary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Gradiente de accion (botones primarios). */
+.vitality-gradient {
+  background: linear-gradient(135deg, #0070eb 0%, #4c4aca 100%);
+}
+
+/* Entrada suave de tarjetas (usada por el diseno animado de referencia). */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
 }
 
 /* Flotacion suave de los adornos de vidrio del hero */
@@ -94,6 +169,8 @@ body {
   .reveal { opacity: 1; transform: none; transition: none; }
   .animate-breathe { animation: none; opacity: 0.7; }
   .animate-floaty { animation: none; }
+  .animate-fade-in-up { animation: none; }
+  .glass-card-hover:hover { transform: none; }
 }
 
 /* Quantity range slider — filled track driven by inline --pct, white thumb */

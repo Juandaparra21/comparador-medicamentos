@@ -48,9 +48,9 @@ export function HeroStats() {
       {cells.map((c) => (
         <div
           key={c.label}
-          className="flex flex-col items-center text-center bg-white/60 backdrop-blur-xl border border-white/50 rounded-2xl px-2 py-3.5 sm:px-3 sm:py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+          className="glass-card glass-card-hover flex flex-col items-center text-center rounded-2xl px-2 py-3.5 sm:px-3 sm:py-4"
         >
-          <p className="text-[18px] sm:text-[24px] font-bold text-[#1d1d1f] tabular-nums leading-none">
+          <p className="text-[18px] sm:text-[24px] font-bold text-[#1a1b1f] tabular-nums leading-none">
             {c.value}
           </p>
           <p className="text-[10px] sm:text-[12px] text-[#6e6e73] mt-1.5 leading-tight">

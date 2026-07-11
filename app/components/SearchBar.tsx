@@ -116,7 +116,7 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
     <div ref={wrapRef} className="relative">
       <form
         onSubmit={handleSubmit}
-        className="flex items-stretch bg-white/70 backdrop-blur-[30px] rounded-xl border border-white/50 shadow-[0_2px_24px_rgba(0,88,188,0.08)] overflow-hidden"
+        className={`flex items-stretch glass-card overflow-hidden shadow-[0_2px_24px_rgba(0,88,188,0.10)] ${compact ? 'rounded-2xl' : 'rounded-[24px]'}`}
       >
         <input
           ref={inputRef}
@@ -135,13 +135,13 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
           onKeyDown={handleKeyDown}
           placeholder={compact ? t('search.placeholderCompact') : t('search.placeholder')}
           autoComplete="off"
-          className="flex-1 py-3.5 pl-4 pr-2.5 sm:pr-3 bg-transparent text-[14px] sm:text-[15px] text-[#1a1b1f] placeholder:text-[#8e8e93] focus:outline-none min-w-0"
+          className="flex-1 py-3.5 pl-5 pr-2.5 sm:pr-3 bg-transparent text-[14px] sm:text-[15px] text-[#1a1b1f] placeholder:text-[#8e8e93] focus:outline-none min-w-0"
         />
         <button
           type="submit"
           disabled={!query.trim()}
           aria-label={t('search.button')}
-          className="m-1.5 px-3.5 sm:px-4 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white rounded-lg shrink-0 flex items-center justify-center disabled:opacity-40 hover:opacity-90 transition-opacity cursor-pointer"
+          className="m-1.5 px-4 sm:px-5 py-2.5 vitality-gradient text-white rounded-full shrink-0 flex items-center justify-center shadow-lg disabled:opacity-40 hover:opacity-90 hover:scale-105 active:scale-95 transition-all cursor-pointer"
         >
           {fetching ? (
             <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -162,7 +162,7 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
 
       {/* Autocomplete dropdown */}
       {open && (suggestions.length > 0 || showCorrection) && (
-        <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-[0_8px_32px_rgba(0,88,188,0.14)] overflow-hidden">
+        <div className="absolute left-0 right-0 top-full mt-1.5 z-50 glass-card-opaque rounded-2xl shadow-[0_8px_32px_rgba(0,88,188,0.14)] overflow-hidden">
           {/* ¿Quisiste decir…? — solo cuando no hubo resultados del índice */}
           {showCorrection && correction && (
             <button

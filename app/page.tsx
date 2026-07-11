@@ -37,27 +37,8 @@ export const revalidate = 3600
 export default function Home() {
   return (
     <>
-      {/* Fondo glass de la portada: lavado azul suave + manchas de color fijas
-         detras de todo. Son gradientes radiales (baratos de pintar), no filtros
-         blur. Solo esta pagina lo monta; el resto del sitio no cambia. */}
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(180deg, #e8edf9 0%, #eff3fb 45%, #f7f9fd 100%)' }}
-        />
-        <div
-          className="absolute -top-[12%] -left-[18%] h-[420px] w-[420px] sm:h-[640px] sm:w-[640px] rounded-full"
-          style={{ background: 'radial-gradient(closest-side, rgba(0,112,235,0.18), transparent 70%)' }}
-        />
-        <div
-          className="absolute top-[4%] -right-[22%] h-[380px] w-[380px] sm:h-[580px] sm:w-[580px] rounded-full"
-          style={{ background: 'radial-gradient(closest-side, rgba(102,100,228,0.16), transparent 70%)' }}
-        />
-        <div
-          className="absolute -bottom-[12%] left-[8%] h-[380px] w-[380px] sm:h-[600px] sm:w-[600px] rounded-full"
-          style={{ background: 'radial-gradient(closest-side, rgba(111,251,133,0.12), transparent 70%)' }}
-        />
-      </div>
+      {/* El fondo mesh y las luces ambientales ahora los monta el layout
+         para todo el sitio (sistema Luminous Health). */}
 
       {/* Hero */}
       <section className="relative isolate overflow-hidden pt-10 sm:pt-20 pb-20 sm:pb-32">

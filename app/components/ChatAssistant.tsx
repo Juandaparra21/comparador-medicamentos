@@ -188,7 +188,7 @@ export function ChatAssistant() {
       {/* Chat window */}
       {open && (
         <div
-          className="fixed bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[360px] max-h-[560px] flex flex-col bg-white rounded-2xl shadow-[0_24px_64px_rgba(0,0,0,0.18)] border border-[#e5e7eb] overflow-hidden"
+          className="fixed bottom-40 md:bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[360px] max-h-[520px] sm:max-h-[560px] flex flex-col glass-card-opaque rounded-2xl shadow-[0_24px_64px_rgba(0,88,188,0.18)] overflow-hidden"
           role="dialog"
           aria-label="Asistente Farmi"
         >
@@ -304,7 +304,7 @@ export function ChatAssistant() {
       )}
 
       {/* Floating button */}
-      <div className="fixed bottom-4 right-4 sm:right-6 z-50 flex flex-col items-end gap-2">
+      <div className="fixed bottom-24 md:bottom-4 right-4 sm:right-6 z-50 flex flex-col items-end gap-2">
         {bubble && !open && (
           <div className="bg-white text-[#1a1b1f] text-[13px] font-semibold px-4 py-2.5 rounded-2xl rounded-br-sm shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-[#e5e7eb] max-w-[220px] leading-snug animate-[fadeInUp_0.4s_ease]">
             Encuentra el medicamento más barato

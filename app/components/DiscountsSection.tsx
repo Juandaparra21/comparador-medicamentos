@@ -110,7 +110,7 @@ export async function DiscountsSection() {
           <Link
             key={item.id}
             href={`/buscar?q=${encodeURIComponent(item.activeIngredient)}`}
-            className="group flex flex-col bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl shadow-sm hover:shadow-[0_8px_32px_rgba(0,88,188,0.10)] hover:bg-white/85 transition-all duration-300 overflow-hidden shrink-0 w-[200px] sm:w-auto snap-start"
+            className="group flex flex-col glass-card glass-card-hover rounded-2xl transition-all duration-300 overflow-hidden shrink-0 w-[200px] sm:w-auto snap-start"
           >
             <div className="relative">
               <MedicationImage ingredient={item.activeIngredient} height={70} />

@@ -34,7 +34,7 @@ export function NearbyMapSection() {
 
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-5xl mb-12">
-      <div className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 border-b border-[#f0f1f5]">
           <div>

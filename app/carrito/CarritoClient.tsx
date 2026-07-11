@@ -63,7 +63,7 @@ export default function CarritoClient() {
   if (!user) {
     return (
       <section className="mx-auto px-4 sm:px-5 max-w-lg pt-16 pb-16 flex flex-col items-center text-center gap-5">
-        <div className="w-16 h-16 rounded-2xl bg-white/70 backdrop-blur-[20px] border border-white/50 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-2xl glass-card rounded-2xl flex items-center justify-center">
           <svg className="w-8 h-8 text-[#c1c6d7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -149,7 +149,7 @@ export default function CarritoClient() {
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {items.map((item) => (
               <div key={item.id}
-                className="group flex flex-col bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl shadow-sm hover:bg-white/85 hover:shadow-[0_8px_32px_rgba(0,88,188,0.10)] transition-all duration-300 overflow-hidden">
+                className="group flex flex-col glass-card glass-card-hover rounded-2xl transition-all duration-300 overflow-hidden">
 
                 <ItemImage imageUrl={item.imageUrl} ingredient={item.activeIngredient} />
 
@@ -207,7 +207,7 @@ export default function CarritoClient() {
           </div>
 
           {/* Summary sidebar */}
-          <div className="w-full lg:w-64 shrink-0 bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl p-5 shadow-sm sticky top-20">
+          <div className="w-full lg:w-64 shrink-0 glass-card rounded-2xl p-5 sticky top-20">
             <h2 className="text-[14px] font-bold text-[#1a1b1f] mb-4">Resumen</h2>
             <div className="flex flex-col gap-2 mb-4">
               {items.map(i => (

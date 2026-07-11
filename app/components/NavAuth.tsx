@@ -68,7 +68,7 @@ export function NavAuth() {
         {open && (
           <div
             role="menu"
-            className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl border border-[#e5e7eb] shadow-[0_12px_32px_rgba(0,0,0,0.12)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+            className="absolute right-0 top-full mt-2 w-60 glass-card-opaque rounded-2xl shadow-[0_12px_32px_rgba(0,88,188,0.14)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150"
           >
             {/* Cabecera */}
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#f0f1f5]">

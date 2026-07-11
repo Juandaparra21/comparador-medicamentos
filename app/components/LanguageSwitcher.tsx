@@ -39,7 +39,7 @@ export function LanguageSwitcher() {
       {open && (
         <ul
           role="listbox"
-          className="absolute right-0 bottom-full mb-2 w-44 bg-white rounded-xl border border-[#e5e7eb] shadow-[0_12px_32px_rgba(0,0,0,0.12)] overflow-hidden z-50 py-1"
+          className="absolute right-0 bottom-full mb-2 w-44 glass-card-opaque rounded-xl shadow-[0_12px_32px_rgba(0,88,188,0.14)] overflow-hidden z-50 py-1"
         >
           {LOCALES.map((l) => (
             <li key={l}>

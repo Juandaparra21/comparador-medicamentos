@@ -42,7 +42,7 @@ export default function CuentaClient() {
   if (!user) {
     return (
       <section className="mx-auto px-4 sm:px-5 max-w-lg pt-16 pb-16 flex flex-col items-center text-center gap-5">
-        <div className="w-16 h-16 rounded-2xl bg-white/70 backdrop-blur-[20px] border border-white/50 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-2xl glass-card rounded-2xl flex items-center justify-center">
           <svg className="w-8 h-8 text-[#c1c6d7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
           </svg>
@@ -142,7 +142,7 @@ export default function CuentaClient() {
 
       <div className="flex flex-col gap-4">
         {/* Perfil */}
-        <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm p-5">
+        <div className="glass-card rounded-2xl p-5">
           <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-3">Perfil</h2>
           <label className="block text-[12px] font-semibold text-[#414755] mb-1.5">Nombre</label>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" className={inputCls} />
@@ -159,7 +159,7 @@ export default function CuentaClient() {
         </div>
 
         {/* Seguridad */}
-        <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm p-5">
+        <div className="glass-card rounded-2xl p-5">
           <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-1">{isGoogle ? 'Establecer contraseña' : 'Cambiar contraseña'}</h2>
           <p className="text-[12px] text-[#717786] mb-3">
             {isGoogle
@@ -186,7 +186,7 @@ export default function CuentaClient() {
         </div>
 
         {/* Accesos rápidos */}
-        <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm p-5">
+        <div className="glass-card rounded-2xl p-5">
           <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-3">Mis guardados</h2>
           <div className="flex flex-col sm:flex-row gap-2.5">
             <Link href="/carrito" className="flex-1 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-white/60 border border-[#c1c6d7]/40 hover:border-secondary/40 hover:bg-white transition-colors">

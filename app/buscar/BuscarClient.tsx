@@ -258,7 +258,7 @@ export default function BuscarClient() {
             </p>
             <button
               onClick={() => setReloadKey((k) => k + 1)}
-              className="px-5 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[14px] font-semibold rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
+              className="px-5 py-2.5 vitality-gradient text-white text-[14px] font-semibold rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
             >
               Reintentar
             </button>
@@ -341,7 +341,7 @@ export default function BuscarClient() {
             </div>
 
             {/* ── Ubicación: detectar GPS o escribir dirección + filtro por cercanía ── */}
-            <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm p-4 sm:p-5">
+            <div className="mt-4 glass-card rounded-2xl p-4 sm:p-5">
               {!hasDistances ? (
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-xl bg-secondary/12 flex items-center justify-center shrink-0">
@@ -358,7 +358,7 @@ export default function BuscarClient() {
                       <button
                         onClick={requestLoc}
                         disabled={locLoading}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white text-[13px] font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-opacity cursor-pointer shrink-0 shadow-[0_4px_16px_rgba(0,88,188,0.20)]"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 vitality-gradient text-white text-[13px] font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-opacity cursor-pointer shrink-0 shadow-[0_4px_16px_rgba(0,88,188,0.20)]"
                       >
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
@@ -447,7 +447,7 @@ export default function BuscarClient() {
 
             {/* ── Filtros (colapsables: presentación, concentracion, cantidad) ── */}
             {(presentations.length > 1 || concentrations.length > 1 || quantities.length > 1) && (
-              <div className="mt-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-sm overflow-hidden">
+              <div className="mt-4 glass-card rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setShowFilters((v) => !v)}
                   aria-expanded={showFilters}
@@ -479,7 +479,7 @@ export default function BuscarClient() {
                 </button>
 
                 {showFilters && (
-                  <div className="divide-y divide-[#f0f1f5] border-t border-[#f0f1f5]">
+                  <div className="divide-y divide-white/40 border-t border-white/40">
                     {presentations.length > 1 && (
                       <div className="p-5">
                         <RadioFilter
@@ -705,7 +705,7 @@ export default function BuscarClient() {
             {filtered.length > 0 && (
               <div className="flex flex-col gap-3 mb-8">
                 <PriceAlert query={normalize(q)} label={q.trim()} currentPrice={currentBestPrice} />
-                <div className="flex items-center justify-between gap-3 flex-wrap bg-white/50 border border-white/40 rounded-2xl px-4 py-3.5">
+                <div className="flex items-center justify-between gap-3 flex-wrap glass-row rounded-2xl px-4 py-3.5">
                   <p className="text-[13px] text-[#414755] font-medium leading-snug">
                     ¿Le sirve a alguien más? Comparte esta comparación.
                   </p>

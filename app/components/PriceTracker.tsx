@@ -87,7 +87,7 @@ export function PriceTracker({ query, label }: Props) {
     .sort((a, b) => a.price - b.price)
 
   return (
-    <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6">
+    <section className="glass-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
         <div>
           <h2 className="text-[16px] font-bold text-[#1a1b1f]">Historial de precios</h2>
@@ -119,7 +119,7 @@ export function PriceTracker({ query, label }: Props) {
           <PriceHistoryChart histories={histories} />
         </>
       ) : days === 1 && latest.length > 0 ? (
-        <div className="rounded-xl bg-[#f5f6fa] border border-white/40 p-4">
+        <div className="glass-row rounded-xl p-4">
           <p className="text-[13px] font-semibold text-[#1a1b1f] mb-1">Primer registro guardado</p>
           <p className="text-[12px] text-[#717786] mb-3">
             Tomamos el precio de hoy. Vuelve mañana para ver como evoluciona la grafica.
@@ -142,7 +142,7 @@ export function PriceTracker({ query, label }: Props) {
           </div>
         </div>
       ) : (
-        <div className="rounded-xl bg-[#f5f6fa] border border-white/40 p-5 text-center">
+        <div className="glass-row rounded-xl p-5 text-center">
           <p className="text-[14px] font-semibold text-[#1a1b1f] mb-1">Aún no hay historial</p>
           <p className="text-[12px] text-[#717786]">
             {isTracked

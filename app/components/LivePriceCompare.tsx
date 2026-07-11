@@ -86,7 +86,9 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
   const cheapest = rows[0]?.price
 
   return (
-    <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6">
+    <section className="glass-card rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+      {/* Brillo interno, como la tarjeta de detalle del diseno de referencia */}
+      <div aria-hidden="true" className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 blur-3xl rounded-full pointer-events-none" />
       <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
         <div>
           <h2 className="text-[17px] sm:text-[19px] font-bold text-[#1a1b1f]">
@@ -112,7 +114,7 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
       {state === 'loading' && (
         <div className="flex flex-col gap-2" aria-hidden="true">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-3 rounded-xl bg-[#f5f6fa] h-12 animate-pulse" />
+            <div key={i} className="flex items-center gap-3 glass-row rounded-xl h-12 animate-pulse" />
           ))}
           <p className="sr-only">Consultando precios...</p>
         </div>
@@ -120,9 +122,9 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
 
       {showTable && (
         <>
-          <div className="rounded-xl border border-white/50 overflow-hidden divide-y divide-[#f0f1f5]">
+          <div className="flex flex-col gap-1.5">
             {rows.map((r, i) => (
-              <div key={r.pharmacy} className={`flex items-center gap-3 px-3.5 py-3 ${i === 0 ? 'bg-secondary/[0.05]' : 'bg-white/40'}`}>
+              <div key={r.pharmacy} className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl ${i === 0 ? 'glass-card border-l-4 border-l-secondary' : 'glass-row'}`}>
                 <PharmacyLogo name={r.pharmacy} size={30} />
                 <span className="flex-1 min-w-0 text-[13px] font-semibold text-[#1a1b1f] truncate flex items-center gap-2">
                   {r.pharmacy}
@@ -159,7 +161,7 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
       )}
 
       {(state === 'empty' || state === 'error') && (
-        <div className="rounded-xl bg-[#f5f6fa] border border-white/40 p-5 text-center">
+        <div className="glass-row rounded-xl p-5 text-center">
           <p className="text-[13px] text-[#717786] mb-3">
             {state === 'empty'
               ? `No encontramos precios de ${ingredient} en este momento.`
@@ -167,7 +169,7 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
           </p>
           <Link
             href={`/buscar?q=${encodeURIComponent(ingredient)}`}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl vitality-gradient text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"
           >
             Buscar {ingredient} en Farmi
           </Link>
@@ -177,7 +179,7 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
       {showTable && (
         <Link
           href={`/buscar?q=${encodeURIComponent(ingredient)}`}
-          className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"
+          className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl vitality-gradient text-white text-[13px] font-semibold hover:opacity-90 transition-opacity"
         >
           Ver todas las presentaciones y precios de {ingredient}
           <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

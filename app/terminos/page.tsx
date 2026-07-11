@@ -151,7 +151,7 @@ export default function TerminosPage() {
         {sections.map((s) => (
           <section
             key={s.title}
-            className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6"
+            className="glass-card rounded-2xl p-5 sm:p-6"
           >
             <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-3">{s.title}</h2>
             {s.body.split('\n\n').map((para, i) => {

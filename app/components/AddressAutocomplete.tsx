@@ -108,11 +108,11 @@ export function AddressAutocomplete({ onSelect, placeholder, disabled }: Props) 
         placeholder={placeholder ?? 'Escribe tu dirección'}
         aria-label="Dirección"
         autoComplete="off"
-        className="w-full px-3.5 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0 disabled:opacity-60"
+        className="w-full px-3.5 py-2.5 bg-white/80 backdrop-blur-sm border border-white/60 rounded-xl text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0 disabled:opacity-60"
       />
 
       {open && (suggestions.length > 0 || loading) && (
-        <ul className="absolute z-[1100] left-0 right-0 mt-1 bg-white border border-[#e5e7eb] rounded-lg shadow-lg overflow-hidden max-h-72 overflow-y-auto">
+        <ul className="absolute z-[1100] left-0 right-0 mt-1 glass-card-opaque rounded-xl shadow-lg overflow-hidden max-h-72 overflow-y-auto">
           {loading && suggestions.length === 0 && (
             <li className="px-3.5 py-2.5 text-[13px] text-[#9ca3af]">Buscando direcciones...</li>
           )}

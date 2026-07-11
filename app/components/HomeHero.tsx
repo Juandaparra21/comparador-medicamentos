@@ -6,7 +6,7 @@ export function HomeHeroText() {
   const { t } = useLang()
   return (
     <div className="text-center mb-12 sm:mb-16">
-      <h1 className="text-[36px] sm:text-[60px] font-bold leading-[1.04] tracking-[-0.03em] text-[#1d1d1f] mb-4 sm:mb-5">
+      <h1 className="text-[36px] sm:text-[60px] font-bold leading-[1.04] tracking-[-0.03em] text-[#1a1b1f] mb-4 sm:mb-5">
         {t('home.heroLead')}
         <span className="text-primary">{t('home.heroKeyword')}</span>
         {t('home.heroTail')}

@@ -7,6 +7,7 @@ import { NavAuth } from '@/app/components/NavAuth'
 import { WishlistNav } from '@/app/components/WishlistNav'
 import { CartNav } from '@/app/components/CartNav'
 import { CercanasNavLink } from '@/app/components/CercanasNavLink'
+import { BottomNav } from '@/app/components/BottomNav'
 import { SiteFooter } from '@/app/components/SiteFooter'
 import { ChatAssistant } from '@/app/components/ChatAssistant'
 import { SITE_URL } from '@/app/lib/siteUrl'
@@ -88,15 +89,22 @@ export default function RootLayout({
 
   return (
     <html lang="es" className={`${hanken.variable} h-full`}>
-      <body className="min-h-full flex flex-col relative bg-[#fbfbfd]">
+      <body className="min-h-full flex flex-col relative bg-[#faf9fe]">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
+        {/* Fondo mesh + luces ambientales del sistema Luminous Health.
+           Fijos y detras de todo el sitio; las tarjetas de vidrio los
+           difuminan con su backdrop-filter. */}
+        <div aria-hidden="true" className="mesh-bg" />
+        <div aria-hidden="true" className="ambient-glow bg-primary -top-40 -left-20" />
+        <div aria-hidden="true" className="ambient-glow bg-tertiary top-[40%] -right-32" />
+        <div aria-hidden="true" className="ambient-glow bg-secondary -bottom-32 left-[20%]" />
         <LanguageProvider>
         <AuthProvider>
           {/* Header */}
-          <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+          <header className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl border-b border-white/30 shadow-sm">
             <div className="mx-auto px-4 sm:px-5 max-w-5xl h-14 flex items-center justify-between gap-4">
               <Link
                 href="/"
@@ -105,28 +113,30 @@ export default function RootLayout({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/farmi_mark.png" alt="" width={26} height={31} className="h-[30px] w-auto" />
-                <span className="font-bold text-[17px] tracking-tight">
-                  <span className="text-[#1a1b1f]">Far</span>
-                  <span className="text-primary">mi</span>
+                <span className="font-bold text-[18px] tracking-tight brand-gradient-text">
+                  Farmi
                 </span>
               </Link>
 
               <nav aria-label="Navegación principal" className="flex items-center gap-2 sm:gap-2.5">
                 <CercanasNavLink />
                 <NavAuth />
-                <CartNav />
-                <WishlistNav />
+                <div className="hidden md:flex items-center gap-2 sm:gap-2.5">
+                  <CartNav />
+                  <WishlistNav />
+                </div>
               </nav>
             </div>
           </header>
 
-          <main className="flex-1" id="main-content">
+          <main className="flex-1 pb-20 md:pb-0" id="main-content">
             {children}
           </main>
 
           <ChatAssistant />
 
           <SiteFooter />
+          <BottomNav />
         </AuthProvider>
         </LanguageProvider>
       </body>

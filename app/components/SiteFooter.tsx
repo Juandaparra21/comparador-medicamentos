@@ -7,14 +7,13 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 export function SiteFooter() {
   const { t } = useLang()
   return (
-    <footer className="border-t border-[#c1c6d7]/30 py-8 px-4" aria-label={t('footer.about')}>
+    <footer className="bg-white/40 backdrop-blur-xl border-t border-white/30 pt-8 pb-24 md:pb-8 px-4" aria-label={t('footer.about')}>
       <div className="mx-auto max-w-5xl">
         {/* Top row: brand + nav links */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-6">
           <div>
-            <p className="font-bold text-[16px] tracking-tight">
-              <span className="text-[#1a1b1f]">Far</span>
-              <span className="text-primary">mi</span>
+            <p className="font-bold text-[16px] tracking-tight brand-gradient-text inline-block">
+              Farmi
             </p>
             <p className="text-[12px] text-[#717786] mt-1">{t('footer.tagline')}</p>
           </div>

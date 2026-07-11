@@ -120,7 +120,7 @@ export function ListComparison({ items }: Props) {
   if (items.length < 2) return null
 
   return (
-    <section className="mt-8 bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6">
+    <section className="mt-8 glass-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3 flex-wrap mb-1">
         <div>
           <h2 className="text-[16px] font-bold text-[#1a1b1f]">Total por farmacia</h2>
@@ -146,7 +146,7 @@ export function ListComparison({ items }: Props) {
       )}
 
       {!loading && error && (
-        <div className="rounded-xl bg-[#f5f6fa] border border-white/40 p-5 text-center mt-4">
+        <div className="glass-row rounded-xl p-5 text-center mt-4">
           <p className="text-[13px] text-[#717786]">
             No pudimos calcular los totales ahora. Intenta de nuevo en unos minutos.
           </p>

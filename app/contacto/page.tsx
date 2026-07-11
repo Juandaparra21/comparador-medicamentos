@@ -63,7 +63,7 @@ export default function ContactoPage() {
           {TOPICS.map((t) => (
             <div
               key={t.label}
-              className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-xl shadow-sm p-4"
+              className="glass-card rounded-xl p-4"
             >
               <p className="text-[13px] font-bold text-[#1a1b1f] mb-1">{t.label}</p>
               <p className="text-[12px] text-[#414755] leading-relaxed">{t.desc}</p>
@@ -73,7 +73,7 @@ export default function ContactoPage() {
       </section>
 
       {/* Email */}
-      <section className="bg-white/70 backdrop-blur-[20px] border border-white/50 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
+      <section className="glass-card rounded-2xl p-5 sm:p-6 mb-6">
         <h2 className="text-[15px] font-bold text-[#1a1b1f] mb-4">Escríbenos</h2>
         <p className="text-[13px] text-[#414755] leading-relaxed mb-5">
           Envıa tu mensaje directamente a nuestro correo. Incluye el nombre del medicamento y la
