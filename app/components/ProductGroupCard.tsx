@@ -1,18 +1,33 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import type { ProductGroup } from '@/app/utils/groupResults'
+import { MedicationImage } from './MedicationImage'
 import { PharmacyLogo } from './PharmacyLogo'
 import { WishlistButton } from './WishlistButton'
 import { CartButton } from './CartButton'
 import { RelativeTime } from './RelativeTime'
 import { formatCOP } from '@/app/utils/format'
+import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
 import { formatQuantity, perUnitSuffix } from '@/app/utils/units'
 import type { PharmacyDistances, PharmacyStores } from '@/app/hooks/useNearbyPharmacies'
 
 interface Props { group: ProductGroup; priceBasis?: 'total' | 'unit'; distances?: PharmacyDistances; stores?: PharmacyStores; fetchedAt?: string }
+
+function GroupThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
+  const [failed, setFailed] = useState(false)
+  if (imageUrl && !failed) {
+    return (
+      <div className="w-full h-[80px] relative overflow-hidden rounded-t-xl bg-white">
+        <img src={thumbnailUrl(imageUrl, 120)} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} className="w-full h-full object-contain p-2" />
+      </div>
+    )
+  }
+  return <MedicationImage ingredient={ingredient} height={80} />
+}
 
 export function ProductGroupCard({ group, priceBasis = 'total', distances, stores, fetchedAt }: Props) {
   const { results, minPrice, maxPrice, savings } = group
@@ -26,6 +41,9 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
 
   return (
     <article className="group relative flex flex-col glass-card glass-card-hover rounded-3xl transition-all duration-300 overflow-hidden">
+
+      {/* Miniatura del producto — imagen real de la farmacia con respaldo SVG */}
+      <GroupThumbnail imageUrl={group.imageUrl} ingredient={group.activeIngredient} />
 
       <div className="flex flex-col gap-3 p-4 flex-1">
 
@@ -48,38 +66,26 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
           </div>
         )}
 
-        {/* Product info header — ficha con icono de capsula, sin fotos */}
-        <div className="flex items-start gap-3">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 ${
+        {/* Product info header */}
+        <div className="flex items-start gap-2 flex-wrap">
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
             results[0]?.type === 'generic'
-              ? 'bg-secondary/10 border-secondary/20 text-secondary'
-              : 'bg-primary/10 border-primary/20 text-primary'
+              ? 'bg-secondary/10 text-secondary border border-secondary/20'
+              : 'bg-primary/10 text-primary border border-primary/20'
           }`}>
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-              <rect x="3" y="8.5" width="18" height="7" rx="3.5" />
-              <line x1="12" y1="8.5" x2="12" y2="15.5" />
-            </svg>
-          </div>
-          <div className="min-w-0 flex-1">
-            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 ${
-              results[0]?.type === 'generic'
-                ? 'bg-secondary/10 text-secondary border border-secondary/20'
-                : 'bg-primary/10 text-primary border border-primary/20'
-            }`}>
-              {results[0]?.type === 'generic' ? 'Genérico' : 'Marca'}
-            </span>
-            <p className="text-[12px] font-semibold text-[#414755] leading-snug">
-              {group.activeIngredient
-                ? <>
-                    {group.activeIngredient}{group.concentration ? ` ${group.concentration}` : ''}
-                    {group.presentation && (
-                      <><span className="text-[#c1c6d7] mx-1">&bull;</span>{formatQuantity(group.quantity, group.presentation)}</>
-                    )}
-                  </>
-                : results[0]?.productName
-              }
-            </p>
-          </div>
+            {results[0]?.type === 'generic' ? 'Genérico' : 'Marca'}
+          </span>
+          <p className="text-[12px] font-semibold text-[#414755] leading-snug">
+            {group.activeIngredient
+              ? <>
+                  {group.activeIngredient}{group.concentration ? ` ${group.concentration}` : ''}
+                  {group.presentation && (
+                    <><span className="text-[#c1c6d7] mx-1">&bull;</span>{formatQuantity(group.quantity, group.presentation)}</>
+                  )}
+                </>
+              : results[0]?.productName
+            }
+          </p>
         </div>
 
         {/* Price range — subcapa de vidrio mas opaca */}

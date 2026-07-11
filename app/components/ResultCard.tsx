@@ -1,12 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import type { PharmacyResult } from '@/app/types'
 import { PharmacyLogo } from './PharmacyLogo'
+import { MedicationImage } from './MedicationImage'
 import { WishlistButton } from './WishlistButton'
 import { CartButton } from './CartButton'
 import { RelativeTime } from './RelativeTime'
 import { formatCOP } from '@/app/utils/format'
+import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
 import { formatQuantity, perUnitSuffix } from '@/app/utils/units'
@@ -44,6 +47,27 @@ interface Props {
   fetchedAt?: string
 }
 
+function ProductThumbnail({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
+  const [imgFailed, setImgFailed] = useState(false)
+
+  if (imageUrl && !imgFailed) {
+    return (
+      <div className="w-full h-[80px] relative overflow-hidden rounded-t-xl bg-white">
+        <img
+          src={thumbnailUrl(imageUrl, 120)}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={() => setImgFailed(true)}
+          className="w-full h-full object-contain p-2"
+        />
+      </div>
+    )
+  }
+
+  return <MedicationImage ingredient={ingredient} height={80} />
+}
+
 export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor precio', distanceKm, store, fetchedAt }: Props) {
   const slug = normalize(result.activeIngredient)
   const perUnitHighlight = isCheapest && cheapestLabel !== 'Mejor precio'
@@ -66,23 +90,24 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
         ${result.availability === 'unavailable' ? 'opacity-65' : ''}
       `}
     >
-      {/* Badges superiores (sin franja de foto: van sobre la tarjeta) */}
-      {(result.discount || isCheapest) && (
-        <div className="flex items-center justify-between gap-2 px-4 pt-3 -mb-1 z-10">
-          {result.discount ? (
-            <span className="bg-error text-white text-[11px] font-black px-2 py-0.5 rounded-lg shadow-sm">
-              -{result.discount}%
-            </span>
-          ) : <span />}
-          {isCheapest && (
-            <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold tracking-[0.05em] uppercase bg-secondary text-white px-2.5 py-1 rounded-full whitespace-nowrap shadow-md">
-              <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
-              </svg>
-              {cheapestLabel}
-            </span>
-          )}
-        </div>
+      {/* Miniatura del producto — imagen real de la farmacia con respaldo SVG */}
+      <ProductThumbnail imageUrl={result.imageUrl} ingredient={result.activeIngredient} />
+
+      {/* Discount badge */}
+      {result.discount && (
+        <span className="absolute top-2 left-2 bg-error text-white text-[11px] font-black px-2 py-0.5 rounded-lg shadow-sm z-10">
+          -{result.discount}%
+        </span>
+      )}
+
+      {/* Cheapest badge */}
+      {isCheapest && (
+        <span className="absolute top-2 right-2 flex items-center gap-1 text-[9px] sm:text-[10px] font-bold tracking-[0.05em] uppercase bg-secondary text-white px-2.5 py-1 rounded-full whitespace-nowrap shadow-md z-10">
+          <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
+          </svg>
+          {cheapestLabel}
+        </span>
       )}
 
       <div className="flex flex-col gap-3 p-4 flex-1">
