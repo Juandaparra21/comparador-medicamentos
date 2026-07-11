@@ -4,7 +4,13 @@ import { useState, useRef, useEffect } from 'react'
 import { useLang } from '@/app/i18n/LanguageProvider'
 import { LOCALES, LOCALE_NAMES, LOCALE_FLAGS } from '@/app/i18n/config'
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({
+  dropDirection = 'up',
+  compact = false,
+}: {
+  dropDirection?: 'up' | 'down'
+  compact?: boolean
+}) {
   const { locale, setLocale, t } = useLang()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -24,13 +30,12 @@ export function LanguageSwitcher() {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={t('footer.language')}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/70 border border-[#c1c6d7]/50 text-[13px] font-semibold text-[#414755] hover:bg-white transition-colors cursor-pointer"
+        className={`flex items-center gap-1.5 rounded-xl bg-white/70 border border-[#c1c6d7]/50 text-[13px] font-semibold text-[#414755] hover:bg-white transition-colors cursor-pointer shrink-0 ${
+          compact ? 'px-2 py-1.5' : 'px-3 py-2 gap-2'
+        }`}
       >
-        <svg className="w-4 h-4 text-[#717786]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M3 12h18M12 3c2.5 2.5 3.5 6 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-6-3.5-9s1-6.5 3.5-9z" />
-        </svg>
-        <span>{LOCALE_FLAGS[locale]} {LOCALE_NAMES[locale]}</span>
+        <span className={compact ? 'text-[16px] leading-none' : ''}>{LOCALE_FLAGS[locale]}</span>
+        {!compact && <span>{LOCALE_NAMES[locale]}</span>}
         <svg className={`w-3.5 h-3.5 text-[#9ca3af] transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
         </svg>
@@ -39,7 +44,9 @@ export function LanguageSwitcher() {
       {open && (
         <ul
           role="listbox"
-          className="absolute right-0 bottom-full mb-2 w-44 glass-card-opaque rounded-xl shadow-[0_12px_32px_rgba(0,88,188,0.14)] overflow-hidden z-50 py-1"
+          className={`absolute right-0 w-44 glass-card-opaque rounded-xl shadow-[0_12px_32px_rgba(0,88,188,0.14)] overflow-hidden z-50 py-1 ${
+            dropDirection === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'
+          }`}
         >
           {LOCALES.map((l) => (
             <li key={l}>
