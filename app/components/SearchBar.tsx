@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { Suggestion } from '@/app/api/suggestions/route'
 import { saveSearchHistory } from '@/app/components/QuickChips'
 import { suggestCorrection, capitalizeFirst } from '@/app/utils/spellCorrect'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 interface Props {
   initialValue?: string
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function SearchBar({ initialValue = '', compact = false }: Props) {
+  const { t } = useLang()
   const [query,       setQuery]       = useState(initialValue)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [activeIdx,   setActiveIdx]   = useState(-1)
@@ -123,7 +125,7 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={open}
-          aria-label="Buscar medicamento"
+          aria-label={t('search.aria')}
           value={query}
           onChange={(e) => {
             setQuery(e.target.value)
@@ -131,14 +133,14 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
           }}
           onFocus={() => suggestions.length > 0 && setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder={compact ? 'Buscar medicamento...' : 'Ej: acetaminofen, Dolex, ibuprofeno...'}
+          placeholder={compact ? t('search.placeholderCompact') : t('search.placeholder')}
           autoComplete="off"
           className="flex-1 py-3.5 pl-4 pr-2.5 sm:pr-3 bg-transparent text-[14px] sm:text-[15px] text-[#1a1b1f] placeholder:text-[#8e8e93] focus:outline-none min-w-0"
         />
         <button
           type="submit"
           disabled={!query.trim()}
-          aria-label="Buscar"
+          aria-label={t('search.button')}
           className="m-1.5 px-3.5 sm:px-4 py-2.5 bg-gradient-to-r from-primary to-tertiary text-white rounded-lg shrink-0 flex items-center justify-center disabled:opacity-40 hover:opacity-90 transition-opacity cursor-pointer"
         >
           {fetching ? (

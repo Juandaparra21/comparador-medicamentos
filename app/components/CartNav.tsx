@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/app/context/AuthContext'
 import { getCartDB, CART_EVENT } from '@/app/utils/cart'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 export function CartNav() {
   const { user } = useAuth()
+  const { t } = useLang()
   const [count, setCount] = useState(0)
   const userRef = useRef(user)
   userRef.current = user
@@ -33,8 +35,8 @@ export function CartNav() {
   return (
     <Link
       href="/carrito"
-      aria-label="Carrito de compra"
-      title="Carrito de compra"
+      aria-label={t('menu.cart')}
+      title={t('menu.cart')}
       className="relative flex items-center justify-center w-9 h-9 rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20 transition-colors"
     >
       <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

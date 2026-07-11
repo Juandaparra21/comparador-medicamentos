@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/app/context/AuthContext'
 import { getWishlist, WISHLIST_EVENT, getWishlistDB } from '@/app/utils/wishlist'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 export function WishlistNav() {
   const { user } = useAuth()
+  const { t } = useLang()
   const [count, setCount] = useState(0)
   const userRef = useRef(user)
   userRef.current = user
@@ -33,8 +35,8 @@ export function WishlistNav() {
   return (
     <Link
       href="/lista"
-      aria-label="Lista de deseos"
-      title="Lista de deseos"
+      aria-label={t('menu.wishlist')}
+      title={t('menu.wishlist')}
       className="relative flex items-center justify-center w-9 h-9 rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
     >
       <svg
