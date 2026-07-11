@@ -54,7 +54,7 @@ export function QuickChips() {
                 key={`h-${term}`}
                 type="button"
                 onClick={() => go(term)}
-                className="flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-white transition-all cursor-pointer"
+                className="flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-1.5 rounded-full bg-[#0070eb]/25 border border-[#0070eb]/40 text-[#cfe6ff] hover:bg-[#0070eb] hover:text-white transition-all cursor-pointer"
               >
                 <svg className="w-3 h-3 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" />

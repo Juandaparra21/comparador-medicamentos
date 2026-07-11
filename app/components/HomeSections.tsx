@@ -27,10 +27,10 @@ const TRUST_KEYS = ['home.trust1', 'home.trust2', 'home.trust3']
 export function TrustStrip() {
   const { t } = useLang()
   return (
-    <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] font-semibold text-[#414755]">
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] font-semibold text-[#e2e4f3]">
       {TRUST_KEYS.map((key) => (
         <span key={key} className="inline-flex items-center gap-1.5">
-          <svg className="w-4 h-4 text-secondary shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <svg className="w-4 h-4 text-[#6ffb85] shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
           </svg>
           {t(key)}
@@ -126,14 +126,14 @@ export function HeroPharmacies() {
   const { t } = useLang()
   return (
     <div className="mt-8 sm:mt-9">
-      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-[#9ca3af] mb-3.5">
+      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-[#aab0cf] mb-3.5">
         {t('heroPharmacies.label')}
       </p>
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-3 gap-y-4 max-w-sm sm:max-w-2xl mx-auto">
         {PHARMACIES.map((p) => (
           <div key={p.key} className="flex flex-col items-center gap-1.5">
             <PharmacyLogo name={p.key} size={46} />
-            <span className="text-[10px] sm:text-[11px] font-medium text-[#717786] text-center leading-tight">
+            <span className="text-[10px] sm:text-[11px] font-medium text-[#c7cbe0] text-center leading-tight">
               {p.label}
             </span>
           </div>

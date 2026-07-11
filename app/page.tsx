@@ -42,6 +42,10 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative isolate overflow-hidden pt-10 sm:pt-20 pb-20 sm:pb-32">
+        {/* Fondo vivido del hero: gradiente oscuro de alto contraste, solo
+           para esta seccion (el resto del sitio sigue con el mesh claro). */}
+        <div aria-hidden="true" className="hero-vivid-bg pointer-events-none absolute inset-0 -z-20" />
+
         {/* Calm breathing glow — a single, very slow ambient pulse */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 flex justify-center">
           <div
@@ -83,9 +87,9 @@ export default function Home() {
           <HomeHeroText />
 
           <div className="max-w-2xl mx-auto">
-            {/* Panel de vidrio del hero: agrupa buscador, logos y chips,
-               como la "ventana" central del diseño de referencia. */}
-            <div className="glass-card rounded-[28px] sm:rounded-[32px] p-4 sm:p-7 pb-6 sm:pb-8">
+            {/* Panel de vidrio oscuro del hero (estilo glassmorphism de
+               referencia): agrupa buscador, logos y chips. */}
+            <div className="glass-hero rounded-[28px] sm:rounded-[32px] p-4 sm:p-7 pb-6 sm:pb-8">
               <SearchBar />
               <HeroSearchNote />
               <HeroPharmacies />

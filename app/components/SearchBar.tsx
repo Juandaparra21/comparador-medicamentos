@@ -116,7 +116,11 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
     <div ref={wrapRef} className="relative">
       <form
         onSubmit={handleSubmit}
-        className={`flex items-stretch glass-card overflow-hidden shadow-[0_2px_24px_rgba(0,88,188,0.10)] ${compact ? 'rounded-2xl' : 'rounded-[24px]'}`}
+        className={`flex items-stretch overflow-hidden ${
+          compact
+            ? 'glass-card shadow-[0_2px_24px_rgba(0,88,188,0.10)] rounded-2xl'
+            : 'glass-hero shadow-[0_8px_32px_rgba(0,0,0,0.35)] rounded-[24px]'
+        }`}
       >
         <input
           ref={inputRef}
@@ -135,7 +139,9 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
           onKeyDown={handleKeyDown}
           placeholder={compact ? t('search.placeholderCompact') : t('search.placeholder')}
           autoComplete="off"
-          className="flex-1 py-3.5 pl-5 pr-2.5 sm:pr-3 bg-transparent text-[14px] sm:text-[15px] text-[#1a1b1f] placeholder:text-[#8e8e93] focus:outline-none min-w-0"
+          className={`flex-1 py-3.5 pl-5 pr-2.5 sm:pr-3 bg-transparent text-[14px] sm:text-[15px] focus:outline-none min-w-0 ${
+            compact ? 'text-[#1a1b1f] placeholder:text-[#8e8e93]' : 'text-white placeholder:text-white/50'
+          }`}
         />
         <button
           type="submit"
