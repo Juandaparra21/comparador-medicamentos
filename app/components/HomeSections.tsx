@@ -336,15 +336,6 @@ export function HomeFaq() {
   return (
     <section className="mx-auto px-4 sm:px-5 max-w-3xl mb-20 sm:mb-32">
       <SectionHeading title={t('faq.title')} />
-      <img
-        src="/fotos/comparando-en-farmacia.webp"
-        alt="Persona comparando el precio de un producto en el estante de una farmacia"
-        width={900}
-        height={1200}
-        loading="lazy"
-        decoding="async"
-        className="mx-auto h-56 sm:h-64 w-auto max-w-full object-contain rounded-3xl border border-white/70 shadow-[0_8px_32px_rgba(24,59,124,0.08)] mb-6"
-      />
       <div className="flex flex-col gap-2.5">
         {FAQ_KEYS.map((f) => (
           <details key={f.q} className={`${CARD} group px-5 py-0.5`}>
