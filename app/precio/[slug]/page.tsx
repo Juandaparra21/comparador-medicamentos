@@ -95,9 +95,31 @@ export default async function PrecioPage({ params }: Props) {
     },
   ]
 
+  // Precios reales del último snapshot para el marcado Product/AggregateOffer.
+  // Solo se emite cuando hay datos: nunca precios inventados.
+  const offerPrices = (snapshot?.rows ?? []).map((r) => r.price).filter((p) => p > 0)
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
+      ...(offerPrices.length > 0
+        ? [
+            {
+              '@type': 'Product',
+              name: ing,
+              description: `Comparación de precios de ${lc} en las principales farmacias de Colombia.`,
+              url: `${SITE_URL}/precio/${slug}`,
+              offers: {
+                '@type': 'AggregateOffer',
+                priceCurrency: 'COP',
+                lowPrice: Math.min(...offerPrices),
+                highPrice: Math.max(...offerPrices),
+                offerCount: offerPrices.length,
+                availability: 'https://schema.org/InStock',
+              },
+            },
+          ]
+        : []),
       {
         '@type': 'BreadcrumbList',
         itemListElement: [

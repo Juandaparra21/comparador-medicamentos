@@ -11,6 +11,7 @@ import { UserOptionsMenu } from '@/app/components/UserOptionsMenu'
 import { BottomNav } from '@/app/components/BottomNav'
 import { SiteFooter } from '@/app/components/SiteFooter'
 import { ChatAssistant } from '@/app/components/ChatAssistant'
+import { Analytics } from '@vercel/analytics/next'
 import { SITE_URL } from '@/app/lib/siteUrl'
 import './globals.css'
 
@@ -152,6 +153,9 @@ export default function RootLayout({
           <BottomNav />
         </AuthProvider>
         </LanguageProvider>
+        {/* Analitica anonima de Vercel (visitas + eventos como outbound_click).
+           No usa cookies ni guarda datos personales. */}
+        <Analytics />
       </body>
     </html>
   )

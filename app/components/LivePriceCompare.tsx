@@ -6,6 +6,7 @@ import type { PharmacyResult } from '@/app/types'
 import { PharmacyLogo } from './PharmacyLogo'
 import { RelativeTime } from './RelativeTime'
 import { formatCOP } from '@/app/utils/format'
+import { trackOutboundClick } from '@/app/utils/analytics'
 
 export interface SnapshotInitial {
   /** YYYY-MM-DD del último registro diario disponible */
@@ -142,6 +143,7 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
                     href={r.url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackOutboundClick({ pharmacy: r.pharmacy, product: ingredient, price: r.price, source: 'precio_page' })}
                     className={`shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-lg transition-all ${
                       i === 0 ? 'bg-secondary text-white hover:opacity-90' : 'bg-white/80 border border-[#e5e7eb] text-[#414755] hover:text-primary hover:border-primary/30'
                     }`}

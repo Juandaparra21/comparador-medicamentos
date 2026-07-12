@@ -13,6 +13,7 @@ import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
 import { formatQuantity, perUnitSuffix } from '@/app/utils/units'
+import { trackOutboundClick } from '@/app/utils/analytics'
 import type { PharmacyDistances, PharmacyStores } from '@/app/hooks/useNearbyPharmacies'
 
 interface Props { group: ProductGroup; priceBasis?: 'total' | 'unit'; distances?: PharmacyDistances; stores?: PharmacyStores; fetchedAt?: string }
@@ -159,6 +160,7 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
                     href={r.url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackOutboundClick({ pharmacy: r.pharmacy, product: r.productName, price: r.price, source: 'group_card' })}
                     className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-md transition-all whitespace-nowrap ${
                       isBest
                         ? 'bg-secondary text-white hover:opacity-90'
@@ -215,6 +217,7 @@ export function ProductGroupCard({ group, priceBasis = 'total', distances, store
             href={cheapest.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackOutboundClick({ pharmacy: cheapest.pharmacy, product: cheapest.productName, price: cheapest.price, source: 'group_card' })}
             className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-semibold vitality-gradient text-white hover:opacity-90 transition-opacity cursor-pointer"
           >
             Comprar en {cheapest.pharmacy}

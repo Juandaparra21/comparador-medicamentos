@@ -12,6 +12,7 @@ import { normalize } from '@/app/utils/search'
 import { formatDistance, formatTripShort, formatTrip, directionsUrl } from '@/app/utils/geo'
 import { formatQuantity, perUnitSuffix } from '@/app/utils/units'
 import { getMedicineInfo } from '@/app/utils/medicineInfo'
+import { trackOutboundClick } from '@/app/utils/analytics'
 import type { NearestStore } from '@/app/hooks/useNearbyPharmacies'
 
 // Quantity meaning + display come from the shared units module so the volume/unit
@@ -56,6 +57,7 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
     const tag = (e.target as HTMLElement).tagName
     if (tag === 'A' || tag === 'BUTTON') return
     if (!result.url) return
+    trackOutboundClick({ pharmacy: result.pharmacy, product: result.productName, price: result.price, source: 'result_card' })
     window.open(result.url, '_blank', 'noopener,noreferrer')
   }
 
@@ -221,7 +223,10 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
           href={result.url}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            trackOutboundClick({ pharmacy: result.pharmacy, product: result.productName, price: result.price, source: 'result_card' })
+          }}
           className={`
             w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl
             text-[13px] font-semibold transition-opacity
