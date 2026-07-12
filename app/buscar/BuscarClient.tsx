@@ -20,6 +20,7 @@ import { PriceAlert } from '@/app/components/PriceAlert'
 import { ShareComparison } from '@/app/components/ShareComparison'
 import { RelativeTime } from '@/app/components/RelativeTime'
 import { groupResults } from '@/app/utils/groupResults'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 type TypeFilter = 'all' | MedicationType
 
@@ -32,6 +33,7 @@ const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
 const N = TYPE_FILTERS.length
 
 export default function BuscarClient() {
+  const { t } = useLang()
   const searchParams = useSearchParams()
   const q = searchParams.get('q') ?? ''
 
@@ -147,7 +149,7 @@ export default function BuscarClient() {
     concFilter,
     qtyFilter ? formatQuantity(qtyFilter, presentFilter) : '',
   ].filter(Boolean)
-  const filterSummary = activeFilterChips.length ? activeFilterChips.join(' · ') : 'Todas las opciones'
+  const filterSummary = activeFilterChips.length ? activeFilterChips.join(' · ') : t('filters.allOptions')
 
   // Setters that auto-reset downstream filters to prevent impossible combinations
   function changePresentation(v: string) {
@@ -403,8 +405,8 @@ export default function BuscarClient() {
                       </p>
                       <p className="text-[12px] text-[#717786] mt-0.5">
                         {nearbyPharmacyCount > 0
-                          ? `${nearbyPharmacyCount} de ${totalPharmacyCount} con sede a menos de 2 km`
-                          : 'No hay sedes de estas cadenas a menos de 2 km de ti'}
+                          ? t('loc.nearbyCount').replace('{x}', String(nearbyPharmacyCount)).replace('{y}', String(totalPharmacyCount))
+                          : t('loc.noneNearby')}
                       </p>
                     </div>
                     <span
@@ -520,10 +522,10 @@ export default function BuscarClient() {
               <div className="flex items-center gap-3 flex-wrap">
                 <p className="text-[13px] text-[#717786]">
                   <span className="font-semibold text-[#1a1b1f]">{filtered.length}</span>{' '}
-                  resultado{filtered.length !== 1 ? 's' : ''}
+                  {filtered.length !== 1 ? t('results.plural') : t('results.singular')}
                   {comparisons.length > 0 && (
                     <span className="text-secondary font-semibold">
-                      {' '}· {comparisons.length} comparación{comparisons.length !== 1 ? 'es' : ''}
+                      {' '}· {comparisons.length} {comparisons.length !== 1 ? t('results.comparisons') : t('results.comparison')}
                     </span>
                   )}
                 </p>
@@ -568,7 +570,7 @@ export default function BuscarClient() {
                   className="text-[12px] bg-white/70 backdrop-blur-sm border border-[#c1c6d7]/60 rounded-lg px-3 py-1.5 text-[#1a1b1f] focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                 >
                   {SORT_OPTIONS.filter(o => o.value !== 'nearest' || hasDistances).map((o) =>
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>{t(`sort.${o.value}`)}</option>
                   )}
                 </select>
               </div>

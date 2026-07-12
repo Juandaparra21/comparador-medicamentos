@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { formatRelativeShort } from '@/app/utils/format'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 interface Props {
   /** ISO timestamp of when the data was fetched */
@@ -15,6 +16,7 @@ interface Props {
 // time stays accurate while the user keeps the page open. Uses the real fetch
 // timestamp passed in iso (never a fixed value).
 export function RelativeTime({ iso, prefix, className }: Props) {
+  const { locale, t } = useLang()
   const [, setTick] = useState(0)
 
   useEffect(() => {
@@ -22,7 +24,10 @@ export function RelativeTime({ iso, prefix, className }: Props) {
     return () => clearInterval(id)
   }, [])
 
-  const rel = formatRelativeShort(iso)
+  // The prefix arrives in Spanish ("Actualizado"); resolve it through the
+  // dictionary so the whole line follows the selected language.
+  if (prefix === 'Actualizado') prefix = t('results.updated')
+  const rel = formatRelativeShort(iso, locale)
   if (!rel) return null
 
   return (

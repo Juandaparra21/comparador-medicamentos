@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { formatCOP } from '@/app/utils/format'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 type Channel = 'email' | 'whatsapp'
 type Status = 'idle' | 'sending' | 'done' | 'error'
@@ -21,6 +22,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 // one). No native <form> — pure onClick/onChange handlers. Stores medication,
 // current price and channel via /api/price-alerts for later processing.
 export function PriceAlert({ query, label, currentPrice }: Props) {
+  const { t } = useLang()
   const [open, setOpen] = useState(false)
   const [channel, setChannel] = useState<Channel>('email')
   const [contact, setContact] = useState('')
@@ -64,10 +66,16 @@ export function PriceAlert({ query, label, currentPrice }: Props) {
           </svg>
         </div>
         <div>
-          <p className="text-[14px] font-bold text-[#1a1b1f]">Listo, te avisaremos</p>
+          <p className="text-[14px] font-bold text-[#1a1b1f]">{t('alert.doneTitle')}</p>
           <p className="text-[12px] text-[#717786] mt-0.5">
-            Te escribiremos por {channel === 'email' ? 'correo' : 'WhatsApp'} solo cuando el precio de{' '}
-            <span className="font-semibold text-[#414755]">{label}</span> baje. Sin spam.
+            {t('alert.doneDesc')
+              .replace('{channel}', channel === 'email' ? t('alert.channelEmail') : 'WhatsApp')
+              .split('{label}')
+              .map((part, i) =>
+                i === 0
+                  ? <span key={i}>{part}<span className="font-semibold text-[#414755]">{label}</span></span>
+                  : <span key={i}>{part}</span>
+              )}
           </p>
         </div>
       </div>
@@ -83,11 +91,11 @@ export function PriceAlert({ query, label, currentPrice }: Props) {
           </svg>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[15px] font-bold text-[#1a1b1f] leading-snug">Avísame si baja de precio</p>
+          <p className="text-[15px] font-bold text-[#1a1b1f] leading-snug">{t('alert.title')}</p>
           <p className="text-[12px] text-[#717786] mt-0.5">
             {currentPrice
-              ? <>Hoy lo más barato está en {formatCOP(currentPrice)}. Te avisamos si baja.</>
-              : 'Te avisamos cuando encontremos un precio más bajo.'}
+              ? t('alert.currentPrice').replace('{price}', formatCOP(currentPrice))
+              : t('alert.noPrice')}
           </p>
         </div>
         {!open && (
@@ -95,7 +103,7 @@ export function PriceAlert({ query, label, currentPrice }: Props) {
             onClick={() => setOpen(true)}
             className="shrink-0 text-[12px] font-bold px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-tertiary text-white hover:opacity-90 transition-opacity cursor-pointer whitespace-nowrap"
           >
-            Activar
+            {t('alert.activate')}
           </button>
         )}
       </div>
@@ -112,7 +120,7 @@ export function PriceAlert({ query, label, currentPrice }: Props) {
                   channel === c ? 'bg-white text-[#1a1b1f] shadow-sm' : 'text-[#717786]'
                 }`}
               >
-                {c === 'email' ? 'Correo' : 'WhatsApp'}
+                {c === 'email' ? t('alert.email') : 'WhatsApp'}
               </button>
             ))}
           </div>
@@ -127,8 +135,8 @@ export function PriceAlert({ query, label, currentPrice }: Props) {
                 if (status === 'error') setStatus('idle')
               }}
               onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
-              placeholder={channel === 'email' ? 'tu@correo.com' : 'Ej: 300 123 4567'}
-              aria-label={channel === 'email' ? 'Tu correo' : 'Tu número de WhatsApp'}
+              placeholder={channel === 'email' ? t('alert.emailPh') : t('alert.phonePh')}
+              aria-label={channel === 'email' ? t('alert.emailAria') : t('alert.phoneAria')}
               autoFocus
               className="flex-1 px-3.5 py-2.5 bg-white/80 backdrop-blur-sm border border-white/60 rounded-xl text-[14px] text-[#1a1b1f] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-0"
             />
@@ -137,7 +145,7 @@ export function PriceAlert({ query, label, currentPrice }: Props) {
               disabled={!valid || status === 'sending'}
               className="px-4 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer whitespace-nowrap"
             >
-              {status === 'sending' ? 'Guardando...' : 'Avisarme'}
+              {status === 'sending' ? t('alert.saving') : t('alert.notify')}
             </button>
           </div>
 
@@ -145,12 +153,12 @@ export function PriceAlert({ query, label, currentPrice }: Props) {
             <svg className="w-3.5 h-3.5 text-secondary shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
             </svg>
-            Sin spam. Solo te escribimos cuando el precio baje.
+            {t('alert.noSpam')}
           </p>
 
           {status === 'error' && (
             <p className="text-[12px] text-red-500 mt-2">
-              No pudimos guardar tu alerta. Revisa el dato e intenta de nuevo.
+              {t('alert.error')}
             </p>
           )}
         </div>

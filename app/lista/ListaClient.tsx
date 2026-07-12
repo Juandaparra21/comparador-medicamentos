@@ -12,6 +12,7 @@ import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { MedicationImage } from '@/app/components/MedicationImage'
 import { ListComparison } from '@/app/components/ListComparison'
 import { BrandLoader } from '@/app/components/BrandLoader'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -33,6 +34,7 @@ function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: st
 }
 
 export default function ListaClient() {
+  const { t } = useLang()
   const { user, loading: authLoading } = useAuth()
   const [items,     setItems]     = useState<WishlistItem[]>([])
   const [dbLoading, setDbLoading] = useState(false)
@@ -109,8 +111,8 @@ export default function ListaClient() {
           </h1>
           <p className="text-[13px] text-[#717786] mt-0.5">
             {items.length > 0
-              ? `${items.length} medicamento${items.length !== 1 ? 's' : ''} guardado${items.length !== 1 ? 's' : ''}`
-              : 'Guarda los medicamentos que quieres seguir'}
+              ? (items.length === 1 ? t('saved.one') : t('saved.many').replace('{n}', String(items.length)))
+              : t('list.savePrompt')}
           </p>
         </div>
         {items.length > 0 && (

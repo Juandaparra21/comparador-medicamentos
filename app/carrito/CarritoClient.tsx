@@ -9,6 +9,7 @@ import { formatCOP } from '@/app/utils/format'
 import { thumbnailUrl } from '@/app/utils/imageUrl'
 import { MedicationImage } from '@/app/components/MedicationImage'
 import { BrandLoader } from '@/app/components/BrandLoader'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: string }) {
   const [failed, setFailed] = useState(false)
@@ -23,6 +24,7 @@ function ItemImage({ imageUrl, ingredient }: { imageUrl?: string; ingredient: st
 }
 
 export default function CarritoClient() {
+  const { t } = useLang()
   const { user, loading: authLoading } = useAuth()
   const [items,     setItems]     = useState<CartItem[]>([])
   const [dbLoading, setDbLoading] = useState(false)
@@ -109,8 +111,8 @@ export default function CarritoClient() {
           </h1>
           <p className="text-[13px] text-[#717786] mt-0.5">
             {items.length > 0
-              ? `${items.length} medicamento${items.length !== 1 ? 's' : ''} guardado${items.length !== 1 ? 's' : ''}`
-              : 'Agrega medicamentos que quieras comprar'}
+              ? (items.length === 1 ? t('saved.one') : t('saved.many').replace('{n}', String(items.length)))
+              : t('cart.addPrompt')}
           </p>
         </div>
         {items.length > 0 && (

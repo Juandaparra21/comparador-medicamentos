@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLang } from '@/app/i18n/LanguageProvider'
 
 interface Props {
   /** the searched term, used to rebuild a shareable results URL */
@@ -12,11 +13,12 @@ interface Props {
 // so whoever opens it lands directly on these results. Uses the native Web Share
 // sheet on mobile, falls back to copying the link on desktop.
 export function ShareComparison({ query, className }: Props) {
+  const { t } = useLang()
   const [copied, setCopied] = useState(false)
 
   async function share() {
     const url = `${window.location.origin}/buscar?q=${encodeURIComponent(query)}`
-    const title = `Precios de ${query} en farmacias de Colombia`
+    const title = `${t('share.titlePrefix')} ${query} ${t('share.titleSuffix')}`
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
@@ -34,7 +36,7 @@ export function ShareComparison({ query, className }: Props) {
       setTimeout(() => setCopied(false), 2500)
     } catch {
       // last-resort fallback when clipboard is blocked
-      window.prompt('Copia este enlace para compartir:', url)
+      window.prompt(t('share.copyPrompt'), url)
     }
   }
 

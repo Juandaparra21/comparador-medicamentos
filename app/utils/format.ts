@@ -24,15 +24,17 @@ export function formatRelativeTime(iso: string): string {
 
 // Compact relative time for tight spaces (cards on mobile): "hace un momento",
 // "hace 2 min", "hace 1 h", "hace 3 d". Computed at render time.
-export function formatRelativeShort(iso: string): string {
+// Locale-aware via Intl.RelativeTimeFormat so the i18n switcher covers it.
+export function formatRelativeShort(iso: string, locale: string = 'es'): string {
   const then = new Date(iso).getTime()
   if (!Number.isFinite(then)) return ''
   const secs = Math.max(0, Math.round((Date.now() - then) / 1000))
-  if (secs < 60) return 'hace un momento'
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto', style: 'narrow' })
+  if (secs < 60) return rtf.format(-secs, 'second')
   const mins = Math.round(secs / 60)
-  if (mins < 60) return `hace ${mins} min`
+  if (mins < 60) return rtf.format(-mins, 'minute')
   const hours = Math.floor(mins / 60)
-  if (hours < 24) return `hace ${hours} h`
+  if (hours < 24) return rtf.format(-hours, 'hour')
   const days = Math.floor(hours / 24)
-  return `hace ${days} d`
+  return rtf.format(-days, 'day')
 }
