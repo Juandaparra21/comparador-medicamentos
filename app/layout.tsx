@@ -74,6 +74,11 @@ export default function RootLayout({
         url: SITE_URL,
         logo: `${SITE_URL}/farmi_logo.png`,
         description: 'Comparador gratuito de precios de medicamentos en Colombia.',
+        sameAs: [
+          'https://www.instagram.com/farmi_col/',
+          'https://www.facebook.com/profile.php?id=61591334621058',
+          'https://www.tiktok.com/@farmi_col',
+        ],
       },
       {
         '@type': 'WebSite',

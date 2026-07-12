@@ -3,6 +3,40 @@
 import Link from 'next/link'
 import { useLang } from '@/app/i18n/LanguageProvider'
 
+// Redes sociales oficiales de Farmi (tambien declaradas como sameAs en el
+// JSON-LD de Organization en layout.tsx; mantener ambas listas en sincronia).
+const SOCIALS = [
+  {
+    name: 'Instagram',
+    href: 'https://www.instagram.com/farmi_col/',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-[18px] h-[18px]" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Facebook',
+    href: 'https://www.facebook.com/profile.php?id=61591334621058',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]" aria-hidden="true">
+        <path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.3-1.5 1.6-1.5h1.3V4.9c-.2 0-1-.1-1.9-.1-1.9 0-3.3 1.2-3.3 3.4V11H8.5v3h2.7v7h2.3z" />
+      </svg>
+    ),
+  },
+  {
+    name: 'TikTok',
+    href: 'https://www.tiktok.com/@farmi_col',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]" aria-hidden="true">
+        <path d="M16.6 3c.3 1.7 1.5 3 3.4 3.3v2.9c-1.3 0-2.5-.4-3.4-1v6.4c0 3.4-2.4 5.4-5.3 5.4-2.9 0-5.3-2.2-5.3-5.2 0-3 2.4-5.2 5.3-5.2.3 0 .6 0 .9.1v3c-.3-.1-.6-.2-.9-.2-1.3 0-2.3 1-2.3 2.3s1 2.3 2.3 2.3 2.3-.9 2.3-2.4V3h3z" />
+      </svg>
+    ),
+  },
+]
+
 export function SiteFooter() {
   const { t } = useLang()
   return (
@@ -15,6 +49,21 @@ export function SiteFooter() {
               Farmi
             </p>
             <p className="text-[12px] text-[#717786] mt-1">{t('footer.tagline')}</p>
+            <div className="flex items-center gap-2 mt-3">
+              {SOCIALS.map((s) => (
+                <a
+                  key={s.name}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Farmi en ${s.name}`}
+                  title={`Farmi en ${s.name}`}
+                  className="w-9 h-9 rounded-full glass-card flex items-center justify-center text-[#717786] hover:text-primary hover:scale-105 active:scale-95 transition-all"
+                >
+                  {s.icon}
+                </a>
+              ))}
+            </div>
           </div>
 
           <nav aria-label={t('footer.about')} className="flex flex-wrap gap-x-5 gap-y-2 text-[12px]">
