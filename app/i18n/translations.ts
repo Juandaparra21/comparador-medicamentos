@@ -156,7 +156,7 @@ export const TRANSLATIONS: Record<string, TranslationEntry> = {
     es: 'Precios en tiempo real', en: 'Real-time prices', fr: 'Prix en temps réel', it: 'Prezzi in tempo reale', de: 'Preise in Echtzeit', pt: 'Preços em tempo real',
   },
   'home.trust2': {
-    es: '6 farmacias en una búsqueda', en: '6 pharmacies in one search', fr: '6 pharmacies en une seule recherche', it: '6 farmacie in una ricerca', de: '6 Apotheken mit einer Suche', pt: '6 farmácias em uma busca',
+    es: '8 farmacias en una búsqueda', en: '8 pharmacies in one search', fr: '8 pharmacies en une seule recherche', it: '8 farmacie in una ricerca', de: '8 Apotheken mit einer Suche', pt: '8 farmácias em uma busca',
   },
   'home.trust3': {
     es: '100% gratis, sin registro', en: '100% free, no sign-up', fr: '100% gratuit, sans inscription', it: '100% gratis, senza registrazione', de: '100% kostenlos, ohne Anmeldung', pt: '100% grátis, sem cadastro',
@@ -171,9 +171,9 @@ export const TRANSLATIONS: Record<string, TranslationEntry> = {
   'value2.desc': {
     es: 'Consultamos cada farmacia en el momento de tu búsqueda.', en: 'We check each pharmacy the moment you search.', fr: 'Nous interrogeons chaque pharmacie au moment de votre recherche.', it: 'Controlliamo ogni farmacia nel momento della tua ricerca.', de: 'Wir prüfen jede Apotheke im Moment deiner Suche.', pt: 'Consultamos cada farmácia no momento da sua busca.',
   },
-  'value3.title': { es: '6 farmacias a la vez', en: '6 pharmacies at once', fr: '6 pharmacies à la fois', it: '6 farmacie insieme', de: '6 Apotheken auf einmal', pt: '6 farmácias de uma vez' },
+  'value3.title': { es: '8 farmacias a la vez', en: '8 pharmacies at once', fr: '8 pharmacies à la fois', it: '8 farmacie insieme', de: '8 Apotheken auf einmal', pt: '8 farmácias de uma vez' },
   'value3.desc': {
-    es: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olimpica.', en: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam and Olimpica.', fr: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam et Olimpica.', it: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam e Olimpica.', de: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam und Olimpica.', pt: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam e Olimpica.',
+    es: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Pasteur y Farmacenter.', en: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Pasteur and Farmacenter.', fr: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Pasteur et Farmacenter.', it: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Pasteur e Farmacenter.', de: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Pasteur und Farmacenter.', pt: 'La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Pasteur e Farmacenter.',
   },
   'value4.title': { es: 'Genérico o de marca', en: 'Generic or brand', fr: 'Générique ou de marque', it: 'Generico o di marca', de: 'Generikum oder Marke', pt: 'Genérico ou de marca' },
   'value4.desc': {
@@ -308,12 +308,12 @@ export const TRANSLATIONS: Record<string, TranslationEntry> = {
   },
   'faq4.q': { es: '¿Qué farmacias comparan?', en: 'Which pharmacies do you compare?', fr: 'Quelles pharmacies comparez-vous ?', it: 'Quali farmacie confrontate?', de: 'Welche Apotheken vergleicht ihr?', pt: 'Quais farmácias vocês comparam?' },
   'faq4.a': {
-    es: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olimpica. Consultamos sus precios cuando haces una búsqueda.',
-    en: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam and Olimpica. We check their prices when you search.',
-    fr: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam et Olimpica. Nous consultons leurs prix lors de votre recherche.',
-    it: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam e Olimpica. Controlliamo i loro prezzi quando fai una ricerca.',
-    de: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam und Olimpica. Wir prüfen ihre Preise, wenn du suchst.',
-    pt: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam e Olimpica. Consultamos os preços deles quando você busca.',
+    es: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Farmacia Pasteur y Farmacenter. Consultamos sus precios cuando haces una búsqueda.',
+    en: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Farmacia Pasteur and Farmacenter. We check their prices when you search.',
+    fr: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Farmacia Pasteur et Farmacenter. Nous consultons leurs prix lors de votre recherche.',
+    it: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Farmacia Pasteur e Farmacenter. Controlliamo i loro prezzi quando fai una ricerca.',
+    de: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Farmacia Pasteur und Farmacenter. Wir prüfen ihre Preise, wenn du suchst.',
+    pt: 'Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica, Farmacia Pasteur e Farmacenter. Consultamos os preços deles quando você busca.',
   },
   'faq5.q': { es: '¿Tiene algún costo?', en: 'Is there any cost?', fr: 'Y a-t-il un coût ?', it: 'Ha qualche costo?', de: 'Gibt es Kosten?', pt: 'Tem algum custo?' },
   'faq5.a': {

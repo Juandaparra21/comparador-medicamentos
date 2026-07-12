@@ -11,7 +11,8 @@ const AI_MODEL    = process.env.AI_MODEL ?? 'llama-3.1-8b-instant'
 
 const SYSTEM_PROMPT = `Eres el asistente de Farmi, un comparador de precios de medicamentos en Colombia.
 Ayudas a las personas a usar la app (buscar un medicamento, entender la diferencia entre generico y de
-marca, comparar precios entre Farmatodo, Cruz Verde, Drogas La Rebaja, Olimpica, Colsubsidio y Cafam, y
+marca, comparar precios entre Farmatodo, Cruz Verde, Drogas La Rebaja, Olimpica, Colsubsidio, Cafam,
+Farmacia Pasteur y Farmacenter, y
 ver farmacias cercanas) y puedes ORIENTAR sobre medicamentos de venta libre para molestias leves.
 
 Reglas sobre medicamentos:

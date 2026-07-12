@@ -53,7 +53,7 @@ export default function OgImage() {
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', gap: 16 }}>
-            {['6 farmacias', 'Genéricos y marcas', 'Gratis'].map((chip) => (
+            {['8 farmacias', 'Genéricos y marcas', 'Gratis'].map((chip) => (
               <div
                 key={chip}
                 style={{

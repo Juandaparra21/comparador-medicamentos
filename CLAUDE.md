@@ -31,7 +31,8 @@ relying on them; do not assume.
 
 - Framework: Next.js, deployed on Vercel.
 - Maps: OpenStreetMap.
-- Pharmacies covered: Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica.
+- Pharmacies covered: Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica,
+  Farmacia Pasteur, Farmacenter (its online store is farmaexpress.com, by Coopidrogas).
 - Routes in production: /, /cercanas, /carrito, /lista, /sobre-nosotros, /contacto, /terminos, /privacidad.
 
 Read these before editing, to confirm current reality instead of assuming:

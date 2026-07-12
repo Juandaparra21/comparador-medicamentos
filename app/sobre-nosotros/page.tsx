@@ -14,6 +14,8 @@ const PHARMACIES = [
   'Olimpica Drogueria',
   'Farmatodo',
   'Cafam',
+  'Farmacia Pasteur',
+  'Farmacenter',
 ]
 
 const HOW_STEPS = [

@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const ing = info.activeIngredient
   const title = `Precio de ${ing} en Colombia: dónde está más barato`
-  const description = `Compara el precio de ${ing.toLowerCase()} en La Rebaja, Cruz Verde, Farmatodo, Colsubsidio, Cafam y Olimpica. Encuentra hoy la farmacia más barata en Colombia.`
+  const description = `Compara el precio de ${ing.toLowerCase()} en La Rebaja, Cruz Verde, Farmatodo, Colsubsidio, Cafam, Olimpica, Pasteur y Farmacenter. Encuentra hoy la farmacia más barata en Colombia.`
   const canonical = `/precio/${slug}`
 
   return {
@@ -74,7 +74,7 @@ export default async function PrecioPage({ params }: Props) {
     },
     {
       q: `¿Dónde comprar ${lc} más barato?`,
-      a: `Puedes comparar el precio de ${lc} en Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olímpica desde una sola búsqueda en Farmi, y luego ir directo a la farmacia con el mejor precio. Casi siempre el genérico y las presentaciones más grandes salen más económicos por unidad.`,
+      a: `Puedes comparar el precio de ${lc} en Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olímpica, Farmacia Pasteur y Farmacenter desde una sola búsqueda en Farmi, y luego ir directo a la farmacia con el mejor precio. Casi siempre el genérico y las presentaciones más grandes salen más económicos por unidad.`,
     },
     {
       q: `¿El genérico de ${lc} es más barato que el de marca?`,
@@ -231,7 +231,7 @@ export default async function PrecioPage({ params }: Props) {
         <h2 className="text-[18px] font-bold text-[#1a1b1f] mb-3">Cómo comprar {lc} más barato</h2>
         <ol className="space-y-3">
           {[
-            ['Compara antes de comprar', `Busca ${lc} en Farmi y mira el precio en las 6 farmacias a la vez. La diferencia entre la más cara y la más barata puede ser importante.`],
+            ['Compara antes de comprar', `Busca ${lc} en Farmi y mira el precio en las 8 farmacias a la vez. La diferencia entre la más cara y la más barata puede ser importante.`],
             ['Revisa el genérico', 'Si tu tratamiento lo permite, el genérico casi siempre es la opción más económica con el mismo principio activo.'],
             ['Mira el precio por unidad', 'A veces una caja más grande cuesta más en total pero menos por tableta. Compara el precio por unidad, no solo el total.'],
             otc

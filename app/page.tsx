@@ -74,7 +74,7 @@ export default function Home() {
               <circle cx="6.5" cy="6.5" r="2.5" />
               <circle cx="17.5" cy="17.5" r="2.5" />
             </svg>
-            <span className="text-[12px] font-bold text-[#414755] whitespace-nowrap">6 farmacias en una búsqueda</span>
+            <span className="text-[12px] font-bold text-[#414755] whitespace-nowrap">8 farmacias en una búsqueda</span>
           </div>
         </div>
 

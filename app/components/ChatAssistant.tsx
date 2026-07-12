@@ -30,14 +30,14 @@ const RESPONSES: Record<string, { text: string; replies?: QuickReply[] }> = {
     ],
   },
   como: {
-    text: 'Escribe el nombre del medicamento en el buscador: puedes usar el nombre genérico (ej: ibuprofeno) o el de marca (ej: Advil). Farmi consulta en tiempo real 6 farmacias y muestra los precios de menor a mayor. Si activas tu ubicación, también te mostramos cuál farmacia tienes más cerca.',
+    text: 'Escribe el nombre del medicamento en el buscador: puedes usar el nombre genérico (ej: ibuprofeno) o el de marca (ej: Advil). Farmi consulta en tiempo real 8 farmacias y muestra los precios de menor a mayor. Si activas tu ubicación, también te mostramos cuál farmacia tienes más cerca.',
     replies: [
       { label: '¿Qué farmacias comparan?', value: 'farmacias' },
       { label: 'Buscar un medicamento',    value: 'buscar'    },
     ],
   },
   farmacias: {
-    text: 'Comparamos precios en tiempo real en 6 farmacias colombianas:\n\n• Drogas La Rebaja\n• Cruz Verde\n• Cafam\n• Colsubsidio\n• Olimpica Drogueria\n• Farmatodo\n\nLos precios se consultan directamente desde cada farmacia cuando buscas.',
+    text: 'Comparamos precios en tiempo real en 8 farmacias colombianas:\n\n• Drogas La Rebaja\n• Cruz Verde\n• Cafam\n• Colsubsidio\n• Olimpica Drogueria\n• Farmatodo\n• Farmacia Pasteur\n• Farmacenter\n\nLos precios se consultan directamente desde cada farmacia cuando buscas.',
     replies: [
       { label: '¿El precio es exacto?', value: 'precio' },
       { label: '¿Cómo funciona Farmi?', value: 'como'   },

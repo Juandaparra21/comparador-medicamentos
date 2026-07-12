@@ -13,6 +13,8 @@ const PHARMACY_COLORS: Record<string, string> = {
   'Farmatodo':            '#e85d04',
   'Olimpica Drogueria':   '#db2777',
   'Cafam':                '#7c3aed',
+  'Farmacia Pasteur':     '#0891b2',
+  'Farmacenter':          '#b45309',
 }
 const FALLBACK_COLORS = ['#0058bc', '#006e28', '#e85d04', '#db2777', '#7c3aed', '#4c4aca', '#0891b2']
 

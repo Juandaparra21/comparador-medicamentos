@@ -36,6 +36,8 @@ const CHAIN_PATTERNS: Array<[RegExp, string, string]> = [
   [/olimpica/i,           'olimpica',    'Olimpica Drogueria'],
   [/colsubsidio/i,        'colsubsidio', 'Drogueria Colsubsidio'],
   [/cafam/i,              'cafam',       'Cafam'],
+  [/pasteur/i,            'pasteur',     'Farmacia Pasteur'],
+  [/farmacenter/i,        'farmacenter', 'Farmacenter'],
 ]
 
 interface OverpassElement {

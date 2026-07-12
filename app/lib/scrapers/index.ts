@@ -7,10 +7,12 @@ import { searchLaRebaja }    from './la_rebaja'
 import { searchOlimpica }    from './olimpica'
 import { searchColsubsidio } from './colsubsidio'
 import { searchCafam }       from './cafam'
+import { searchPasteur, searchFarmacenter } from './vtex'
 
 const SCRAPERS = [
   searchFarmatodo, searchCruzVerde, searchLaRebaja,
   searchOlimpica, searchColsubsidio, searchCafam,
+  searchPasteur, searchFarmacenter,
 ] as const
 
 // Well-known Colombian brand -> active ingredient. Searching a brand also searches
@@ -44,6 +46,8 @@ const PHARMACY_NAMES: Record<string, string> = {
   'olimpica':    'Olimpica Drogueria',
   'colsubsidio': 'Drogueria Colsubsidio',
   'cafam':       'Cafam',
+  'pasteur':     'Farmacia Pasteur',
+  'farmacenter': 'Farmacenter',
 }
 
 function hashId(pharmacyId: string, productName: string): string {

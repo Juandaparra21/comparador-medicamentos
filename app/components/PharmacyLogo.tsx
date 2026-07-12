@@ -13,6 +13,8 @@ const PHARMACY_CONFIG: Record<string, Config> = {
   'Cafam':            { bg: '#1e3a8a', abbr: 'CF', icon: 'text' },
   'Farmatodo':        { bg: '#ea580c', abbr: 'FT', icon: 'pill' },
   'Olimpica Drogueria':{ bg: '#6d28d9', abbr: 'OD', icon: 'text' },
+  'Farmacia Pasteur': { bg: '#0a4f9e', abbr: 'FP', icon: 'cross' },
+  'Farmacenter':      { bg: '#d81e2c', abbr: 'FC', icon: 'text' },
 }
 
 function CrossSvg({ s }: { s: number }) {

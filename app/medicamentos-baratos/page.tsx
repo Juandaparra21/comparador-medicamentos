@@ -28,7 +28,7 @@ const CARD = 'glass-card rounded-2xl'
 const faqs = [
   {
     q: '¿Dónde comprar medicamentos baratos en Colombia?',
-    a: 'No hay una farmacia que siempre sea la más barata: cada cadena tiene sus propios precios y promociones, y la más económica cambia según el medicamento y el momento. Lo más efectivo es comparar el precio del medicamento que necesitas en varias farmacias a la vez, que es lo que hace Farmi con Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olímpica.',
+    a: 'No hay una farmacia que siempre sea la más barata: cada cadena tiene sus propios precios y promociones, y la más económica cambia según el medicamento y el momento. Lo más efectivo es comparar el precio del medicamento que necesitas en varias farmacias a la vez, que es lo que hace Farmi con Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olímpica, Farmacia Pasteur y Farmacenter.',
   },
   {
     q: '¿Los medicamentos genéricos son igual de buenos que los de marca?',
@@ -86,7 +86,7 @@ export default function MedicamentosBaratosPage() {
           Conseguir medicamentos económicos en Colombia no depende de la suerte ni de recorrer
           droguerías: depende de comparar. El mismo medicamento puede costar el doble en una farmacia
           que en otra, y el genérico suele valer bastante menos que el de marca con el mismo principio
-          activo. Busca el tuyo y mira el precio real en las 6 farmacias principales del país al mismo tiempo.
+          activo. Busca el tuyo y mira el precio real en las 8 farmacias principales del país al mismo tiempo.
         </p>
         <div className="mt-5">
           <SearchBar />
@@ -98,7 +98,7 @@ export default function MedicamentosBaratosPage() {
         <h2 className="text-[18px] font-bold text-[#1a1b1f] mb-3">Cómo encontrar medicamentos a bajo precio</h2>
         <ol className="space-y-3">
           {[
-            ['Compara entre farmacias', 'Ningún medicamento tiene un precio único. Farmi consulta en tiempo real La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam y Olímpica y te muestra de una la opción más barata disponible.'],
+            ['Compara entre farmacias', 'Ningún medicamento tiene un precio único. Farmi consulta en tiempo real La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olímpica, Pasteur y Farmacenter y te muestra de una la opción más barata disponible.'],
             ['Prefiere el genérico', 'El genérico tiene el mismo principio activo y la misma dosis que el de marca, está regulado por el INVIMA y casi siempre es la opción más económica.'],
             ['Mira el precio por unidad', 'Una caja más grande puede costar más en total pero menos por tableta. Comparar por unidad revela el verdadero ahorro, sobre todo en tratamientos largos.'],
             ['Aprovecha ofertas y alertas', 'Los precios cambian todos los días. Revisa las ofertas activas o crea una alerta para que te avisemos cuando baje el precio del medicamento que necesitas.'],

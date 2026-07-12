@@ -46,7 +46,7 @@ function emailBody(d: Drop): { subject: string; html: string; text: string } {
   const text =
     `El precio de ${d.label} bajo.\n` +
     `Antes: ${formatCOP(d.oldPrice)}  ->  Ahora desde: ${formatCOP(d.newPrice)} en ${d.pharmacy}.\n\n` +
-    `Comparar en 6 farmacias: ${d.link}\n\n` +
+    `Comparar en 8 farmacias: ${d.link}\n\n` +
     `Farmi es un comparador de precios, no una farmacia. Los precios son referenciales ` +
     `y pueden variar por sede y promociones. Recibes este aviso porque activaste una ` +
     `alerta en Farmi.`
@@ -58,7 +58,7 @@ function emailBody(d: Drop): { subject: string; html: string; text: string } {
     `Antes: <span style="text-decoration:line-through;color:#9ca3af">${formatCOP(d.oldPrice)}</span>` +
     ` &nbsp;&rarr;&nbsp; Ahora desde <b style="color:#10b981">${formatCOP(d.newPrice)}</b> en ${d.pharmacy}.</p>` +
     `<a href="${d.link}" style="display:inline-block;background:#0058bc;color:#fff;text-decoration:none;` +
-    `font-weight:bold;padding:10px 18px;border-radius:10px;font-size:14px">Comparar en 6 farmacias</a>` +
+    `font-weight:bold;padding:10px 18px;border-radius:10px;font-size:14px">Comparar en 8 farmacias</a>` +
     `<p style="font-size:11px;color:#717786;margin:20px 0 0;line-height:1.5">` +
     `Farmi es un comparador de precios, no una farmacia. Los precios son referenciales y pueden ` +
     `variar por sede y promociones. Recibes este aviso porque activaste una alerta en Farmi.</p>` +
@@ -70,7 +70,7 @@ function whatsappBody(d: Drop): string {
   return (
     `*Farmi* · Bajo de precio\n\n` +
     `${d.label} bajo a *${formatCOP(d.newPrice)}* (antes ${formatCOP(d.oldPrice)}) en ${d.pharmacy}.\n\n` +
-    `Compara en 6 farmacias: ${d.link}\n\n` +
+    `Compara en 8 farmacias: ${d.link}\n\n` +
     `Precios referenciales. Farmi es un comparador, no una farmacia.`
   )
 }
