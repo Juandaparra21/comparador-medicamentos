@@ -1,32 +1,14 @@
 import Link from 'next/link'
 import { formatCOP } from '@/app/utils/format'
-import { getAdminClient } from '@/app/lib/supabase/admin'
+import { getDiscountPool } from '@/app/lib/discounts'
 import { PharmacyLogo } from './PharmacyLogo'
 import { ProductThumbnail } from './ProductThumbnail'
 import type { PharmacyResult } from '@/app/types'
-
-// Only offers re-confirmed by a real scrape in the last 7 days count as fresh.
-const FRESH_DAYS = 7
 
 interface DiscountsData {
   featured: PharmacyResult[]
   topPharmacy: { name: string; count: number } | null
   updatedAt: string | null
-}
-
-// Formas farmaceuticas (medicamentos) o cuidado personal/maquillaje: lo unico
-// que queremos destacar. Excluye mercancia de bazar que la farmacia tambien
-// vende (papeleria, accesorios) aunque traiga descuento.
-const DOSAGE_FORM_RE =
-  /\b(\d+\s?(mg|mcg|ml|g)\b|tableta|c[aá]psula|jarabe|comprimido|gotas|suspensi[oó]n|crema|gel|ung[uü]ento|soluci[oó]n|parche|inyectable|polvo|spray|aerosol)/i
-const PERSONAL_CARE_RE =
-  /\b(maquillaje|labial|r[ií]mel|base de maquillaje|protector solar|bloqueador|shampoo|champ[uú]|jab[oó]n|perfume|colonia|esmalte|delineador|rubor|sombra|corrector|polvo compacto|desodorante)/i
-const NON_HEALTH_RE = /\b(papel|hoja|rice paper|toalla|cepillo|peine|bater[ií]a|pila|juguete)/i
-
-function isRelevantDiscount(r: { activeIngredient: string; productName: string }): boolean {
-  const text = `${r.activeIngredient} ${r.productName}`
-  if (NON_HEALTH_RE.test(text)) return false
-  return DOSAGE_FORM_RE.test(text) || PERSONAL_CARE_RE.test(text)
 }
 
 // The pool (search_results) is refreshed by every live search and by the daily
@@ -35,24 +17,7 @@ function isRelevantDiscount(r: { activeIngredient: string; productName: string }
 // first, so one aggressive source (e.g. Farmatodo) cannot monopolize the section.
 async function getFeaturedDiscounts(): Promise<DiscountsData> {
   const empty: DiscountsData = { featured: [], topPharmacy: null, updatedAt: null }
-  const db = getAdminClient()
-  if (!db) return empty
-
-  const since = new Date(Date.now() - FRESH_DAYS * 86_400_000).toISOString()
-  const { data } = await db
-    .from('search_results')
-    .select('*')
-    .gt('discount', 0)
-    .eq('availability', 'available')
-    .gte('lastUpdated', since)
-    // Filtrar ingredientes que parecen nombres de producto, no principio activo
-    .not('activeIngredient', 'ilike', 'oferta%')
-    .not('activeIngredient', 'ilike', 'aranda%')
-    .order('discount', { ascending: false })
-    .limit(120)
-
-  const raw = (data ?? []) as (PharmacyResult & { lastUpdated?: string })[]
-  const pool = raw.filter(isRelevantDiscount)
+  const pool = await getDiscountPool()
   if (pool.length === 0) return empty
 
   // Best offer per pharmacy (pool is already discount-desc), then fill the
@@ -161,7 +126,10 @@ export async function DiscountsSection() {
         ))}
 
         {topPharmacy && (
-          <div className="flex flex-col justify-between bg-gradient-to-br from-primary/10 to-tertiary/10 border border-primary/20 rounded-xl p-4 shrink-0 w-[200px] sm:w-auto snap-start">
+          <Link
+            href="/ofertas"
+            className="group flex flex-col justify-between bg-gradient-to-br from-primary/10 to-tertiary/10 border border-primary/20 rounded-xl p-4 shrink-0 w-[200px] sm:w-auto snap-start transition-all hover:border-primary/40"
+          >
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-primary mb-1.5">
                 Más descuentos
@@ -171,15 +139,15 @@ export async function DiscountsSection() {
                 {topPharmacy.name}
               </p>
             </div>
-            <div className="mt-3 bg-primary/10 rounded-lg px-3 py-2 text-center">
+            <div className="mt-3 bg-primary/10 rounded-lg px-3 py-2 text-center group-hover:bg-primary/15 transition-colors">
               <p className="text-[22px] font-black text-primary leading-none">
                 {topPharmacy.count}
               </p>
               <p className="text-[11px] text-primary/70 font-semibold">
-                ofertas activas
+                ofertas activas &rarr;
               </p>
             </div>
-          </div>
+          </Link>
         )}
       </div>
     </section>
