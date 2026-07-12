@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import type { PharmacyResult, MedicationType } from '@/app/types'
 import { suggestCorrection, capitalizeFirst } from '@/app/utils/spellCorrect'
-import { sortResults, SORT_OPTIONS, normalize, type SortKey } from '@/app/utils/search'
+import { SORT_OPTIONS, normalize, type SortKey } from '@/app/utils/search'
 import { useNearbyPharmacies } from '@/app/hooks/useNearbyPharmacies'
 import { isVolumePresentation, quantityUnit, formatQuantity } from '@/app/utils/units'
 import { formatCOP } from '@/app/utils/format'
@@ -182,15 +182,46 @@ export default function BuscarClient() {
 
   const { comparisons, singles } = groupResults(filtered)
 
-  // Re-rank comparison groups by the chosen basis (groupResults orders by
-  // absolute minPrice). Most-available first, then cheapest by basis.
-  const groupMin = (g: typeof comparisons[number]) =>
-    priceBasis === 'unit' ? g.minPricePerUnit : g.minPrice
-  const orderedComparisons = [...comparisons].sort((a, b) =>
-    b.availableCount !== a.availableCount
-      ? b.availableCount - a.availableCount
-      : groupMin(a) - groupMin(b),
-  )
+  // Lista unica mezclada: tablitas comparativas y productos sueltos juntos,
+  // ordenados por el criterio elegido (por defecto, el precio mas bajo primero).
+  // Una tablita se posiciona por su precio minimo disponible.
+  type MixedItem =
+    | { kind: 'group'; group: (typeof comparisons)[number] }
+    | { kind: 'single'; result: PharmacyResult }
+
+  const mixedItems: MixedItem[] = [
+    ...comparisons.map((group) => ({ kind: 'group' as const, group })),
+    ...singles.map((result) => ({ kind: 'single' as const, result })),
+  ]
+
+  const itemAvailRank = (it: MixedItem) =>
+    it.kind === 'group'
+      ? (it.group.availableCount > 0 ? 0 : 1)
+      : it.result.availability === 'unavailable' ? 1 : 0
+  const itemPrice = (it: MixedItem) => (it.kind === 'group' ? it.group.minPrice : it.result.price)
+  const itemUnit  = (it: MixedItem) => (it.kind === 'group' ? it.group.minPricePerUnit : it.result.pricePerUnit)
+  const itemPharmacy = (it: MixedItem) =>
+    it.kind === 'group' ? it.group.results[0].pharmacy : it.result.pharmacy
+  const itemDistance = (it: MixedItem) =>
+    it.kind === 'group'
+      ? Math.min(...it.group.results.map((r) => distances[r.pharmacy] ?? Infinity))
+      : distances[it.result.pharmacy] ?? Infinity
+
+  mixedItems.sort((a, b) => {
+    // Agotados siempre al final
+    const dr = itemAvailRank(a) - itemAvailRank(b)
+    if (dr !== 0) return dr
+    if (sortKey === 'nearest') {
+      const da = itemDistance(a)
+      const db = itemDistance(b)
+      if (da !== db) return da === Infinity ? 1 : db === Infinity ? -1 : da - db
+    }
+    if (sortKey === 'price-desc')  return itemPrice(b) - itemPrice(a)
+    if (sortKey === 'unit-asc')    return itemUnit(a) - itemUnit(b)
+    if (sortKey === 'pharmacy-asc') return itemPharmacy(a).localeCompare(itemPharmacy(b), 'es')
+    // price-asc y desempate del resto: menor precio primero
+    return itemPrice(a) - itemPrice(b)
+  })
 
   // Ahorro real y comparable: SOLO entre el mismo producto exacto (mismos principio
   // activo, concentracion, presentación y cantidad) vendido en 2+ farmacias. Así
@@ -616,43 +647,26 @@ export default function BuscarClient() {
 
             {/* Tarjetas */}
             {filtered.length > 0 ? (
-                <div className="flex flex-col gap-6 mb-8">
-                  {/* Comparison groups — same product in 2+ pharmacies */}
-                  {comparisons.length > 0 && (
-                    <div>
-                      <p className="text-[11px] font-bold tracking-widest uppercase text-[#717786] mb-3">
-                        Mismo producto, distintas farmacias
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {orderedComparisons.map((group) => (
-                          <ProductGroupCard key={group.key} group={group} priceBasis={priceBasis} distances={distances} stores={stores} fetchedAt={fetchedAt ?? undefined} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {/* Singles — products found in only one pharmacy */}
-                  {singles.length > 0 && (
-                    <div>
-                      {comparisons.length > 0 && (
-                        <p className="text-[11px] font-bold tracking-widest uppercase text-[#717786] mb-3">
-                          Solo en una farmacia
-                        </p>
-                      )}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {sortResults(singles, sortKey, distances).map((result) => (
-                          <ResultCard
-                            key={result.id}
-                            result={result}
-                            isCheapest={result.availability !== 'unavailable' && basisVal(result) === minPrice}
-                            cheapestLabel={priceBasis === 'unit' ? 'Mejor x unidad' : 'Mejor precio'}
-                            distanceKm={distances[result.pharmacy]}
-                            store={stores[result.pharmacy]}
-                            fetchedAt={fetchedAt ?? undefined}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                <div className="mb-8">
+                  {/* Lista unica: tablitas comparativas (mismo producto en 2+
+                     farmacias) mezcladas con productos sueltos, menor precio primero */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {mixedItems.map((item) =>
+                      item.kind === 'group' ? (
+                        <ProductGroupCard key={item.group.key} group={item.group} priceBasis={priceBasis} distances={distances} stores={stores} fetchedAt={fetchedAt ?? undefined} />
+                      ) : (
+                        <ResultCard
+                          key={item.result.id}
+                          result={item.result}
+                          isCheapest={item.result.availability !== 'unavailable' && basisVal(item.result) === minPrice}
+                          cheapestLabel={priceBasis === 'unit' ? 'Mejor x unidad' : 'Mejor precio'}
+                          distanceKm={distances[item.result.pharmacy]}
+                          store={stores[item.result.pharmacy]}
+                          fetchedAt={fetchedAt ?? undefined}
+                        />
+                      )
+                    )}
+                  </div>
                 </div>
             ) : (
               <div className="text-center py-16">

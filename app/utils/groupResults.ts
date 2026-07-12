@@ -59,8 +59,10 @@ function makeKey(productName: string): string {
 
   // Strip packaging/presentation noise words (abbreviations included so a leftover
   // "tab"/"cap"/"comp" token never makes two equal products look different).
+  // "recubiertas/cubiertas" (el recubrimiento de la tableta) tambien es ruido: una
+  // farmacia lo escribe y otra no para el mismo producto, y rompia la agrupacion.
   s = s.replace(
-    /\b(?:tabletas?|tabs?|capsulas?|caps?|comprimidos?|comps?|pastillas?|grageas?|gelcaps?|ampollas?|jeringas?|plumas?|viales?|jarabe|suspen[sc]ion|solucion|locion|emulsion|crema|gel|pomada|spray|aerosol|gotas|polvo|supositorio|parche|ovulo|inyectable|encapsulado|refrigerado|frasco|fco|caja|blister|sobre|sachet|ampolleta|unidades?|unds?)\b/g,
+    /\b(?:tabletas?|tabs?|capsulas?|caps?|comprimidos?|comps?|pastillas?|grageas?|gelcaps?|ampollas?|jeringas?|plumas?|viales?|jarabe|suspen[sc]ion|solucion|locion|emulsion|crema|gel|pomada|spray|aerosol|gotas|polvo|supositorio|parche|ovulo|inyectable|encapsulado|refrigerado|frasco|fco|caja|blister|sobre|sachet|ampolleta|unidades?|unds?|recubiert[ao]s?|cubiert[ao]s?|laqueada?s?)\b/g,
     ' '
   )
 
