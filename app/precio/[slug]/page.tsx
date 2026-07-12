@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!info) return { title: 'Precio de medicamentos' }
 
   const ing = info.activeIngredient
-  const title = `Precio de ${ing} en Colombia`
+  const title = `Precio de ${ing} en Colombia: dónde está más barato`
   const description = `Compara el precio de ${ing.toLowerCase()} en La Rebaja, Cruz Verde, Farmatodo, Colsubsidio, Cafam y Olimpica. Encuentra hoy la farmacia más barata en Colombia.`
   const canonical = `/precio/${slug}`
 

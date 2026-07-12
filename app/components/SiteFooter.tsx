@@ -18,6 +18,9 @@ export function SiteFooter() {
           </div>
 
           <nav aria-label={t('footer.about')} className="flex flex-wrap gap-x-5 gap-y-2 text-[12px]">
+            <Link href="/medicamentos-baratos" className="text-[#717786] hover:text-primary transition-colors font-medium">
+              {t('footer.cheap')}
+            </Link>
             <Link href="/sobre-nosotros" className="text-[#717786] hover:text-primary transition-colors font-medium">
               {t('footer.about')}
             </Link>

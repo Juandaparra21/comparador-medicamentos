@@ -132,6 +132,9 @@ export const TRANSLATIONS: Record<string, TranslationEntry> = {
     de: 'Kostenloser Medikamenten-Preisvergleich in Kolumbien.',
     pt: 'Comparador gratuito de preços de medicamentos na Colômbia.',
   },
+  'footer.cheap': {
+    es: 'Medicamentos baratos', en: 'Cheap medications', fr: 'Médicaments pas chers', it: 'Farmaci economici', de: 'Günstige Medikamente', pt: 'Medicamentos baratos',
+  },
   'footer.about': {
     es: 'Sobre nosotros', en: 'About us', fr: 'À propos', it: 'Chi siamo', de: 'Über uns', pt: 'Sobre nós',
   },

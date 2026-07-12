@@ -8,7 +8,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Static, indexable pages. /buscar, /carrito, /lista and auth routes are
   // intentionally excluded (dynamic or per-user — see robots.ts).
   const staticRoutes: MetadataRoute.Sitemap = ([
-    { url: `${SITE_URL}/`,                priority: 1.0,  changeFrequency: 'daily'   },
+    { url: `${SITE_URL}/`,                      priority: 1.0,  changeFrequency: 'daily'   },
+    { url: `${SITE_URL}/medicamentos-baratos`,  priority: 0.8,  changeFrequency: 'weekly'  },
+    { url: `${SITE_URL}/ofertas`,               priority: 0.7,  changeFrequency: 'daily'   },
     { url: `${SITE_URL}/cercanas`,        priority: 0.7,  changeFrequency: 'weekly'  },
     { url: `${SITE_URL}/sobre-nosotros`,  priority: 0.4,  changeFrequency: 'monthly' },
     { url: `${SITE_URL}/contacto`,        priority: 0.4,  changeFrequency: 'monthly' },
