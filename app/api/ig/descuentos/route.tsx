@@ -6,6 +6,7 @@ import {
   getDiscountPool,
   isPriorityDiscount,
   isKnownOtcDiscount,
+  productCategory,
   seededShuffle,
   daySeed,
 } from '@/app/lib/discounts'
@@ -211,16 +212,22 @@ export async function GET(req: Request) {
   )
   const candidates = [...consumer, ...otc].slice(0, CANDIDATES)
 
-  // Se conservan solo los que tienen foto descargable, maximo 3 por farmacia.
+  // Se conservan solo los que tienen foto descargable, maximo 3 por farmacia
+  // y maximo 1 por familia de producto (no repetir "condones", "citrato de
+  // magnesio", etc. con dos marcas distintas en el mismo video).
   const fetched = await Promise.all(candidates.map((i) => toDataUri(i.imageUrl)))
   const rows: { item: PharmacyResult; img: string }[] = []
   const perPharmacy: Record<string, number> = {}
+  const perCategory: Record<string, number> = {}
   for (let i = 0; i < candidates.length && rows.length < SLOTS; i++) {
     const img = fetched[i]
     if (!img) continue
+    const cat = productCategory(candidates[i])
     if ((perPharmacy[candidates[i].pharmacy] ?? 0) >= 3) continue
+    if ((perCategory[cat] ?? 0) >= 1) continue
     rows.push({ item: candidates[i], img })
     perPharmacy[candidates[i].pharmacy] = (perPharmacy[candidates[i].pharmacy] ?? 0) + 1
+    perCategory[cat] = (perCategory[cat] ?? 0) + 1
   }
   rows.sort((a, b) => (b.item.discount ?? 0) - (a.item.discount ?? 0))
   if (rows.length === 0) {

@@ -59,6 +59,51 @@ export function isMassConsumerDiscount(r: { activeIngredient: string; productNam
   return isPriorityDiscount(r) || isKnownOtcDiscount(r)
 }
 
+// Familia de producto para no repetir la misma categoria en una misma tanda
+// (p.ej. dos condones distintos, o dos citratos de magnesio de marcas
+// distintas). Se busca en el NOMBRE del producto, no en activeIngredient: para
+// articulos de bazar (condones, protector solar...) ese campo suele traer
+// basura heredada del scraper VTEX (p.ej. un condon con activeIngredient
+// "IBUPROFENO"). Si ninguna familia conocida hace match, se usa el principio
+// activo normalizado como respaldo (asi dos medicamentos genericos distintos
+// no se tratan como la misma familia por error).
+const CATEGORY_PATTERNS: [string, RegExp][] = [
+  ['condon', /\b(cond[oó]n(es)?|preservativo(s)?|durex)\b/i],
+  ['colageno', /\bcol[aá]geno\b/i],
+  ['magnesio', /\bmagnesio\b/i],
+  ['vitamina', /\b(vitamina|multivitam[ií]n)/i],
+  ['protector-solar', /\b(protector solar|bloqueador solar)/i],
+  ['shampoo', /\b(shampoo|champ[uú])/i],
+  ['jabon', /\bjab[oó]n/i],
+  ['gel-ducha', /\bgel de ducha\b/i],
+  ['desodorante', /\b(desodorante|antitranspirante)/i],
+  ['panal', /\bpa[ñn]al(es)?\b/i],
+  ['toalla-higienica', /\btoalla(s)? (higi[eé]nica|sanitaria)/i],
+  ['cuidado-dental', /\b(crema dental|pasta dental|cepillo dental|hilo dental|seda dental|enjuague bucal)/i],
+  ['acetaminofen', /\bacetaminof[eé]n/i],
+  ['ibuprofeno', /\bibuprofeno\b/i],
+  ['naproxeno', /\bnaproxeno\b/i],
+  ['loratadina', /\bloratadina\b/i],
+  ['cetirizina', /\bcetirizina\b/i],
+  ['omeprazol', /\bomeprazol\b/i],
+  ['dolex', /\bdolex\b/i],
+  ['advil', /\badvil\b/i],
+  ['apronax', /\bapronax\b/i],
+  ['dolofen', /\bdolofen\b/i],
+  ['tafirol', /\btafirol\b/i],
+  ['mejoral', /\bmejoral\b/i],
+  ['cerave', /\bcerave\b/i],
+  ['neutrogena', /\bneutrogena\b/i],
+  ['nivea', /\bnivea\b/i],
+]
+
+export function productCategory(r: { activeIngredient: string; productName: string }): string {
+  for (const [name, re] of CATEGORY_PATTERNS) {
+    if (re.test(r.productName)) return name
+  }
+  return (r.activeIngredient || r.productName).trim().toLowerCase()
+}
+
 // The full fresh, relevant, discounted pool across all pharmacies (search_results
 // is refreshed by every live search and by the daily cron). Ordered by discount desc.
 export async function getDiscountPool(): Promise<(PharmacyResult & { lastUpdated?: string })[]> {
@@ -124,17 +169,35 @@ export function selectDailyFeatured(
     ...seededShuffle(otc.slice(0, 60), seed + 1),
   ]
 
+  // Max 1 por familia de producto (no repetir "condones", "citrato de
+  // magnesio", etc. con dos marcas distintas en la misma tanda) y max 2 por
+  // farmacia. Dos pasadas mas relajan cada tope si faltan candidatos, para
+  // no dejar huecos cuando el catalogo del dia es escaso.
   const featured: PharmacyResult[] = []
   const chosen = new Set<string>()
   const perPharmacy: Record<string, number> = {}
+  const perCategory: Record<string, number> = {}
   for (const r of candidates) {
     if (featured.length >= limit) break
-    if (chosen.has(r.id) || (perPharmacy[r.pharmacy] ?? 0) >= 2) continue
+    const cat = productCategory(r)
+    if (chosen.has(r.id) || (perPharmacy[r.pharmacy] ?? 0) >= 2 || (perCategory[cat] ?? 0) >= 1) continue
     featured.push(r)
     chosen.add(r.id)
     perPharmacy[r.pharmacy] = (perPharmacy[r.pharmacy] ?? 0) + 1
+    perCategory[cat] = (perCategory[cat] ?? 0) + 1
   }
-  // Si el tope por farmacia dejó huecos (pocas fuentes con ofertas), rellenar.
+  // Relajar el tope por farmacia (pocas fuentes con ofertas) pero seguir sin
+  // repetir familia.
+  for (const r of candidates) {
+    if (featured.length >= limit) break
+    const cat = productCategory(r)
+    if (chosen.has(r.id) || (perCategory[cat] ?? 0) >= 1) continue
+    featured.push(r)
+    chosen.add(r.id)
+    perCategory[cat] = (perCategory[cat] ?? 0) + 1
+  }
+  // Ultimo recurso: si aun faltan cupos (catalogo del dia muy escaso), llenar
+  // sin restricciones para no dejar la seccion incompleta.
   for (const r of candidates) {
     if (featured.length >= limit) break
     if (!chosen.has(r.id)) { featured.push(r); chosen.add(r.id) }
