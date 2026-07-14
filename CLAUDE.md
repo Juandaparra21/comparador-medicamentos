@@ -9,7 +9,7 @@ active ingredient so users find the cheapest option without depending on a singl
 source.
 
 Current stage: working product in production on Vercel. Public landing with live
-search, results comparison across 6 pharmacies, nearby-pharmacy map (OpenStreetMap),
+search, results comparison across 9 pharmacies, nearby-pharmacy map (OpenStreetMap),
 and pages for cart, list, and favorites. Active work is shifting from "make search
 work" to trust, retention, and growth features.
 
@@ -32,7 +32,8 @@ relying on them; do not assume.
 - Framework: Next.js, deployed on Vercel.
 - Maps: OpenStreetMap.
 - Pharmacies covered: Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica,
-  Farmacia Pasteur, Farmacenter (its online store is farmaexpress.com, by Coopidrogas).
+  Farmacia Pasteur, Farmacenter (its online store is farmaexpress.com, by Coopidrogas),
+  Drogueria Alemana (its online store is tudrogueriavirtual.com, by Unidrogas).
 - Routes in production: /, /cercanas, /carrito, /lista, /sobre-nosotros, /contacto, /terminos, /privacidad.
 
 Read these before editing, to confirm current reality instead of assuming:

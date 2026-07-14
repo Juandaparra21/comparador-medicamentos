@@ -104,6 +104,8 @@ export async function snapshotQuery(query: string): Promise<SnapshotOutcome> {
 // via the search_results view (products JOIN pharmacies) filtered by freshness.
 
 // La vista/tabla usa los ids de pharmacies; los resultados traen el nombre visible.
+// Pasteur y Farmacenter faltaban aqui desde que se agregaron como fuente: sus
+// descuentos se scrapeaban pero nunca entraban al pool de ofertas destacadas.
 const PHARMACY_NAME_TO_ID: Record<string, string> = {
   'Farmatodo':             'farmatodo',
   'Cruz Verde':            'cruz-verde',
@@ -112,6 +114,9 @@ const PHARMACY_NAME_TO_ID: Record<string, string> = {
   'Drogueria Colsubsidio': 'colsubsidio',
   'Colsubsidio':           'colsubsidio',
   'Cafam':                 'cafam',
+  'Farmacia Pasteur':      'pasteur',
+  'Farmacenter':           'farmacenter',
+  'Drogueria Alemana':     'alemana',
 }
 
 export async function harvestDiscounts(results: PharmacyResult[]): Promise<number> {
