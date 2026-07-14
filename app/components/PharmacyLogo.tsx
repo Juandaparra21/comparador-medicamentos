@@ -38,20 +38,10 @@ function PillSvg({ s }: { s: number }) {
   )
 }
 
-// Real brand logos (in /public/pharmacy-logos). Only pharmacies with a usable
-// logo file are listed; the rest fall back to the stylized tile below.
-// Logos are property of each pharmacy; shown only to identify whose price it is.
-const LOGO_FILES: Record<string, string> = {
-  'Drogas La Rebaja':      'la-rebaja.png',
-  'Drogueria Colsubsidio': 'colsubsidio.png',
-  'Colsubsidio':           'colsubsidio.png',
-  'Cafam':                 'cafam.png',
-  'Farmatodo':             'farmatodo.png',
-  'Olimpica Drogueria':    'olimpica.png',
-  'Farmacia Pasteur':      'pasteur.png',
-  'Farmacenter':           'farmacenter.png',
-  'Tu Drogueria Virtual':  'tudrogueria-virtual.png',
-}
+// Real brand logos (files still in /public/pharmacy-logos). Desactivado a
+// pedido del dueno: todas las farmacias caen ahora en el mosaico de
+// respaldo (circulo de color + siglas/icono) en vez de la imagen real.
+const LOGO_FILES: Record<string, string> = {}
 
 interface Props {
   name: string
