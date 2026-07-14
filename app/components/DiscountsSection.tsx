@@ -118,9 +118,13 @@ export async function DiscountsSection() {
 
       <div className="flex gap-3.5 overflow-x-auto pb-2 sm:pb-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 -mx-4 sm:mx-0 px-4 sm:px-0 snap-x snap-mandatory">
         {featured.map((item) => (
-          <Link
+          // Directo a la pagina del producto en la farmacia (Farmi no vende,
+          // enlaza). Si el registro no trae URL, cae a la busqueda interna.
+          <a
             key={item.id}
-            href={`/buscar?q=${encodeURIComponent(item.activeIngredient.toLowerCase())}`}
+            href={item.url || `/buscar?q=${encodeURIComponent(item.activeIngredient.toLowerCase())}`}
+            target={item.url ? '_blank' : undefined}
+            rel={item.url ? 'noopener noreferrer' : undefined}
             className="group flex flex-col glass-card glass-card-hover rounded-2xl transition-all duration-300 overflow-hidden shrink-0 w-[200px] sm:w-auto snap-start"
           >
             <div className="relative">
@@ -152,7 +156,7 @@ export async function DiscountsSection() {
                 </p>
               </div>
             </div>
-          </Link>
+          </a>
         ))}
 
         {topPharmacy && (
