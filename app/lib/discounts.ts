@@ -55,3 +55,59 @@ export async function getDiscountPool(): Promise<(PharmacyResult & { lastUpdated
   const raw = (data ?? []) as (PharmacyResult & { lastUpdated?: string })[]
   return raw.filter(isRelevantDiscount)
 }
+
+// Deterministic shuffle: same order during the whole day (stable across the
+// hourly ISR regenerations), different order the next day.
+function seededShuffle<T>(items: T[], seed: number): T[] {
+  const arr = [...items]
+  let s = seed || 1
+  const rand = () => {
+    s = (s * 1664525 + 1013904223) % 4_294_967_296
+    return s / 4_294_967_296
+  }
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
+// Día en Bogotá como semilla: la selección cambia cada medianoche local.
+export function daySeed(): number {
+  return Math.floor((Date.now() - 5 * 3_600_000) / 86_400_000)
+}
+
+// Daily featured picks: rotate among the best offers instead of always showing
+// the single highest discount (long-running promos made the section look
+// frozen). Beauty/personal-care and easy-consumption items go first,
+// medications fill the rest. Max 2 per pharmacy so one aggressive source
+// cannot monopolize. Shared by the home section and the IG image.
+export function selectDailyFeatured(
+  pool: (PharmacyResult & { lastUpdated?: string })[],
+  limit: number,
+): PharmacyResult[] {
+  const seed = daySeed()
+  const priority = pool.filter(isPriorityDiscount)
+  const rest = pool.filter((r) => !isPriorityDiscount(r))
+  const candidates = [
+    ...seededShuffle(priority.slice(0, 40), seed),
+    ...seededShuffle(rest.slice(0, 60), seed + 1),
+  ]
+
+  const featured: PharmacyResult[] = []
+  const chosen = new Set<string>()
+  const perPharmacy: Record<string, number> = {}
+  for (const r of candidates) {
+    if (featured.length >= limit) break
+    if (chosen.has(r.id) || (perPharmacy[r.pharmacy] ?? 0) >= 2) continue
+    featured.push(r)
+    chosen.add(r.id)
+    perPharmacy[r.pharmacy] = (perPharmacy[r.pharmacy] ?? 0) + 1
+  }
+  // Si el tope por farmacia dejó huecos (pocas fuentes con ofertas), rellenar.
+  for (const r of candidates) {
+    if (featured.length >= limit) break
+    if (!chosen.has(r.id)) { featured.push(r); chosen.add(r.id) }
+  }
+  return featured.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0))
+}
