@@ -185,7 +185,14 @@ function Row({ item, img }: { item: PharmacyResult; img: string }) {
   )
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  // ?etapa=N (0..7): dibuja el mismo lienzo pero con solo las primeras N
+  // ofertas visibles (las demas van con opacity 0 para que nada se mueva de
+  // sitio). Lo usa el generador de video para animar la cascada: fotograma a
+  // fotograma van apareciendo las ofertas. Sin parametro: imagen completa.
+  const etapaParam = new URL(req.url).searchParams.get('etapa')
+  const etapa = etapaParam === null ? null : Math.max(0, Math.min(SLOTS, parseInt(etapaParam, 10) || 0))
+
   const pool = await getDiscountPool()
   if (pool.length === 0) {
     return new Response('Sin descuentos frescos hoy', { status: 404 })
@@ -296,9 +303,18 @@ export async function GET() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center', gap: 20, marginTop: 24 }}>
-          {rows.map(({ item, img }) => (
-            <Row key={item.id} item={item} img={img} />
-          ))}
+          {rows.map(({ item, img }, i) =>
+            etapa !== null && i >= etapa ? (
+              // Espaciador del mismo alto que una tarjeta: mantiene cada
+              // oferta en su sitio entre etapas (opacity 0 dejaba artefactos
+              // del tachado en satori).
+              <div key={item.id} style={{ display: 'flex', height: 176 }} />
+            ) : (
+              <div key={item.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                <Row item={item} img={img} />
+              </div>
+            ),
+          )}
         </div>
 
         <div
