@@ -345,7 +345,16 @@ export async function GET() {
   // error de render salga como 500 con detalle y no tumbe la respuesta a medias.
   try {
     const png = await image.arrayBuffer()
-    return new Response(png, { headers: { 'Content-Type': 'image/png' } })
+    return new Response(png, {
+      headers: {
+        'Content-Type': 'image/png',
+        // Cache corto en CDN: el cron de publicacion "calienta" la URL del dia
+        // y el fetch de Meta (que no espera una generacion de varios segundos)
+        // recibe la copia cacheada. 10 min no cruza el corte de las 7:00 am
+        // porque la URL del cron cambia cada dia (?v=daySeed).
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=60',
+      },
+    })
   } catch (e) {
     console.error('ig/descuentos render:', e)
     return new Response('Error generando la imagen, intenta de nuevo en unos minutos', { status: 500 })

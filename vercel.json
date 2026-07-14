@@ -1,6 +1,7 @@
 {
   "crons": [
     { "path": "/api/cron/snapshot", "schedule": "0 11 * * *" },
-    { "path": "/api/cron/alerts", "schedule": "0 12 * * *" }
+    { "path": "/api/cron/alerts", "schedule": "0 12 * * *" },
+    { "path": "/api/cron/ig-story", "schedule": "15 12 * * *" }
   ]
 }
