@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SITE_URL } from '@/app/lib/siteUrl'
 import { daySeed } from '@/app/lib/discounts'
+import { getAdminClient } from '@/app/lib/supabase/admin'
 
 // Publica automaticamente la historia diaria de descuentos en Instagram via
 // la Content Publishing API de Meta (cuenta profesional requerida). Corre por
@@ -9,6 +10,8 @@ import { daySeed } from '@/app/lib/discounts'
 //
 // Contrato: GET /api/cron/ig-story (Authorization: Bearer CRON_SECRET)
 //   -> 200 { ok: true, storyId }        historia publicada
+//   -> 200 { ok: true, skipped }        ya se publico hoy (candado app_state);
+//                                       ?force=1 publica de todas formas
 //   -> 503 { ok: false, error }         faltan IG_USER_ID / IG_ACCESS_TOKEN
 //   -> 502 { ok: false, error, detail } Meta rechazo la publicacion
 //
@@ -48,9 +51,30 @@ export async function GET(req: NextRequest) {
     )
   }
 
+  // Candado antiduplicados: si la historia de este "dia" (semilla de 7am) ya
+  // se publico, no publicar otra aunque llamen la ruta varias veces. ?force=1
+  // lo salta a proposito. Si la tabla app_state no existe aun, el candado se
+  // omite en silencio y el robot publica como siempre.
+  const seed = daySeed()
+  const force = req.nextUrl.searchParams.get('force') === '1'
+  const db = getAdminClient()
+  if (db && !force) {
+    const { data: state } = await db
+      .from('app_state')
+      .select('value')
+      .eq('key', 'ig_story_last_seed')
+      .maybeSingle()
+    if (state?.value === String(seed)) {
+      return NextResponse.json({
+        ok: true,
+        skipped: 'la historia de hoy ya se publico (usa ?force=1 para publicar otra)',
+      })
+    }
+  }
+
   // URL publica de la imagen del dia. El ?v= por dia hace que Meta y el CDN
   // la traten como un archivo nuevo cada manana (la ruta ignora el parametro).
-  const imageUrl = `${SITE_URL}/api/ig/descuentos?v=${daySeed()}`
+  const imageUrl = `${SITE_URL}/api/ig/descuentos?v=${seed}`
 
   // Calentar el CDN: la imagen tarda varios segundos en generarse y el fetch
   // de Meta no espera tanto; tras esta llamada queda cacheada unos minutos.
@@ -103,6 +127,13 @@ export async function GET(req: NextRequest) {
       { ok: false, error: 'Meta no publico la historia', detail: publish.body },
       { status: 502 },
     )
+  }
+
+  // Registrar el dia publicado (si la tabla no existe, se ignora el error).
+  if (db) {
+    await db
+      .from('app_state')
+      .upsert({ key: 'ig_story_last_seed', value: String(seed), updated_at: new Date().toISOString() })
   }
 
   return NextResponse.json({ ok: true, storyId })
