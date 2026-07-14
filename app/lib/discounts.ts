@@ -9,23 +9,28 @@ export const FRESH_DAYS = 7
 // vende (papeleria, accesorios) aunque traiga descuento.
 const DOSAGE_FORM_RE =
   /\b(\d+\s?(mg|mcg|ml|g)\b|tableta|c[aá]psula|jarabe|comprimido|gotas|suspensi[oó]n|crema|gel|ung[uü]ento|soluci[oó]n|parche|inyectable|polvo|spray|aerosol)/i
+const NON_HEALTH_RE = /\b(papel|hoja|rice paper|bater[ií]a|pila|juguete)/i
+
+// Belleza y cuidado personal: lo que la gente reconoce y compra sin pensarlo.
 const PERSONAL_CARE_RE =
-  /\b(maquillaje|labial|r[ií]mel|base de maquillaje|protector solar|bloqueador|shampoo|champ[uú]|jab[oó]n|perfume|colonia|esmalte|delineador|rubor|sombra|corrector|polvo compacto|desodorante)/i
-const NON_HEALTH_RE = /\b(papel|hoja|rice paper|toalla|cepillo|peine|bater[ií]a|pila|juguete)/i
+  /\b(maquillaje|labial|b[aá]lsamo labial|r[ií]mel|base de maquillaje|base l[ií]quida|polvo (compacto|suelto)|protector solar|bloqueador solar|autobronceador|bronceador|shampoo|champ[uú]|acondicionador|jab[oó]n (l[ií]quido|de tocador|en barra)?|gel de ducha|perfume|colonia|fragancia|esmalte|quitaesmalte|removedor de esmalte|delineador|rubor|sombra (de ojos)?|corrector( de ojeras)?|contorno de ojos|desodorante|antitranspirante|crema de afeitar|espuma de afeitar|after\s?shave|locion para afeitar|m[aá]quina de afeitar|rastrillo|rasuradora|cera depilatoria|depilaci[oó]n|tinte (para el cabello|capilar)|gel para el cabello|mousse capilar|keratina|crema antiarrugas|crema antiedad|cepillo dental|cepillo de dientes|hilo dental|seda dental|enjuague bucal|pasta dental)/i
 
 // Consumo facil: productos que se compran sin pensarlo mucho (vitaminas,
-// cuidado diario, condones, cuidado de piel). Junto con belleza/cuidado
-// personal, son la prioridad editorial de la seccion de descuentos.
-// Ojo: "magnesio"/"zinc" sueltos NO sirven, son sales de medicamentos
-// (p. ej. "esomeprazol magnesio trihidrato"); se exige contexto de suplemento.
+// cuidado diario, bebe, higiene femenina, primeros auxilios). Junto con
+// belleza/cuidado personal, son la prioridad editorial de la seccion de
+// descuentos. Ojo: "magnesio"/"zinc" sueltos NO sirven, son sales de
+// medicamentos (p. ej. "esomeprazol magnesio trihidrato"); se exige contexto
+// de suplemento.
 const EASY_CONSUMPTION_RE =
-  /\b(vitamina|multivitam[ií]n|suplemento|col[aá]geno|omega\s?3|(citrato|cloruro|gluconato)\s+de\s+magnesio|crema dental|enjuague bucal|hidratante|humectante|exfoliante|mascarilla|s[eé]rum|acondicionador|tratamiento capilar|pa[ñn]itos|suero oral|electrolitos|cond[oó]n|condones|preservativo|lubricante|gel antibacterial|alcohol antis[eé]ptico|repelente|pa[ñn]al|crema (corporal|facial|de manos)|locion|loci[oó]n|talco|curitas?|venditas?)/i
+  /\b(vitamina|multivitam[ií]n|suplemento|col[aá]geno|omega\s?3|prote[ií]na (en polvo|whey)|biotina|[aá]cido f[oó]lico|complejo b|melatonina|prop[oó]leo|jalea real|probi[oó]tico|(citrato|cloruro|gluconato)\s+de\s+magnesio|crema dental|hidratante|humectante|exfoliante|mascarilla( facial)?|s[eé]rum|tratamiento capilar|pa[ñn]itos( h[uú]medos)?|toallitas h[uú]medas|suero oral|suero fisiol[oó]gico|soluci[oó]n salina|electrolitos|cond[oó]n(es)?|preservativo|lubricante( [ií]ntimo)?|gel antibacterial|alcohol (antis[eé]ptico|en gel)?|repelente|pa[ñn]al(es)?|f[oó]rmula infantil|leche de f[oó]rmula|biber[oó]n|chupo|chupete|toalla(s)? higi[eé]nica(s)?|toalla(s)? sanitaria(s)?|tamp[oó]n(es)?|protector(es)? diario(s)?|copa menstrual|gasas?|algod[oó]n|agua oxigenada|curitas?|venditas?|tapabocas|mascarilla quir[uú]rgica|term[oó]metro|crema (corporal|facial|de manos|antipa[ñn]alitis)|locion|loci[oó]n)/i
 
 // Marcas y genericos de venta libre que cualquiera reconoce en una historia
-// de Instagram. Es la segunda capa de la historia cuando no alcanzan los de
-// consumo; los medicamentos de formula poco conocidos no entran a la historia.
+// de Instagram: analgesicos/gripales de mostrador, digestivos, marcas de
+// higiene/cuidado personal masivas, bebidas/geles de rehidratacion. Es la
+// segunda capa cuando no alcanzan los de consumo; los medicamentos de formula
+// poco conocidos no entran aqui.
 const KNOWN_OTC_RE =
-  /\b(apronax|dolex|advil|aspirina|alka.?seltzer|acetaminof[eé]n|ibuprofeno|naproxeno|buscapina|noraver|vick|isodine|mylanta|milanta|sal de frutas|ensure|pediasure|pedialyte|smecta|gaseosol|acetaminofen)/i
+  /\b(apronax|dolex|advil|aspirina|bayaspirina|alka.?seltzer|acetaminof[eé]n|ibuprofeno|naproxeno|loratadina|cetirizina|clarityne|allegra|benadryl|actifed|bisolvon|ambroxol|resfrialivio|coldrex|buscapina|noraver|winasorb|dolofin|tafirol|mejoral|aliviax|dolo ?neurobion|cafiaspirina|omeprazol|ranitidina|vick|vaporub|isodine|betadine|mylanta|milanta|gelusil|rennie|alusil|sal de frutas|ensure|boost|centrum|redoxon|emergen-?c|berocca|pediasure|pedialyte|electrolit|smecta|gaseosol|nivea|dove|vaselina|eucerin|cetaphil|cerave|neutrogena|johnson|sedal|head\s?&\s?shoulders|pantene|gillette|colgate|oral-?b|listerine)/i
 
 // Producto reconocible para publicar en redes: consumo facil o marca OTC.
 export function isKnownOtcDiscount(r: { activeIngredient: string; productName: string }): boolean {
@@ -42,6 +47,16 @@ export function isRelevantDiscount(r: { activeIngredient: string; productName: s
 export function isPriorityDiscount(r: { activeIngredient: string; productName: string }): boolean {
   const text = `${r.activeIngredient} ${r.productName}`
   return PERSONAL_CARE_RE.test(text) || EASY_CONSUMPTION_RE.test(text)
+}
+
+// De consumo masivo: prioridad (belleza/consumo facil) o marca OTC conocida.
+// Es el filtro real para "promociones" cara al publico (portada e Instagram):
+// deja fuera medicamentos de formula poco reconocibles aunque tengan mas
+// descuento, para que solo se destaque lo que de verdad le interesa a la
+// gente. La pagina /ofertas (listado completo) NO usa este filtro a proposito:
+// ahi sigue entrando todo lo relevante, para quien busca su medicamento puntual.
+export function isMassConsumerDiscount(r: { activeIngredient: string; productName: string }): boolean {
+  return isPriorityDiscount(r) || isKnownOtcDiscount(r)
 }
 
 // The full fresh, relevant, discounted pool across all pharmacies (search_results
@@ -92,19 +107,21 @@ export function daySeed(): number {
 
 // Daily featured picks: rotate among the best offers instead of always showing
 // the single highest discount (long-running promos made the section look
-// frozen). Beauty/personal-care and easy-consumption items go first,
-// medications fill the rest. Max 2 per pharmacy so one aggressive source
-// cannot monopolize. Shared by the home section and the IG image.
+// frozen). Solo entra consumo masivo (isMassConsumerDiscount): belleza/
+// cuidado facil primero, marcas OTC reconocibles rellenan el resto.
+// Medicamentos de formula poco conocidos NUNCA aparecen aqui, aunque tengan
+// mas descuento. Max 2 por farmacia para que ninguna fuente monopolice.
+// Compartido por la portada y el video/imagen de Instagram.
 export function selectDailyFeatured(
   pool: (PharmacyResult & { lastUpdated?: string })[],
   limit: number,
 ): PharmacyResult[] {
   const seed = daySeed()
   const priority = pool.filter(isPriorityDiscount)
-  const rest = pool.filter((r) => !isPriorityDiscount(r))
+  const otc = pool.filter((r) => !isPriorityDiscount(r) && isKnownOtcDiscount(r))
   const candidates = [
     ...seededShuffle(priority.slice(0, 40), seed),
-    ...seededShuffle(rest.slice(0, 60), seed + 1),
+    ...seededShuffle(otc.slice(0, 60), seed + 1),
   ]
 
   const featured: PharmacyResult[] = []
