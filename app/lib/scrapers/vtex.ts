@@ -1,5 +1,5 @@
 import type { ScrapedProduct } from './types'
-import { extractConcentration, extractPresentation, extractPackQuantity, classify, matchesQuery } from './utils'
+import { extractConcentration, extractPresentation, extractPackQuantity, classify, matchesQuery, normalize } from './utils'
 import { withCache } from './cache'
 
 // Scraper generico para tiendas VTEX (misma API publica de catalogo que ya
@@ -54,10 +54,25 @@ function mapProduct(store: VtexStore, p: Record<string, any>): ScrapedProduct | 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const firstImage = (items[0] as any).images?.[0]?.imageUrl as string | undefined
 
+  const type = classify({ name, brand })
+  // Algunos catalogos VTEX (Tu Drogueria Virtual, sistematicamente) solo
+  // ponen el laboratorio en el campo `brand`, nunca en el nombre: un
+  // generico llega como "Acetaminofen 150 Mg Jarabe X 60 Ml" sin ninguna
+  // palabra que lo identifique, mientras otras farmacias del mismo tipo de
+  // producto ya incluyen el laboratorio en el titulo (p.ej. "ACETAMINOFEN
+  // GENFAR TABLETAS 500 MG" en Pasteur). classify() ya determino que este
+  // nombre no tiene marca reconocible (type === 'generic'); si ademas el
+  // laboratorio no aparece ya en el texto, se agrega entre parentesis para
+  // que dos genericos distintos no se vean identicos/anonimos.
+  const displayName =
+    type === 'generic' && brand && !normalize(name).includes(normalize(brand))
+      ? `${name} (${brand})`
+      : name
+
   return {
     pharmacyId:     store.pharmacyId,
-    productName:    name,
-    type:           classify({ name, brand }),
+    productName:    displayName,
+    type,
     activeIngredient: name.split(/\s/)[0] ?? '',
     concentration:  extractConcentration(name, presentation),
     presentation,
