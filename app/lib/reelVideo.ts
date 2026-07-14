@@ -11,11 +11,12 @@ const execFileAsync = promisify(execFile)
 // Debe coincidir con SLOTS de /api/ig/descuentos.
 export const STAGES = 7
 
-// Construye el video "cascada" del dia (1080x1920, ~7s, H.264 mudo): las
-// ofertas van apareciendo una por una con fundidos. Recibe las URLs de las
-// etapas (?etapa=0..7 de /api/ig/descuentos), las baja, y las hila con
-// ffmpeg (xfade). Devuelve el MP4 como Buffer. Lanza Error si algo falla.
-export async function buildCascadeVideo(stageUrls: string[]): Promise<Buffer> {
+// Construye el video "cascada" del dia (1080x1920, ~7s, H.264): las ofertas
+// van apareciendo una por una con fundidos. Recibe las URLs de las etapas
+// (?etapa=0..7 de /api/ig/descuentos) y opcionalmente la ruta de una pista de
+// audio (stock) que se mezcla recortada a la duracion del video con fundido
+// de salida. Devuelve el MP4 como Buffer. Lanza Error si algo falla.
+export async function buildCascadeVideo(stageUrls: string[], audioPath?: string): Promise<Buffer> {
   if (!ffmpegPath) throw new Error('ffmpeg no disponible en este entorno')
 
   const dir = await mkdtemp(join(tmpdir(), 'reel-'))
@@ -44,14 +45,30 @@ export async function buildCascadeVideo(stageUrls: string[]): Promise<Buffer> {
     steps.push(`${last}fade=t=in:st=0:d=0.5,format=yuv420p[v]`)
 
     const out = join(dir, 'reel.mp4')
-    const totalDur = (0.9 + 0.55 * (pngs.length - 1) + 2.5).toFixed(2)
+    const totalSecs = 0.9 + 0.55 * (pngs.length - 1) + 2.5
+    const totalDur = totalSecs.toFixed(2)
+
+    // Audio: entra como ultimo input; se recorta a la duracion del video con
+    // fundido de salida en el ultimo segundo para que no corte en seco.
+    const audioInputs = audioPath ? ['-i', audioPath] : []
+    const audioArgs = audioPath
+      ? [
+          '-map', `${pngs.length}:a`,
+          '-af', `afade=t=out:st=${(totalSecs - 1).toFixed(2)}:d=1`,
+          '-c:a', 'aac',
+          '-b:a', '128k',
+        ]
+      : []
+
     await execFileAsync(
       ffmpegPath,
       [
         '-y',
         ...inputs,
+        ...audioInputs,
         '-filter_complex', steps.join(';'),
         '-map', '[v]',
+        ...audioArgs,
         '-t', totalDur,
         '-r', '30',
         '-c:v', 'libx264',

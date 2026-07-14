@@ -1,3 +1,5 @@
+import { join } from 'path'
+import { access } from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
 import { SITE_URL } from '@/app/lib/siteUrl'
 import { daySeed } from '@/app/lib/discounts'
@@ -109,7 +111,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // ── 1. Video del dia: cascada + subida a Storage ──────────────────────────
+  // ── 1. Video del dia: cascada + audio del dia + subida a Storage ──────────
   const warnings: string[] = []
   let videoUrl: string | null = null
   if (db) {
@@ -117,7 +119,18 @@ export async function GET(req: NextRequest) {
       const stageUrls = Array.from({ length: STAGES + 1 }, (_, k) =>
         `${SITE_URL}/api/ig/descuentos?etapa=${k}&v=${seed}`,
       )
-      const mp4 = await buildCascadeVideo(stageUrls)
+      // Las 4 pistas de stock (assets/reel-audio) rotan con el dia. Si el
+      // archivo no aparece en el despliegue, el video sale mudo y se avisa.
+      let audioPath: string | undefined = join(
+        process.cwd(), 'assets', 'reel-audio', `pista-${(seed % 4) + 1}.mp3`,
+      )
+      try {
+        await access(audioPath)
+      } catch {
+        warnings.push(`audio no encontrado: ${audioPath}`)
+        audioPath = undefined
+      }
+      const mp4 = await buildCascadeVideo(stageUrls, audioPath)
       const file = `reel-${seed}.mp4`
       const { error } = await db.storage
         .from('ig')

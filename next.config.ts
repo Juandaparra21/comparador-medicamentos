@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   // archivos lo copia dentro de la funcion del cron que genera el video.
   serverExternalPackages: ['ffmpeg-static'],
   outputFileTracingIncludes: {
-    '/api/cron/ig-story': ['./node_modules/ffmpeg-static/**'],
+    '/api/cron/ig-story': ['./node_modules/ffmpeg-static/**', './assets/reel-audio/**'],
   },
 
   // La ficha informativa /medicamento/[slug] se consolido en la pagina de precios.
