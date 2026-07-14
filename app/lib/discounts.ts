@@ -72,9 +72,11 @@ function seededShuffle<T>(items: T[], seed: number): T[] {
   return arr
 }
 
-// Día en Bogotá como semilla: la selección cambia cada medianoche local.
+// Semilla del día: la selección rota a las 7:00 am hora Bogotá (UTC-5), la
+// hora a la que el dueño publica la historia en Instagram. Se resta 12h
+// (5 de zona horaria + 7 de corte) para que el "día" arranque a esa hora.
 export function daySeed(): number {
-  return Math.floor((Date.now() - 5 * 3_600_000) / 86_400_000)
+  return Math.floor((Date.now() - 12 * 3_600_000) / 86_400_000)
 }
 
 // Daily featured picks: rotate among the best offers instead of always showing
