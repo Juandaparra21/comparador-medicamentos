@@ -1,4 +1,7 @@
+import { readFile } from 'fs/promises'
+import { join } from 'path'
 import { ImageResponse } from 'next/og'
+import { SITE_URL } from '@/app/lib/siteUrl'
 import {
   getDiscountPool,
   isPriorityDiscount,
@@ -88,64 +91,92 @@ function truncate(s: string, max: number): string {
   return s.length > max ? `${s.slice(0, max - 1).trimEnd()}…` : s
 }
 
+// Marca capsula de Farmi (public/farmi_mark.png). Primero disco local (dev y
+// Vercel con file tracing); si no, el asset publico del dominio.
+let logoCache: string | null = null
+async function loadLogo(): Promise<string | null> {
+  if (logoCache) return logoCache
+  try {
+    const buf = await readFile(join(process.cwd(), 'public', 'farmi_mark.png'))
+    logoCache = `data:image/png;base64,${buf.toString('base64')}`
+    return logoCache
+  } catch {
+    return toDataUri(`${SITE_URL}/farmi_mark.png`)
+  }
+}
+
+// Paleta tomada del logo: capsula menta sobre azul profundo.
+const NAVY = '#101f4d'
+const NAVY_CARD_INK = '#182046'
+const BLUE = '#0058bc'
+const TEAL = '#2ed9a9'
+const MUTED = '#66708c'
+const GREEN = '#00964e'
+
 function Row({ item, img }: { item: PharmacyResult; img: string }) {
   return (
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 24,
-        background: 'rgba(255,255,255,0.94)',
-        borderRadius: 28,
-        border: '2px solid rgba(0,88,188,0.10)',
-        boxShadow: '0 14px 28px rgba(0,40,90,0.08)',
-        padding: '18px 26px 18px 18px',
-        height: 172,
+        gap: 26,
+        background: '#ffffff',
+        borderRadius: 26,
+        boxShadow: '0 18px 34px rgba(4,12,40,0.35)',
+        padding: '18px 30px 18px 18px',
+        height: 176,
       }}
     >
+      {/* Foto sobre panal menta, guino a la capsula del logo */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 136,
-          height: 136,
-          background: '#ffffff',
-          borderRadius: 20,
+          width: 140,
+          height: 140,
+          background: 'linear-gradient(150deg, #e7fbf3, #f3f9ff)',
+          borderRadius: '70px 24px 70px 24px',
           flexShrink: 0,
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={img} alt="" style={{ maxWidth: 124, maxHeight: 124, objectFit: 'contain' }} />
+        <img src={img} alt="" style={{ maxWidth: 116, maxHeight: 116, objectFit: 'contain' }} />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: 4, minWidth: 0 }}>
-        <div style={{ display: 'flex', fontSize: 30, fontWeight: 900, color: '#1a1b1f', lineHeight: 1.15 }}>
-          {truncate(item.productName, 56)}
+        <div style={{ display: 'flex', fontSize: 30, fontWeight: 900, color: NAVY_CARD_INK, lineHeight: 1.12 }}>
+          {truncate(item.productName, 52)}
         </div>
-        <div style={{ display: 'flex', fontSize: 24, color: '#717786' }}>{item.pharmacy}</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginTop: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', width: 10, height: 10, borderRadius: 9999, background: TEAL }} />
+          <div style={{ display: 'flex', fontSize: 23, color: MUTED, fontWeight: 400 }}>{item.pharmacy}</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginTop: 4 }}>
           {item.referencePrice ? (
-            <div style={{ display: 'flex', fontSize: 26, color: '#9aa0b0', textDecoration: 'line-through' }}>
+            <div style={{ display: 'flex', fontSize: 26, color: '#a6adc4', textDecoration: 'line-through' }}>
               {formatCOP(item.referencePrice)}
             </div>
           ) : null}
-          <div style={{ display: 'flex', fontSize: 40, fontWeight: 900, color: '#006e28' }}>
+          <div style={{ display: 'flex', fontSize: 42, fontWeight: 900, color: GREEN }}>
             {formatCOP(item.price)}
           </div>
         </div>
       </div>
 
+      {/* Insignia capsula con el degradado del logo, levemente inclinada */}
       <div
         style={{
           display: 'flex',
-          background: '#ef4444',
+          background: `linear-gradient(135deg, ${TEAL}, ${BLUE})`,
           color: '#ffffff',
-          fontSize: 36,
+          fontSize: 37,
           fontWeight: 900,
-          padding: '10px 20px',
-          borderRadius: 16,
+          padding: '14px 26px',
+          borderRadius: 9999,
           flexShrink: 0,
+          transform: 'rotate(-5deg)',
+          boxShadow: '0 8px 18px rgba(16,31,77,0.30)',
         }}
       >
         -{item.discount}%
@@ -189,7 +220,7 @@ export async function GET() {
     return new Response('Sin descuentos con foto hoy', { status: 404 })
   }
 
-  const fonts = await loadFonts()
+  const [fonts, logo] = await Promise.all([loadFonts(), loadLogo()])
 
   const image = new ImageResponse(
     (
@@ -199,33 +230,72 @@ export async function GET() {
           flexDirection: 'column',
           width: '100%',
           height: '100%',
-          background: 'linear-gradient(170deg, #eef4fd 0%, #ffffff 40%, #e9f7ee 100%)',
+          background: `linear-gradient(160deg, ${NAVY} 0%, #0c2f74 55%, ${BLUE} 130%)`,
           fontFamily: 'Hanken Grotesk',
-          padding: '52px 44px 40px',
+          padding: '54px 44px 42px',
+          position: 'relative',
         }}
       >
+        {/* Capsulas gigantes de ambiente, el motivo del logo cruzando el lienzo */}
+        <div
+          style={{
+            display: 'flex',
+            position: 'absolute',
+            width: 1100,
+            height: 1100,
+            borderRadius: 9999,
+            background: `radial-gradient(circle, ${TEAL} 0%, rgba(46,217,169,0) 60%)`,
+            opacity: 0.16,
+            top: -560,
+            left: -420,
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            position: 'absolute',
+            width: 1300,
+            height: 320,
+            borderRadius: 9999,
+            background: `linear-gradient(90deg, transparent, ${TEAL})`,
+            opacity: 0.10,
+            bottom: -40,
+            right: -380,
+            transform: 'rotate(24deg)',
+          }}
+        />
+
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', fontSize: 52, fontWeight: 900, color: '#0058bc' }}>Farmi</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
+            {logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logo} alt="" width={96} height={110} style={{ objectFit: 'contain' }} />
+            ) : null}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', fontSize: 56, fontWeight: 900, color: '#ffffff', lineHeight: 1.02 }}>
+                Descuentos
+              </div>
+              <div style={{ display: 'flex', fontSize: 56, fontWeight: 900, color: TEAL, lineHeight: 1.02 }}>
+                de hoy
+              </div>
+            </div>
+          </div>
           <div
             style={{
               display: 'flex',
               fontSize: 28,
-              color: '#0058bc',
-              background: 'rgba(0,88,188,0.08)',
-              border: '2px solid rgba(0,88,188,0.18)',
+              color: NAVY,
+              background: TEAL,
               borderRadius: 9999,
-              padding: '10px 26px',
+              padding: '12px 28px',
               fontWeight: 900,
             }}
           >
             {todayBogota()}
           </div>
         </div>
-        <div style={{ display: 'flex', fontSize: 58, fontWeight: 900, color: '#1a1b1f', marginTop: 6 }}>
-          Descuentos de hoy
-        </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center', gap: 22, marginTop: 26 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center', gap: 20, marginTop: 24 }}>
           {rows.map(({ item, img }) => (
             <Row key={item.id} item={item} img={img} />
           ))}
@@ -236,12 +306,24 @@ export async function GET() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 6,
-            marginTop: 24,
+            gap: 10,
+            marginTop: 26,
           }}
         >
-          <div style={{ display: 'flex', fontSize: 34, fontWeight: 900, color: '#0058bc' }}>www.farmi.com.co</div>
-          <div style={{ display: 'flex', fontSize: 22, color: '#717786' }}>
+          <div
+            style={{
+              display: 'flex',
+              background: '#ffffff',
+              color: NAVY,
+              fontSize: 34,
+              fontWeight: 900,
+              padding: '12px 40px',
+              borderRadius: 9999,
+            }}
+          >
+            www.farmi.com.co
+          </div>
+          <div style={{ display: 'flex', fontSize: 21, color: 'rgba(255,255,255,0.55)' }}>
             Precios referenciales tomados en línea de cada farmacia
           </div>
         </div>
