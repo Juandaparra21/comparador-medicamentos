@@ -33,7 +33,9 @@ relying on them; do not assume.
 - Maps: OpenStreetMap.
 - Pharmacies covered: Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olimpica,
   Farmacia Pasteur, Farmacenter (its online store is farmaexpress.com, by Coopidrogas),
-  Drogueria Alemana (its online store is tudrogueriavirtual.com, by Unidrogas).
+  Tu Drogueria Virtual (tudrogueriavirtual.com) — a shared UNIDROGAS storefront for
+  several allied drugstore banners (Alemana, Andina, Botica, Drogueria Inglesa...),
+  not a single chain; shown under its own name, not any one allied brand's name.
 - Routes in production: /, /cercanas, /carrito, /lista, /sobre-nosotros, /contacto, /terminos, /privacidad.
 
 Read these before editing, to confirm current reality instead of assuming:

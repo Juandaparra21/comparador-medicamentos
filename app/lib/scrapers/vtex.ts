@@ -4,9 +4,8 @@ import { withCache } from './cache'
 
 // Scraper generico para tiendas VTEX (misma API publica de catalogo que ya
 // usamos en Olimpica). Sirve para cualquier farmacia montada sobre VTEX: hoy
-// Farmacia Pasteur, Farmacenter (tienda online farmaexpress.com, el e-commerce
-// de Coopidrogas) y Drogueria Alemana (tienda online tudrogueriavirtual.com,
-// del grupo Unidrogas).
+// Farmacia Pasteur y Farmacenter (tienda online farmaexpress.com, el
+// e-commerce de Coopidrogas).
 interface VtexStore {
   /** id interno estable (se usa en cache y PHARMACY_NAMES) */
   pharmacyId: string
@@ -121,9 +120,13 @@ export const searchFarmacenter = createVtexScraper({
   base: 'https://www.farmaexpress.com',
 })
 
-// Drogueria Alemana (grupo Unidrogas) vende online a traves de
-// tudrogueriavirtual.com; el link de compra lleva alla.
-export const searchAlemana = createVtexScraper({
-  pharmacyId: 'alemana',
+// tudrogueriavirtual.com NO es la tienda propia de una sola cadena: es el
+// portal compartido de UNIDROGAS S.A.S, que agrupa varias marcas de droguerias
+// aliadas (Alemana, Andina, Botica, Drogueria Inglesa, Ahorro Droguerias...).
+// El copyright del sitio dice "Tu Drogueria Virtual UNIDROGAS S.A.S"; mostrar
+// estos precios como si fueran de una sola cadena (p.ej. "Drogueria Alemana")
+// seria inexacto, asi que la fuente se identifica con su propio nombre.
+export const searchTuDrogueriaVirtual = createVtexScraper({
+  pharmacyId: 'tudrogueria-virtual',
   base: 'https://www.tudrogueriavirtual.com',
 })

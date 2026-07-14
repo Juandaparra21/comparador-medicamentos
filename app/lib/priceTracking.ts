@@ -116,7 +116,7 @@ const PHARMACY_NAME_TO_ID: Record<string, string> = {
   'Cafam':                 'cafam',
   'Farmacia Pasteur':      'pasteur',
   'Farmacenter':           'farmacenter',
-  'Drogueria Alemana':     'alemana',
+  'Tu Drogueria Virtual':  'tudrogueria-virtual',
 }
 
 export async function harvestDiscounts(results: PharmacyResult[]): Promise<number> {

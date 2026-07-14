@@ -15,7 +15,7 @@ const PHARMACY_CONFIG: Record<string, Config> = {
   'Olimpica Drogueria':{ bg: '#6d28d9', abbr: 'OD', icon: 'text' },
   'Farmacia Pasteur': { bg: '#0a4f9e', abbr: 'FP', icon: 'cross' },
   'Farmacenter':      { bg: '#d81e2c', abbr: 'FC', icon: 'text' },
-  'Drogueria Alemana': { bg: '#000000', abbr: 'DA', icon: 'text' },
+  'Tu Drogueria Virtual': { bg: '#e5195a', abbr: 'TU', icon: 'text' },
 }
 
 function CrossSvg({ s }: { s: number }) {
@@ -50,7 +50,7 @@ const LOGO_FILES: Record<string, string> = {
   'Olimpica Drogueria':    'olimpica.png',
   'Farmacia Pasteur':      'pasteur.png',
   'Farmacenter':           'farmacenter.png',
-  'Drogueria Alemana':     'alemana.png',
+  'Tu Drogueria Virtual':  'tudrogueria-virtual.png',
 }
 
 interface Props {
