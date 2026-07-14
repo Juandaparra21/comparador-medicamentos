@@ -150,6 +150,122 @@ body {
   background: linear-gradient(135deg, #0070eb 0%, #4c4aca 100%);
 }
 
+/* ── Boton de vidrio ("glass button") ─────────────────────────────────
+   Adaptado de la tecnica de Petr Knoll (codepen.io/Petr-Knoll/pen/QwWLZdx):
+   destello diagonal + sombras internas en capas + anillo con barrido cónico
+   al pasar el mouse, para que un boton de accion se sienta tactil en vez
+   de un gradiente plano. Version de un solo elemento (sin los divs extra
+   del original) para poder agregarla con solo una clase sobre el boton/
+   enlace que ya existe, sin tocar el resto del marcado.
+   Requiere: position relative + overflow visible en el elemento (ya lo
+   trae .btn-glass) y que el TEXTO vaya envuelto en <span class="btn-glass-label">
+   para que el destello al pasar el mouse solo brille sobre el texto. */
+.btn-glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(-75deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.05)),
+    var(--btn-glass-tint, linear-gradient(135deg, #0070eb 0%, #4c4aca 100%));
+  box-shadow:
+    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.1),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.35),
+    0 0.35em 0.6em -0.2em rgba(0, 40, 90, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  transition: transform 350ms cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 350ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Anillo con barrido conico: mismo truco del original (conic-gradient
+   enmascarado a solo el borde via mask-composite: exclude). */
+.btn-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from -75deg at 50% 50%,
+      rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 25% 45%,
+      rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0) 65% 90%,
+      rgba(255, 255, 255, 0.7));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: background 500ms ease;
+}
+.btn-glass:hover {
+  transform: scale(0.975);
+  box-shadow:
+    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.12),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.45),
+    0 0.2em 0.4em -0.15em rgba(0, 40, 90, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.35) inset;
+}
+.btn-glass:active {
+  transform: scale(0.95);
+}
+.btn-glass:disabled {
+  transform: none;
+}
+/* Destello diagonal que recorre el texto al pasar el mouse (mix-blend
+   screen: solo aclara, nunca oscurece el texto blanco encima). */
+.btn-glass-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.btn-glass-label::after {
+  content: "";
+  position: absolute;
+  inset: -0.4em -0.6em;
+  background: linear-gradient(-45deg,
+      rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.7) 40% 50%, rgba(255, 255, 255, 0) 55%);
+  background-size: 220% 220%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: background-position 450ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+.btn-glass:hover .btn-glass-label::after {
+  background-position: 30% 50%;
+}
+.btn-glass:active .btn-glass-label::after {
+  background-position: 55% 20%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-glass, .btn-glass:hover, .btn-glass:active { transform: none; transition: none; }
+  .btn-glass-label::after { transition: none; }
+}
+
+/* Variante neutra (sobre tarjetas de vidrio claras: filas de farmacia,
+   botones secundarios) — vidrio blanco en vez del degradado de marca. */
+.btn-glass-neutral {
+  --btn-glass-tint: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.75));
+}
+
+/* Boton/pulsador circular pequeno (iconos: carrito, favoritos). Misma
+   sensacion de vidrio con menos capas, para que no se vea recargado a
+   32-36px. */
+.btn-glass-icon {
+  position: relative;
+  isolation: isolate;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 0.1em 0.1em rgba(0, 0, 0, 0.06),
+    inset 0 -0.1em 0.1em rgba(255, 255, 255, 0.5),
+    0 0.15em 0.3em -0.1em rgba(0, 40, 90, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: transform 250ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 250ms ease;
+}
+.btn-glass-icon:hover { transform: scale(1.08); }
+.btn-glass-icon:active { transform: scale(0.92); }
+@media (prefers-reduced-motion: reduce) {
+  .btn-glass-icon, .btn-glass-icon:hover, .btn-glass-icon:active { transform: none; transition: none; }
+}
+
 /* Entrada suave de tarjetas (usada por el diseno animado de referencia). */
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
@@ -199,18 +315,42 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 9999px;
-  background: #ffffff;
-  border: 3px solid var(--color-primary);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(-75deg, rgba(255, 255, 255, 0.4), #ffffff, rgba(255, 255, 255, 0.4));
+  border: 2px solid var(--color-primary);
+  box-shadow:
+    inset 0 0.1em 0.08em rgba(0, 0, 0, 0.06),
+    inset 0 -0.08em 0.08em rgba(255, 255, 255, 0.8),
+    0 2px 5px rgba(0, 40, 90, 0.3);
 }
 .qty-range::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 9999px;
-  background: #ffffff;
-  border: 3px solid var(--color-primary);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(-75deg, rgba(255, 255, 255, 0.4), #ffffff, rgba(255, 255, 255, 0.4));
+  border: 2px solid var(--color-primary);
+  box-shadow:
+    inset 0 0.1em 0.08em rgba(0, 0, 0, 0.06),
+    inset 0 -0.08em 0.08em rgba(255, 255, 255, 0.8),
+    0 2px 5px rgba(0, 40, 90, 0.3);
 }
+/* Riel de interruptor (deslizador claro/noche y similares): mismo lenguaje
+   de sombras en capas del boton de vidrio, en un riel en vez de un boton. */
+.switch-glass {
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    inset 0 0.1em 0.15em rgba(0, 0, 0, 0.12),
+    inset 0 -0.05em 0.1em rgba(255, 255, 255, 0.6);
+  transition: box-shadow 250ms ease, background 250ms ease;
+}
+.switch-glass-knob {
+  box-shadow:
+    inset 0 0.06em 0.06em rgba(255, 255, 255, 0.9),
+    0 0.1em 0.2em rgba(0, 40, 90, 0.25);
+}
+
 .qty-range:focus-visible {
   outline: none;
 }

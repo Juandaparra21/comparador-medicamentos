@@ -229,17 +229,19 @@ export default function ResultCard({ result, isCheapest, cheapestLabel = 'Mejor 
           }}
           className={`
             w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl
-            text-[13px] font-semibold transition-opacity
+            text-[13px] font-semibold
             ${result.availability === 'unavailable'
               ? 'bg-[#f0f1f5] text-[#717786] cursor-not-allowed'
-              : 'vitality-gradient text-white hover:opacity-90 cursor-pointer'
+              : 'btn-glass text-white cursor-pointer'
             }
           `}
         >
-          Comprar en {result.pharmacy}
-          <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clipRule="evenodd" />
-          </svg>
+          <span className="btn-glass-label gap-1.5">
+            Comprar en {result.pharmacy}
+            <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clipRule="evenodd" />
+            </svg>
+          </span>
         </a>
       </div>
     </article>

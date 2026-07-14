@@ -55,7 +55,7 @@ export function WishlistButton({ result }: Props) {
         onClick={toggle}
         disabled={pending}
         aria-label={saved ? 'Quitar de lista de deseos' : 'Agregar a lista de deseos'}
-        className={`w-8 h-8 flex items-center justify-center rounded-full transition-all cursor-pointer disabled:opacity-50 ${
+        className={`btn-glass-icon w-8 h-8 flex items-center justify-center rounded-full cursor-pointer disabled:opacity-50 ${
           saved
             ? 'text-red-500 bg-red-50'
             : 'text-[#c1c6d7] hover:text-red-400 hover:bg-red-50/60'

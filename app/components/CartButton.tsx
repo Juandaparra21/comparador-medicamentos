@@ -58,7 +58,7 @@ export function CartButton({ result }: Props) {
         disabled={pending}
         aria-label={inCart ? 'Quitar del carrito' : 'Agregar al carrito'}
         title={inCart ? 'Quitar del carrito' : 'Agregar al carrito'}
-        className={`w-8 h-8 flex items-center justify-center rounded-full transition-all cursor-pointer disabled:opacity-50 ${
+        className={`btn-glass-icon w-8 h-8 flex items-center justify-center rounded-full cursor-pointer disabled:opacity-50 ${
           inCart
             ? 'text-secondary bg-secondary/10'
             : 'text-[#c1c6d7] hover:text-secondary hover:bg-secondary/10'

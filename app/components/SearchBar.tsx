@@ -141,22 +141,24 @@ export function SearchBar({ initialValue = '', compact = false }: Props) {
           type="submit"
           disabled={!query.trim()}
           aria-label={t('search.button')}
-          className="m-1.5 px-4 sm:px-5 py-2.5 vitality-gradient text-white rounded-full shrink-0 flex items-center justify-center shadow-lg disabled:opacity-40 hover:opacity-90 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="btn-glass m-1.5 px-4 sm:px-5 py-2.5 text-white rounded-full shrink-0 flex items-center justify-center disabled:opacity-40 cursor-pointer"
         >
-          {fetching ? (
-            <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fillRule="evenodd"
-                d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                clipRule="evenodd"
-              />
-            </svg>
-          )}
+          <span className="btn-glass-label">
+            {fetching ? (
+              <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path
+                  fillRule="evenodd"
+                  d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </span>
         </button>
       </form>
 

@@ -44,11 +44,11 @@ export function ThemeToggle() {
       aria-checked={dark}
       aria-label={dark ? 'Cambiar a modo claro' : 'Cambiar a modo noche'}
       onClick={toggle}
-      className="relative h-[26px] w-[46px] shrink-0 rounded-full border border-white/60 bg-white/55 shadow-inner backdrop-blur-sm transition-colors cursor-pointer"
+      className="switch-glass relative h-[26px] w-[46px] shrink-0 rounded-full transition-colors cursor-pointer"
     >
       {/* Perilla deslizante con el icono del modo actual */}
       <span
-        className={`absolute top-[2px] left-[2px] flex h-[20px] w-[20px] items-center justify-center rounded-full shadow transition-transform duration-200 ${
+        className={`switch-glass-knob absolute top-[2px] left-[2px] flex h-[20px] w-[20px] items-center justify-center rounded-full transition-transform duration-200 ${
           mounted && dark ? 'translate-x-[20px] bg-[#1b2145] text-[#ffd76a]' : 'translate-x-0 bg-white text-[#f59e0b]'
         }`}
       >
