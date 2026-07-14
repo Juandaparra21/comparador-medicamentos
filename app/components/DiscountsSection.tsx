@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { formatCOP } from '@/app/utils/format'
-import { getDiscountPool } from '@/app/lib/discounts'
+import { getDiscountPool, isPriorityDiscount } from '@/app/lib/discounts'
 import { PharmacyLogo } from './PharmacyLogo'
 import { ProductThumbnail } from './ProductThumbnail'
 import type { PharmacyResult } from '@/app/types'
@@ -11,31 +11,61 @@ interface DiscountsData {
   updatedAt: string | null
 }
 
+// Deterministic shuffle: same order during the whole day (stable across the
+// hourly ISR regenerations), different order the next day.
+function seededShuffle<T>(items: T[], seed: number): T[] {
+  const arr = [...items]
+  let s = seed || 1
+  const rand = () => {
+    s = (s * 1664525 + 1013904223) % 4_294_967_296
+    return s / 4_294_967_296
+  }
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
 // The pool (search_results) is refreshed by every live search and by the daily
-// cron, across ALL pharmacies. Here we take the freshest slice, keep only
-// medication/personal-care items, and diversify: best offer of each pharmacy
-// first, so one aggressive source (e.g. Farmatodo) cannot monopolize the section.
+// cron, across ALL pharmacies. The featured picks rotate daily among the best
+// offers instead of always showing the single highest discount (long-running
+// promos made the section look frozen). Beauty/personal-care and easy-consumption
+// items go first, medications fill the rest. Max 2 cards per pharmacy so one
+// aggressive source cannot monopolize the section.
 async function getFeaturedDiscounts(): Promise<DiscountsData> {
   const empty: DiscountsData = { featured: [], topPharmacy: null, updatedAt: null }
   const pool = await getDiscountPool()
   if (pool.length === 0) return empty
 
-  // Best offer per pharmacy (pool is already discount-desc), then fill the
-  // remaining slots with the next highest discounts overall.
-  const bestPerPharmacy = new Map<string, PharmacyResult>()
-  for (const r of pool) {
-    if (!bestPerPharmacy.has(r.pharmacy)) bestPerPharmacy.set(r.pharmacy, r)
+  // Día en Bogotá como semilla: la selección cambia cada medianoche local.
+  const daySeed = Math.floor((Date.now() - 5 * 3_600_000) / 86_400_000)
+
+  // Candidatos: los mejores descuentos de cada grupo (el pool ya viene
+  // ordenado por descuento desc), barajados con la semilla del día.
+  const priority = pool.filter(isPriorityDiscount)
+  const rest = pool.filter((r) => !isPriorityDiscount(r))
+  const candidates = [
+    ...seededShuffle(priority.slice(0, 40), daySeed),
+    ...seededShuffle(rest.slice(0, 60), daySeed + 1),
+  ]
+
+  const featured: PharmacyResult[] = []
+  const chosen = new Set<string>()
+  const perPharmacy: Record<string, number> = {}
+  for (const r of candidates) {
+    if (featured.length >= 8) break
+    if (chosen.has(r.id) || (perPharmacy[r.pharmacy] ?? 0) >= 2) continue
+    featured.push(r)
+    chosen.add(r.id)
+    perPharmacy[r.pharmacy] = (perPharmacy[r.pharmacy] ?? 0) + 1
   }
-  const featured = [...bestPerPharmacy.values()]
-    .sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0))
-    .slice(0, 8)
-  if (featured.length < 8) {
-    const chosen = new Set(featured.map((r) => r.id))
-    for (const r of pool) {
-      if (featured.length >= 8) break
-      if (!chosen.has(r.id)) { featured.push(r); chosen.add(r.id) }
-    }
+  // Si el tope por farmacia dejó huecos (pocas fuentes con ofertas), rellenar.
+  for (const r of candidates) {
+    if (featured.length >= 8) break
+    if (!chosen.has(r.id)) { featured.push(r); chosen.add(r.id) }
   }
+  featured.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0))
 
   // Farmacia con más ofertas frescas en todo el pool
   const counts: Record<string, number> = {}

@@ -13,10 +13,24 @@ const PERSONAL_CARE_RE =
   /\b(maquillaje|labial|r[ií]mel|base de maquillaje|protector solar|bloqueador|shampoo|champ[uú]|jab[oó]n|perfume|colonia|esmalte|delineador|rubor|sombra|corrector|polvo compacto|desodorante)/i
 const NON_HEALTH_RE = /\b(papel|hoja|rice paper|toalla|cepillo|peine|bater[ií]a|pila|juguete)/i
 
+// Consumo facil: productos que se compran sin pensarlo mucho (vitaminas,
+// cuidado diario). Junto con belleza/cuidado personal, son la prioridad
+// editorial de la seccion de descuentos.
+// Ojo: "magnesio"/"zinc" sueltos NO sirven, son sales de medicamentos
+// (p. ej. "esomeprazol magnesio trihidrato"); se exige contexto de suplemento.
+const EASY_CONSUMPTION_RE =
+  /\b(vitamina|multivitam[ií]n|suplemento|col[aá]geno|omega\s?3|(citrato|cloruro|gluconato)\s+de\s+magnesio|crema dental|enjuague bucal|hidratante|humectante|exfoliante|mascarilla|s[eé]rum|acondicionador|tratamiento capilar|pa[ñn]itos|suero oral|electrolitos)/i
+
 export function isRelevantDiscount(r: { activeIngredient: string; productName: string }): boolean {
   const text = `${r.activeIngredient} ${r.productName}`
   if (NON_HEALTH_RE.test(text)) return false
-  return DOSAGE_FORM_RE.test(text) || PERSONAL_CARE_RE.test(text)
+  return DOSAGE_FORM_RE.test(text) || PERSONAL_CARE_RE.test(text) || EASY_CONSUMPTION_RE.test(text)
+}
+
+// Belleza/cuidado personal y consumo facil van primero en los destacados.
+export function isPriorityDiscount(r: { activeIngredient: string; productName: string }): boolean {
+  const text = `${r.activeIngredient} ${r.productName}`
+  return PERSONAL_CARE_RE.test(text) || EASY_CONSUMPTION_RE.test(text)
 }
 
 // The full fresh, relevant, discounted pool across all pharmacies (search_results
