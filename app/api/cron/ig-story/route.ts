@@ -137,6 +137,16 @@ export async function GET(req: NextRequest) {
         .upload(file, mp4, { contentType: 'video/mp4', upsert: true })
       if (error) throw new Error(`storage: ${error.message}`)
       videoUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/ig/${file}`
+
+      // Limpieza: solo se conserva el video del dia; los anteriores se borran
+      // para no acumular espacio. Si falla, no es motivo para no publicar.
+      try {
+        const { data: files } = await db.storage.from('ig').list()
+        const viejos = (files ?? []).map((f) => f.name).filter((n) => n !== file)
+        if (viejos.length) await db.storage.from('ig').remove(viejos)
+      } catch {
+        warnings.push('no se pudieron borrar videos anteriores')
+      }
     } catch (e) {
       warnings.push(`video: ${e instanceof Error ? e.message : e}`)
     }
