@@ -1,5 +1,11 @@
 import { ImageResponse } from 'next/og'
-import { getDiscountPool, selectDailyFeatured } from '@/app/lib/discounts'
+import {
+  getDiscountPool,
+  isPriorityDiscount,
+  isKnownOtcDiscount,
+  seededShuffle,
+  daySeed,
+} from '@/app/lib/discounts'
 import { formatCOP } from '@/app/utils/format'
 import type { PharmacyResult } from '@/app/types'
 
@@ -14,7 +20,7 @@ import type { PharmacyResult } from '@/app/types'
 export const maxDuration = 60
 
 const SLOTS = 7        // filas que caben en 1920px de alto
-const CANDIDATES = 16  // se piden de mas porque algunas fotos no descargan
+const CANDIDATES = 36  // se piden de mas porque bastantes fotos no descargan
 
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 
@@ -154,15 +160,31 @@ export async function GET() {
     return new Response('Sin descuentos frescos hoy', { status: 404 })
   }
 
-  // Se seleccionan mas candidatos de los que caben y se conservan solo los que
-  // tienen foto descargable, en el mismo orden (mayor descuento primero).
-  const candidates = selectDailyFeatured(pool, CANDIDATES)
+  // La historia solo lleva productos que la gente reconoce: primero consumo
+  // (jabones, geles, condones, colageno, vitaminas...), despues marcas de
+  // venta libre (Apronax, Dolex...). Los medicamentos de formula poco
+  // conocidos NO entran aunque tengan mas descuento; mejor menos filas que
+  // filas irreconocibles. Rotan a diario con la misma semilla de la portada.
+  const seed = daySeed()
+  const consumer = seededShuffle(pool.filter(isPriorityDiscount), seed)
+  const otc = seededShuffle(
+    pool.filter((r) => !isPriorityDiscount(r) && isKnownOtcDiscount(r)),
+    seed + 1,
+  )
+  const candidates = [...consumer, ...otc].slice(0, CANDIDATES)
+
+  // Se conservan solo los que tienen foto descargable, maximo 3 por farmacia.
   const fetched = await Promise.all(candidates.map((i) => toDataUri(i.imageUrl)))
   const rows: { item: PharmacyResult; img: string }[] = []
+  const perPharmacy: Record<string, number> = {}
   for (let i = 0; i < candidates.length && rows.length < SLOTS; i++) {
     const img = fetched[i]
-    if (img) rows.push({ item: candidates[i], img })
+    if (!img) continue
+    if ((perPharmacy[candidates[i].pharmacy] ?? 0) >= 3) continue
+    rows.push({ item: candidates[i], img })
+    perPharmacy[candidates[i].pharmacy] = (perPharmacy[candidates[i].pharmacy] ?? 0) + 1
   }
+  rows.sort((a, b) => (b.item.discount ?? 0) - (a.item.discount ?? 0))
   if (rows.length === 0) {
     return new Response('Sin descuentos con foto hoy', { status: 404 })
   }

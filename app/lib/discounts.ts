@@ -14,12 +14,23 @@ const PERSONAL_CARE_RE =
 const NON_HEALTH_RE = /\b(papel|hoja|rice paper|toalla|cepillo|peine|bater[ií]a|pila|juguete)/i
 
 // Consumo facil: productos que se compran sin pensarlo mucho (vitaminas,
-// cuidado diario). Junto con belleza/cuidado personal, son la prioridad
-// editorial de la seccion de descuentos.
+// cuidado diario, condones, cuidado de piel). Junto con belleza/cuidado
+// personal, son la prioridad editorial de la seccion de descuentos.
 // Ojo: "magnesio"/"zinc" sueltos NO sirven, son sales de medicamentos
 // (p. ej. "esomeprazol magnesio trihidrato"); se exige contexto de suplemento.
 const EASY_CONSUMPTION_RE =
-  /\b(vitamina|multivitam[ií]n|suplemento|col[aá]geno|omega\s?3|(citrato|cloruro|gluconato)\s+de\s+magnesio|crema dental|enjuague bucal|hidratante|humectante|exfoliante|mascarilla|s[eé]rum|acondicionador|tratamiento capilar|pa[ñn]itos|suero oral|electrolitos)/i
+  /\b(vitamina|multivitam[ií]n|suplemento|col[aá]geno|omega\s?3|(citrato|cloruro|gluconato)\s+de\s+magnesio|crema dental|enjuague bucal|hidratante|humectante|exfoliante|mascarilla|s[eé]rum|acondicionador|tratamiento capilar|pa[ñn]itos|suero oral|electrolitos|cond[oó]n|condones|preservativo|lubricante|gel antibacterial|alcohol antis[eé]ptico|repelente|pa[ñn]al|crema (corporal|facial|de manos)|locion|loci[oó]n|talco|curitas?|venditas?)/i
+
+// Marcas y genericos de venta libre que cualquiera reconoce en una historia
+// de Instagram. Es la segunda capa de la historia cuando no alcanzan los de
+// consumo; los medicamentos de formula poco conocidos no entran a la historia.
+const KNOWN_OTC_RE =
+  /\b(apronax|dolex|advil|aspirina|alka.?seltzer|acetaminof[eé]n|ibuprofeno|naproxeno|buscapina|noraver|vick|isodine|mylanta|milanta|sal de frutas|ensure|pediasure|pedialyte|smecta|gaseosol|acetaminofen)/i
+
+// Producto reconocible para publicar en redes: consumo facil o marca OTC.
+export function isKnownOtcDiscount(r: { activeIngredient: string; productName: string }): boolean {
+  return KNOWN_OTC_RE.test(`${r.activeIngredient} ${r.productName}`)
+}
 
 export function isRelevantDiscount(r: { activeIngredient: string; productName: string }): boolean {
   const text = `${r.activeIngredient} ${r.productName}`
@@ -58,7 +69,7 @@ export async function getDiscountPool(): Promise<(PharmacyResult & { lastUpdated
 
 // Deterministic shuffle: same order during the whole day (stable across the
 // hourly ISR regenerations), different order the next day.
-function seededShuffle<T>(items: T[], seed: number): T[] {
+export function seededShuffle<T>(items: T[], seed: number): T[] {
   const arr = [...items]
   let s = seed || 1
   const rand = () => {
