@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/app/lib/supabase/admin'
-import { snapshotQuery } from '@/app/lib/priceTracking'
+import { snapshotQuery, bogotaDay } from '@/app/lib/priceTracking'
 import { searchAllPharmacies } from '@/app/lib/scrapers'
-import { getAllMedicineSlugs, getMedicineInfo } from '@/app/utils/medicineInfo'
+import { getAllPriceEntries } from '@/app/utils/priceCatalog'
 import { normalize } from '@/app/utils/search'
 
 export const maxDuration = 60
 
-// Daily job (Vercel Cron): scrape the whole medicine catalog plus every
-// user-tracked medication and append today's real price point per pharmacy.
-// Builds the price-history repository (and refreshes the discounts pool as a
-// side effect of each scrape). No simulation.
+// Vercel Cron job: scrape the whole medicine catalog plus every user-tracked
+// medication and append today's real price point per pharmacy. Builds the
+// price-history repository (and refreshes the discounts pool as a side effect
+// of each scrape). No simulation.
 //
-// Time budget: each query fans out to 6 scrapers (~5-10s). Queries run ONE at
-// a time — same concurrency as a normal user search; parallel batches made the
-// sources throttle us and everything came back empty. Whatever doesn't fit in
-// the deadline is retried first tomorrow thanks to the rotating start offset,
-// and upserts make any partial run safe to repeat. Re-triggering within 10
-// minutes advances the frontier cheaply thanks to the scraper cache.
+// Time budget: each query fans out to the scrapers (~5-10s). Queries run ONE at
+// a time, same concurrency as a normal user search; parallel batches made the
+// sources throttle us and everything came back empty.
+//
+// Several runs a day (see vercel.json): each takes the stalest medications
+// first and skips those already snapshotted today (see buildQueue), so the
+// runs add up to a full daily pass. Upserts make any partial run safe to repeat.
 const DEADLINE_MS = 45_000
 
 export async function GET(req: NextRequest) {
@@ -55,38 +56,83 @@ export async function GET(req: NextRequest) {
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
 
   // Catalog ingredients (the /precio pages) + user-tracked queries, deduped.
-  const catalogMeds = getAllMedicineSlugs()
-    .map((slug) => getMedicineInfo(slug))
-    .filter((m): m is NonNullable<typeof m> => m !== null)
+  const catalogMeds = getAllPriceEntries()
 
   // price_snapshots.query tiene FK hacia tracked_medications(query): sin este
   // registro previo, el upsert del snapshot falla para todo el catalogo.
   await db.from('tracked_medications').upsert(
-    catalogMeds.map((m) => ({ query: normalize(m.activeIngredient), label: m.activeIngredient })),
+    catalogMeds.map((m) => ({ query: m.query, label: m.activeIngredient })),
     { onConflict: 'query', ignoreDuplicates: true },
   )
 
-  const catalog = catalogMeds.map((m) => normalize(m.activeIngredient))
+  const catalog = catalogMeds.map((m) => m.query)
   const trackedQueries = (tracked ?? []).map((r) => r.query as string)
   const all = [...new Set([...catalog, ...trackedQueries])]
 
-  // Rotate the starting point daily so a timeout never starves the same tail.
-  const dayNumber = Math.floor(Date.now() / 86_400_000)
-  const offset = all.length ? dayNumber % all.length : 0
-  const ordered = [...all.slice(offset), ...all.slice(0, offset)]
+  const ordered = await buildQueue(db, all)
 
   const results: { query: string; points: number; error?: string }[] = []
   for (const query of ordered) {
     if (Date.now() - started > DEADLINE_MS) break
+    // Marcar el intento ANTES de raspar: si falla o se agota el tiempo, la
+    // siguiente ejecucion del dia pasa al siguiente en vez de repetir este.
+    await db
+      .from('tracked_medications')
+      .update({ last_attempt_at: new Date().toISOString() })
+      .eq('query', query)
     const outcome = await snapshotQuery(query)
     results.push({ query, ...outcome })
   }
 
   return NextResponse.json({
     ok: true,
-    total: ordered.length,
+    total: all.length,
+    pending: ordered.length,
     done: results.length,
     ms: Date.now() - started,
     results,
   })
+}
+
+// Cola del dia: excluye lo que ya tiene snapshot con fecha de hoy (Bogota) y
+// ordena el resto por el intento mas viejo primero (nunca intentados de
+// primeros). Como vercel.json dispara esta ruta varias veces al dia, cada
+// ejecucion continua donde quedo la anterior sin repetir trabajo.
+//
+// Si la columna last_attempt_at aun no existe (migracion 0007 sin aplicar),
+// cae al orden por last_snapshot_at, que sigue siendo mejor que el orden fijo.
+async function buildQueue(
+  db: NonNullable<ReturnType<typeof getAdminClient>>,
+  all: string[],
+): Promise<string[]> {
+  const todayStartUtc = `${bogotaDay()}T05:00:00.000Z`
+  const wanted = new Set(all)
+
+  let rows: { query: string; last_snapshot_at: string | null; last_attempt_at?: string | null }[] | null = null
+  const withAttempt = await db
+    .from('tracked_medications')
+    .select('query, last_snapshot_at, last_attempt_at')
+  if (!withAttempt.error) {
+    rows = withAttempt.data
+  } else {
+    const legacy = await db.from('tracked_medications').select('query, last_snapshot_at')
+    rows = legacy.data
+  }
+
+  const info = new Map((rows ?? []).map((r) => [r.query, r]))
+  const ts = (v: string | null | undefined) => (v ? Date.parse(v) : 0)
+
+  return all
+    .filter((q) => wanted.has(q))
+    .filter((q) => {
+      const last = info.get(q)?.last_snapshot_at
+      return !last || last < todayStartUtc
+    })
+    .sort((a, b) => {
+      const ra = info.get(a)
+      const rb = info.get(b)
+      const ka = ts(ra?.last_attempt_at ?? ra?.last_snapshot_at)
+      const kb = ts(rb?.last_attempt_at ?? rb?.last_snapshot_at)
+      return ka - kb
+    })
 }

@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { SearchBar } from '@/app/components/SearchBar'
 import { PopularMeds } from '@/app/components/PopularMeds'
 import { SITE_URL } from '@/app/lib/siteUrl'
+import { getAllPriceEntries } from '@/app/utils/priceCatalog'
+import { getAllMedicineSlugs } from '@/app/utils/medicineInfo'
 
 // Página pilar del cluster "medicamentos baratos / económicos / a bajo precio".
 // Una sola página fuerte para todos los sinónimos (Google los agrupa como una
@@ -66,6 +68,11 @@ export default function MedicamentosBaratosPage() {
     ],
   }
 
+  const popular = new Set(getAllMedicineSlugs())
+  const moreMeds = getAllPriceEntries()
+    .filter((e) => !popular.has(e.slug))
+    .sort((a, b) => a.activeIngredient.localeCompare(b.activeIngredient, 'es'))
+
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-5 py-8 sm:py-12 space-y-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -86,7 +93,7 @@ export default function MedicamentosBaratosPage() {
           Conseguir medicamentos económicos en Colombia no depende de la suerte ni de recorrer
           droguerías: depende de comparar. El mismo medicamento puede costar el doble en una farmacia
           que en otra, y el genérico suele valer bastante menos que el de marca con el mismo principio
-          activo. Busca el tuyo y mira el precio real en las 8 farmacias principales del país al mismo tiempo.
+          activo. Busca el tuyo y mira el precio real en las principales farmacias del país al mismo tiempo.
         </p>
         <div className="mt-5">
           <SearchBar />
@@ -145,6 +152,21 @@ export default function MedicamentosBaratosPage() {
 
       {/* Enlaces a todas las páginas /precio (mismo componente del home) */}
       <PopularMeds />
+
+      {/* Resto del catalogo /precio: enlaces internos para que cada pagina
+          tenga al menos un enlace entrante desde una pagina indexada. */}
+      {moreMeds.length > 0 && (
+        <section className={`${CARD} p-5 sm:p-6`}>
+          <h2 className="text-[18px] font-bold text-[#1a1b1f] mb-3">Más medicamentos para comparar</h2>
+          <div className="flex flex-wrap gap-2">
+            {moreMeds.map((m) => (
+              <Link key={m.slug} href={`/precio/${m.slug}`} className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 border border-[#c1c6d7]/50 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">
+                {m.activeIngredient}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* FAQ */}
       <section className={`${CARD} p-5 sm:p-6`}>

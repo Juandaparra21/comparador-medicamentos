@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAllMedicineSlugs } from '@/app/utils/medicineInfo'
+import { getAllPriceSlugs } from '@/app/utils/priceCatalog'
 import { SITE_URL } from '@/app/lib/siteUrl'
 
 export const maxDuration = 15
@@ -13,7 +13,7 @@ const INDEXNOW_KEY = 'e22f7cf2c619462418842fae5483edc0'
 // these into Bing/Yandex (and DuckDuckGo/Ecosia) almost immediately. Google does
 // not use IndexNow — that still goes through Search Console.
 function allUrls(): string[] {
-  const slugs = getAllMedicineSlugs()
+  const slugs = getAllPriceSlugs()
   const staticRoutes = ['/', '/cercanas', '/sobre-nosotros', '/contacto', '/terminos', '/privacidad']
   const precio = slugs.map((s) => `/precio/${s}`)
   // /medicamento/[slug] is omitted on purpose: it now 308-redirects to /precio, so it
