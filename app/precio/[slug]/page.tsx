@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { getMedicineInfo, getAllMedicineSlugs } from '@/app/utils/medicineInfo'
-import { normalize } from '@/app/utils/search'
+import { cache } from 'react'
+import { getPriceEntry, getAllPriceSlugs, getRelatedEntries } from '@/app/utils/priceCatalog'
 import { LivePriceCompare } from '@/app/components/LivePriceCompare'
 import { getLatestSnapshot } from '@/app/lib/priceTracking'
 import { SITE_URL } from '@/app/lib/siteUrl'
@@ -14,8 +14,11 @@ interface Props {
 // One transactional "precio de <medicamento> en Colombia" page per medication,
 // pre-rendered at build time so crawlers get static HTML.
 export function generateStaticParams() {
-  return getAllMedicineSlugs().map((slug) => ({ slug }))
+  return getAllPriceSlugs().map((slug) => ({ slug }))
 }
+
+// Metadata y pagina leen el mismo snapshot: una sola consulta por render.
+const latestSnapshot = cache((query: string) => getLatestSnapshot(query))
 
 // Regenera la página cada 6 horas: así el HTML estático que ve Google incluye
 // los precios del snapshot diario más reciente, con su fecha.
@@ -23,18 +26,27 @@ export const revalidate = 21600
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const info = getMedicineInfo(slug)
+  const info = getPriceEntry(slug)
   if (!info) return { title: 'Precio de medicamentos' }
 
   const ing = info.activeIngredient
-  const title = `Precio de ${ing} en Colombia: dónde está más barato`
-  const description = `Compara el precio de ${ing.toLowerCase()} en La Rebaja, Cruz Verde, Farmatodo, Colsubsidio, Cafam, Olimpica, Pasteur y Farmacenter. Encuentra hoy la farmacia más barata en Colombia.`
+  const brand = info.brands?.[0]
+  const title = brand
+    ? `Precio de ${ing} (${brand}) en Colombia: dónde está más barato`
+    : `Precio de ${ing} en Colombia: dónde está más barato`
+  const description = `Compara el precio de ${ing.toLowerCase()}${brand ? ` (${info.brands!.join(', ')})` : ''} en La Rebaja, Cruz Verde, Farmatodo, Colsubsidio, Cafam, Olimpica, Pasteur y Farmacenter. Encuentra hoy la farmacia más barata en Colombia.`
   const canonical = `/precio/${slug}`
+
+  // Sin precios guardados la pagina seria contenido delgado: no se indexa
+  // hasta que el cron de snapshot guarde el primero (y entre al sitemap).
+  const snapshot = await latestSnapshot(info.query)
+  const hasPrices = (snapshot?.rows.length ?? 0) > 0
 
   return {
     title,
     description,
     alternates: { canonical },
+    robots: hasPrices ? undefined : { index: false, follow: true },
     openGraph: {
       type: 'website',
       title: `${title} | Farmi`,
@@ -49,23 +61,22 @@ const CARD = 'glass-card rounded-2xl'
 
 export default async function PrecioPage({ params }: Props) {
   const { slug } = await params
-  const info = getMedicineInfo(slug)
+  const info = getPriceEntry(slug)
   if (!info) notFound()
 
   const ing = info.activeIngredient
   // Lowercased for natural mid-sentence use ("el precio de acetaminofén...").
   const lc = ing.charAt(0).toLowerCase() + ing.slice(1)
-  const otc = !info.requiresPrescription
+  // true = requiere formula; false = venta libre (solo fichas completas);
+  // undefined = no se afirma nada.
+  const rx = info.requiresPrescription
+  const brands = info.brands ?? []
 
   // Último registro diario real: se renderiza en el servidor para que los
   // buscadores indexen precios con fecha; el cliente luego actualiza en vivo.
-  const snapshot = await getLatestSnapshot(normalize(ing))
+  const snapshot = await latestSnapshot(info.query)
 
-  const related = getAllMedicineSlugs()
-    .filter((s) => s !== slug)
-    .map((s) => getMedicineInfo(s))
-    .filter((m): m is NonNullable<typeof m> => m !== null)
-    .slice(0, 4)
+  const related = getRelatedEntries(slug, 6)
 
   const faqs = [
     {
@@ -80,15 +91,24 @@ export default async function PrecioPage({ params }: Props) {
       q: `¿El genérico de ${lc} es más barato que el de marca?`,
       a: `Sí. El genérico tiene el mismo principio activo, la misma dosis y la misma forma que el de marca, está regulado por el INVIMA y suele costar bastante menos. En Farmi ves ambos lado a lado para que decidas según tu presupuesto.`,
     },
-    otc
+    rx === false
       ? {
           q: `¿${ing} necesita fórmula médica en Colombia?`,
           a: `${ing} es de venta libre para molestias leves, así que puedes compararlo y comprarlo sin receta. Si los síntomas persisten o son fuertes, consulta a un médico o químico farmacéutico.`,
         }
-      : {
-          q: `¿${ing} necesita fórmula médica en Colombia?`,
-          a: `Sí. ${ing} se vende bajo fórmula médica; su compra y dispensación requieren la prescripción de un profesional de salud. Aun así puedes comparar precios en Farmi para pagar menos cuando lo compres.`,
-        },
+      : rx === true
+        ? {
+            q: `¿${ing} necesita fórmula médica en Colombia?`,
+            a: `Sí. ${ing} se vende bajo fórmula médica; su compra y dispensación requieren la prescripción de un profesional de salud. Aun así puedes comparar precios en Farmi para pagar menos cuando lo compres.`,
+          }
+        : {
+            q: `¿${ing} necesita fórmula médica en Colombia?`,
+            a: `Depende de la presentación y de la concentración. Revisa el empaque o pregunta en la farmacia antes de comprar, y consulta a un médico o químico farmacéutico si tienes dudas. En Farmi puedes comparar el precio en cualquier caso.`,
+          },
+    ...brands.map((b) => ({
+      q: `¿${b} y ${lc} son lo mismo?`,
+      a: `${b} es una marca comercial que contiene ${lc} como principio activo. Puede haber otras marcas o genéricos con el mismo principio activo; su precio y su presentación varían. Si tu fórmula dice ${b}, consulta con tu médico o químico farmacéutico antes de cambiar de producto.`,
+    })),
     {
       q: `¿Los precios de ${lc} en Farmi están actualizados?`,
       a: `Sí. Consultamos el precio directamente en el sitio de cada farmacia cuando haces la búsqueda, así que ves valores en tiempo real y no listas viejas. Los precios son de referencia y pueden variar por sede y promociones.`,
@@ -155,14 +175,14 @@ export default async function PrecioPage({ params }: Props) {
           Precio de {ing} en Colombia
         </h1>
         <p className="text-[15px] sm:text-[16px] text-[#414755] leading-relaxed mt-3">
-          El precio de {lc} en Colombia cambia según la farmacia, la presentación y si compras el
+          El precio de {lc}{brands.length > 0 ? ` (${brands.join(', ')})` : ''} en Colombia cambia según la farmacia, la presentación y si compras el
           genérico o el de marca. En vez de llamar o recorrer droguerías, aquí comparas el valor real
           de {lc} en las principales farmacias del país y encuentras, en segundos, dónde está más barato.
         </p>
       </header>
 
       {/* Comparador en vivo (precios reales), sembrado con el último snapshot */}
-      <LivePriceCompare query={normalize(ing)} ingredient={ing} initial={snapshot} />
+      <LivePriceCompare query={info.query} ingredient={ing} initial={snapshot} />
 
       {/* ¿Cuánto cuesta? */}
       <section className={`${CARD} p-5 sm:p-6`}>
@@ -175,9 +195,11 @@ export default async function PrecioPage({ params }: Props) {
           valor actual en varias farmacias al mismo tiempo, que es justo lo que hace Farmi.
         </p>
         <p className="text-[14px] text-[#414755] leading-relaxed mt-3">
-          {ing} pertenece al grupo de {info.therapeuticClass.toLowerCase()} y {otc
+          {ing} pertenece al grupo de {info.therapeuticClass.toLowerCase()} y {rx === false
             ? 'es de venta libre, así que puedes compararlo y comprarlo sin fórmula médica'
-            : 'se vende bajo fórmula médica, así que necesitarás la receta para comprarlo'}. En el comparador de arriba
+            : rx === true
+              ? 'se vende bajo fórmula médica, así que necesitarás la receta para comprarlo'
+              : 'algunas presentaciones pueden requerir fórmula médica, así que revisa antes de comprar'}. En el comparador de arriba
           verás el precio más bajo disponible por farmacia en este momento, con la opción más económica marcada como la
           más barata.
         </p>
@@ -231,10 +253,10 @@ export default async function PrecioPage({ params }: Props) {
         <h2 className="text-[18px] font-bold text-[#1a1b1f] mb-3">Cómo comprar {lc} más barato</h2>
         <ol className="space-y-3">
           {[
-            ['Compara antes de comprar', `Busca ${lc} en Farmi y mira el precio en las 8 farmacias a la vez. La diferencia entre la más cara y la más barata puede ser importante.`],
+            ['Compara antes de comprar', `Busca ${lc} en Farmi y mira el precio en todas las farmacias a la vez. La diferencia entre la más cara y la más barata puede ser importante.`],
             ['Revisa el genérico', 'Si tu tratamiento lo permite, el genérico casi siempre es la opción más económica con el mismo principio activo.'],
             ['Mira el precio por unidad', 'A veces una caja más grande cuesta más en total pero menos por tableta. Compara el precio por unidad, no solo el total.'],
-            otc
+            rx !== true
               ? ['Aprovecha las promociones', 'Los precios cambian. Puedes activar una alerta en Farmi para que te avisemos cuando baje el precio.']
               : ['Ten a mano tu fórmula', `${ing} requiere receta médica. Ten tu fórmula lista y compara antes para pagar menos al comprarlo.`],
           ].map(([t, d], i) => (
@@ -256,7 +278,7 @@ export default async function PrecioPage({ params }: Props) {
           <Link href={`/buscar?q=${encodeURIComponent(ing)}`} className="text-[13px] font-semibold px-4 py-2 rounded-xl vitality-gradient text-white hover:opacity-90 transition-opacity">
             Comparar precios de {ing}
           </Link>
-          <Link href={`/historial/${slug}`} className="text-[13px] font-semibold px-4 py-2 rounded-lg border border-[#c1c6d7]/60 bg-white/60 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">
+          <Link href={`/historial/${encodeURIComponent(info.query)}`} className="text-[13px] font-semibold px-4 py-2 rounded-lg border border-[#c1c6d7]/60 bg-white/60 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">
             Historial de precios
           </Link>
         </div>
