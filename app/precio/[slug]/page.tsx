@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { cache } from 'react'
-import { getPriceEntry, getAllPriceSlugs, getRelatedEntries } from '@/app/utils/priceCatalog'
+import { getPriceEntry, getAllPriceSlugs, getRelatedEntries, getBrandEntries, type PriceEntry } from '@/app/utils/priceCatalog'
 import { LivePriceCompare } from '@/app/components/LivePriceCompare'
 import { getLatestSnapshot } from '@/app/lib/priceTracking'
 import { SITE_URL } from '@/app/lib/siteUrl'
@@ -30,11 +30,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!info) return { title: 'Precio de medicamentos' }
 
   const ing = info.activeIngredient
-  const brand = info.brands?.[0]
-  const title = brand
-    ? `Precio de ${ing} (${brand}) en Colombia: dónde está más barato`
-    : `Precio de ${ing} en Colombia: dónde está más barato`
-  const description = `Compara el precio de ${ing.toLowerCase()}${brand ? ` (${info.brands!.join(', ')})` : ''} en La Rebaja, Cruz Verde, Farmatodo, Colsubsidio, Cafam, Olimpica, Pasteur y Farmacenter. Encuentra hoy la farmacia más barata en Colombia.`
+  const brand = info.brandName ?? info.brands?.[0]
+  const title = info.brandName
+    ? `Precio de ${info.brandName} en Colombia: dónde está más barato`
+    : brand
+      ? `Precio de ${ing} (${brand}) en Colombia: dónde está más barato`
+      : `Precio de ${ing} en Colombia: dónde está más barato`
+  const description = info.brandName
+    ? `Compara el precio de ${info.brandName} (${ing.toLowerCase()}) en La Rebaja, Cruz Verde, Farmatodo, Colsubsidio, Cafam, Olimpica, Pasteur y Farmacenter. Encuentra hoy dónde está más barato en Colombia.`
+    : `Compara el precio de ${ing.toLowerCase()}${brand ? ` (${info.brands!.join(', ')})` : ''} en La Rebaja, Cruz Verde, Farmatodo, Colsubsidio, Cafam, Olimpica, Pasteur y Farmacenter. Encuentra hoy la farmacia más barata en Colombia.`
   const canonical = `/precio/${slug}`
 
   // Sin precios guardados la pagina seria contenido delgado: no se indexa
@@ -63,6 +67,7 @@ export default async function PrecioPage({ params }: Props) {
   const { slug } = await params
   const info = getPriceEntry(slug)
   if (!info) notFound()
+  if (info.brandName) return <BrandPrecioPage info={info} />
 
   const ing = info.activeIngredient
   // Lowercased for natural mid-sentence use ("el precio de acetaminofén...").
@@ -77,6 +82,7 @@ export default async function PrecioPage({ params }: Props) {
   const snapshot = await latestSnapshot(info.query)
 
   const related = getRelatedEntries(slug, 6)
+  const brandPages = getBrandEntries(slug)
 
   const faqs = [
     {
@@ -282,6 +288,18 @@ export default async function PrecioPage({ params }: Props) {
             Historial de precios
           </Link>
         </div>
+        {brandPages.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-[#f0f1f5]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#9ca3af] mb-2">Precio por marca</p>
+            <div className="flex flex-wrap gap-2">
+              {brandPages.map((b) => (
+                <Link key={b.slug} href={`/precio/${b.slug}`} className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 border border-[#c1c6d7]/50 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">
+                  Precio de {b.brandName}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
         {related.length > 0 && (
           <div className="mt-4 pt-4 border-t border-[#f0f1f5]">
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#9ca3af] mb-2">Precios de otros medicamentos</p>
@@ -319,6 +337,170 @@ export default async function PrecioPage({ params }: Props) {
         Farmi es un comparador de precios independiente, no una farmacia: no vende ni dispensa medicamentos y te
         redirige al sitio de cada farmacia para comprar. Los precios son de referencia y pueden variar. La información
         sobre {lc} es educativa y no reemplaza la consulta con un médico o químico farmacéutico.{' '}
+        <Link href="/terminos" className="underline hover:text-[#717786] transition-colors">Ver condiciones</Link>.
+      </p>
+    </div>
+  )
+}
+
+// Pagina de marca ("Precio de Ozempic en Colombia"): compara ESA marca entre
+// farmacias y lleva a la pagina del principio activo para ver genericos y otras
+// marcas. Sin afirmaciones medicas: solo que la marca contiene el principio
+// activo, que es un dato del registro sanitario.
+async function BrandPrecioPage({ info }: { info: PriceEntry }) {
+  const brand = info.brandName!
+  const ing = info.activeIngredient
+  const lc = ing.charAt(0).toLowerCase() + ing.slice(1)
+  const rx = info.requiresPrescription
+  const ingredientSlug = info.ingredientSlug!
+  const siblings = getBrandEntries(ingredientSlug).filter((b) => b.slug !== info.slug)
+  const snapshot = await latestSnapshot(info.query)
+
+  const faqs = [
+    {
+      q: `¿Cuánto cuesta ${brand} en Colombia?`,
+      a: `El precio de ${brand} cambia según la presentación y la farmacia. No hay un precio único: Farmi consulta el valor real en cada farmacia y te muestra dónde está más barato hoy.`,
+    },
+    {
+      q: `¿Dónde comprar ${brand} más barato?`,
+      a: `Compara el precio de ${brand} en Drogas La Rebaja, Cruz Verde, Colsubsidio, Farmatodo, Cafam, Olímpica, Farmacia Pasteur y Farmacenter desde una sola búsqueda en Farmi, y luego ve directo a la farmacia con el mejor precio.`,
+    },
+    {
+      q: `¿${brand} y ${lc} son lo mismo?`,
+      a: `${brand} es una marca comercial que contiene ${lc} como principio activo. Puede haber otras marcas o genéricos con el mismo principio activo, con otro precio y otra presentación. Si tu fórmula dice ${brand}, consulta con tu médico o químico farmacéutico antes de cambiar de producto.`,
+    },
+    rx === true
+      ? {
+          q: `¿${brand} necesita fórmula médica?`,
+          a: `Sí. ${brand} contiene ${lc}, que se vende bajo fórmula médica. Aun así puedes comparar precios en Farmi para pagar menos cuando lo compres.`,
+        }
+      : {
+          q: `¿${brand} necesita fórmula médica?`,
+          a: `Depende de la presentación y de la concentración. Revisa el empaque o pregunta en la farmacia antes de comprar, y consulta a un médico o químico farmacéutico si tienes dudas.`,
+        },
+    {
+      q: `¿Los precios de ${brand} en Farmi están actualizados?`,
+      a: `Sí. Consultamos el precio directamente en el sitio de cada farmacia, así que ves valores en tiempo real y no listas viejas. Los precios son de referencia y pueden variar por sede y promociones.`,
+    },
+  ]
+
+  const offerPrices = (snapshot?.rows ?? []).map((r) => r.price).filter((p) => p > 0)
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      ...(offerPrices.length > 0
+        ? [
+            {
+              '@type': 'Product',
+              name: brand,
+              brand: { '@type': 'Brand', name: brand },
+              description: `Comparación de precios de ${brand} (${lc}) en las principales farmacias de Colombia.`,
+              url: `${SITE_URL}/precio/${info.slug}`,
+              offers: {
+                '@type': 'AggregateOffer',
+                priceCurrency: 'COP',
+                lowPrice: Math.min(...offerPrices),
+                highPrice: Math.max(...offerPrices),
+                offerCount: offerPrices.length,
+                availability: 'https://schema.org/InStock',
+              },
+            },
+          ]
+        : []),
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: `Precio de ${ing}`, item: `${SITE_URL}/precio/${ingredientSlug}` },
+          { '@type': 'ListItem', position: 3, name: `Precio de ${brand}`, item: `${SITE_URL}/precio/${info.slug}` },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+    ],
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 sm:px-5 py-8 sm:py-12 space-y-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+      <nav className="flex items-center gap-2 text-[12px] text-[#717786] flex-wrap" aria-label="Ruta de navegación">
+        <Link href="/" className="hover:text-primary transition-colors">Inicio</Link>
+        <span>/</span>
+        <Link href={`/precio/${ingredientSlug}`} className="hover:text-primary transition-colors">{ing}</Link>
+        <span>/</span>
+        <span className="text-[#1a1b1f] font-medium">{brand}</span>
+      </nav>
+
+      <header>
+        <h1 className="text-[28px] sm:text-[36px] font-bold text-[#1a1b1f] tracking-tight leading-tight">
+          Precio de {brand} en Colombia
+        </h1>
+        <p className="text-[15px] sm:text-[16px] text-[#414755] leading-relaxed mt-3">
+          {brand} es una marca comercial que contiene {lc}. Su precio cambia según la farmacia y la
+          presentación. Aquí comparas el valor real de {brand} en las principales farmacias del país y
+          ves, en segundos, dónde está más barato.
+        </p>
+      </header>
+
+      <LivePriceCompare query={info.query} ingredient={brand} initial={snapshot} />
+
+      <section className={`${CARD} p-5 sm:p-6`}>
+        <h2 className="text-[18px] font-bold text-[#1a1b1f] mb-3">Otras opciones con {lc}</h2>
+        <p className="text-[14px] text-[#414755] leading-relaxed">
+          Además de {brand}, puede haber otras marcas o genéricos con el mismo principio activo, a otro
+          precio. Compáralos todos en la página de {lc}. Si tu fórmula indica {brand}, consulta con tu
+          médico o químico farmacéutico antes de cambiar de producto.
+        </p>
+        <div className="flex flex-wrap gap-2.5 mt-4">
+          <Link href={`/precio/${ingredientSlug}`} className="text-[13px] font-semibold px-4 py-2 rounded-xl vitality-gradient text-white hover:opacity-90 transition-opacity">
+            Ver precios de {ing}
+          </Link>
+          <Link href={`/historial/${encodeURIComponent(info.query)}`} className="text-[13px] font-semibold px-4 py-2 rounded-lg border border-[#c1c6d7]/60 bg-white/60 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">
+            Historial de precios de {brand}
+          </Link>
+        </div>
+        {siblings.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-[#f0f1f5]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#9ca3af] mb-2">Otras marcas con {lc}</p>
+            <div className="flex flex-wrap gap-2">
+              {siblings.map((b) => (
+                <Link key={b.slug} href={`/precio/${b.slug}`} className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white/60 border border-[#c1c6d7]/50 text-[#414755] hover:text-primary hover:border-primary/30 transition-all">
+                  Precio de {b.brandName}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      <section className={`${CARD} p-5 sm:p-6`}>
+        <h2 className="text-[18px] font-bold text-[#1a1b1f] mb-3">Preguntas frecuentes sobre el precio de {brand}</h2>
+        <div className="flex flex-col">
+          {faqs.map((f) => (
+            <details key={f.q} className="group border-b border-[#f0f1f5] last:border-0">
+              <summary className="flex items-center justify-between gap-3 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <span className="text-[13px] sm:text-[14px] font-semibold text-[#1a1b1f]">{f.q}</span>
+                <svg className="w-4 h-4 text-[#9ca3af] shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clipRule="evenodd" />
+                </svg>
+              </summary>
+              <p className="text-[13px] text-[#6e6e73] leading-relaxed pb-3 -mt-0.5">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <p className="text-[11px] text-[#c1c6d7] leading-relaxed">
+        Farmi es un comparador de precios independiente, no una farmacia: no vende ni dispensa medicamentos y te
+        redirige al sitio de cada farmacia para comprar. No está afiliado a {brand} ni a su fabricante. Los precios son
+        de referencia y pueden variar. Esta información no reemplaza la consulta con un médico o químico farmacéutico.{' '}
         <Link href="/terminos" className="underline hover:text-[#717786] transition-colors">Ver condiciones</Link>.
       </p>
     </div>

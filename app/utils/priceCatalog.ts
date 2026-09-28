@@ -32,6 +32,10 @@ export interface PriceEntry {
   requiresPrescription?: boolean
   /** Marcas comerciales que contienen este principio activo. */
   brands?: string[]
+  /** Solo en paginas de marca: nombre comercial ("Ozempic"). */
+  brandName?: string
+  /** Solo en paginas de marca: slug de la pagina del principio activo. */
+  ingredientSlug?: string
 }
 
 type Extra = Omit<PriceEntry, 'query'> & { query?: string }
@@ -141,6 +145,51 @@ const EXTRA_ENTRIES: Extra[] = [
   { slug: 'tadalafil', activeIngredient: 'Tadalafil', therapeuticClass: 'Inhibidor de la fosfodiesterasa-5 (PDE5)', brands: ['Cialis'] },
 ]
 
+// Paginas por marca comercial. La gente busca "precio Dolex" u "Ozempic
+// Colombia" mucho mas que el principio activo. Cada una raspa el nombre de la
+// marca (compara ESA marca entre farmacias) y enlaza a la pagina del principio
+// activo, donde estan los genericos y otras marcas.
+//
+// Reglas: solo marcas que contienen ese principio activo como unico activo
+// (sin combinaciones) y cuyo principio activo ya tiene pagina en el catalogo.
+const BRAND_ENTRIES: { brand: string; ingredientSlug: string }[] = [
+  { brand: 'Dolex', ingredientSlug: 'acetaminofen' },
+  { brand: 'Advil', ingredientSlug: 'ibuprofeno' },
+  { brand: 'Voltaren', ingredientSlug: 'diclofenaco' },
+  { brand: 'Buscapina', ingredientSlug: 'butilbromuro-de-hioscina' },
+  { brand: 'Ozempic', ingredientSlug: 'semaglutida' },
+  { brand: 'Wegovy', ingredientSlug: 'semaglutida' },
+  { brand: 'Rybelsus', ingredientSlug: 'semaglutida' },
+  { brand: 'Mounjaro', ingredientSlug: 'tirzepatida' },
+  { brand: 'Saxenda', ingredientSlug: 'liraglutida' },
+  { brand: 'Victoza', ingredientSlug: 'liraglutida' },
+  { brand: 'Nizoral', ingredientSlug: 'ketoconazol' },
+  { brand: 'Clarityne', ingredientSlug: 'loratadina' },
+  { brand: 'Allegra', ingredientSlug: 'fexofenadina' },
+  { brand: 'Nexium', ingredientSlug: 'esomeprazol' },
+  { brand: 'Lipitor', ingredientSlug: 'atorvastatina' },
+  { brand: 'Crestor', ingredientSlug: 'rosuvastatina' },
+  { brand: 'Glucophage', ingredientSlug: 'metformina' },
+  { brand: 'Eutirox', ingredientSlug: 'levotiroxina' },
+  { brand: 'Cozaar', ingredientSlug: 'losartan' },
+  { brand: 'Plavix', ingredientSlug: 'clopidogrel' },
+  { brand: 'Singulair', ingredientSlug: 'montelukast' },
+  { brand: 'Ventolin', ingredientSlug: 'salbutamol' },
+  { brand: 'Viagra', ingredientSlug: 'sildenafil' },
+  { brand: 'Cialis', ingredientSlug: 'tadalafil' },
+  { brand: 'Rivotril', ingredientSlug: 'clonazepam' },
+  { brand: 'Xanax', ingredientSlug: 'alprazolam' },
+  { brand: 'Daflon', ingredientSlug: 'diosmina-hesperidina' },
+  { brand: 'Arcoxia', ingredientSlug: 'etoricoxib' },
+  { brand: 'Xarelto', ingredientSlug: 'rivaroxaban' },
+  { brand: 'Eliquis', ingredientSlug: 'apixaban' },
+  { brand: 'Januvia', ingredientSlug: 'sitagliptina' },
+  { brand: 'Jardiance', ingredientSlug: 'empagliflozina' },
+  { brand: 'Forxiga', ingredientSlug: 'dapagliflozina' },
+  { brand: 'Entresto', ingredientSlug: 'sacubitril-valsartan' },
+  { brand: 'Lyrica', ingredientSlug: 'pregabalina' },
+]
+
 function fromMedicineInfo(): PriceEntry[] {
   return getAllMedicineSlugs()
     .map((slug) => getMedicineInfo(slug))
@@ -162,6 +211,25 @@ const CATALOG: Map<string, PriceEntry> = (() => {
     if (map.has(e.slug)) continue // la ficha completa tiene prioridad
     map.set(e.slug, { ...e, query: e.query ?? normalize(e.activeIngredient) })
   }
+  // Marcas: se agregan a la lista de marcas del principio activo y cada una
+  // obtiene su propia pagina.
+  for (const b of BRAND_ENTRIES) {
+    const ing = map.get(b.ingredientSlug)
+    if (!ing || ing.brandName) continue
+    const slug = normalize(b.brand).replace(/[^a-z0-9]+/g, '-')
+    if (map.has(slug)) continue
+    const brands = ing.brands ?? []
+    if (!brands.includes(b.brand)) ing.brands = [...brands, b.brand]
+    map.set(slug, {
+      slug,
+      activeIngredient: ing.activeIngredient,
+      query: normalize(b.brand),
+      therapeuticClass: ing.therapeuticClass,
+      requiresPrescription: ing.requiresPrescription,
+      brandName: b.brand,
+      ingredientSlug: ing.slug,
+    })
+  }
   return map
 })()
 
@@ -177,12 +245,18 @@ export function getAllPriceSlugs(): string[] {
   return [...CATALOG.keys()]
 }
 
+/** Paginas de marca de un principio activo (Ozempic, Wegovy... para semaglutida). */
+export function getBrandEntries(ingredientSlug: string): PriceEntry[] {
+  return getAllPriceEntries().filter((e) => e.ingredientSlug === ingredientSlug)
+}
+
 /** Enlaces relacionados: primero el mismo grupo terapeutico, luego vecinos alfabeticos. */
 export function getRelatedEntries(slug: string, limit = 6): PriceEntry[] {
   const self = getPriceEntry(slug)
   if (!self) return []
+  // Solo paginas de principio activo: las de marca se enlazan aparte.
   const all = getAllPriceEntries()
-    .filter((e) => e.slug !== slug)
+    .filter((e) => e.slug !== slug && !e.brandName && e.slug !== self.ingredientSlug)
     .sort((a, b) => a.activeIngredient.localeCompare(b.activeIngredient, 'es'))
   const family = (c: string) => c.split('(')[0].trim().toLowerCase()
   const same = all.filter((e) => family(e.therapeuticClass) === family(self.therapeuticClass))

@@ -7,6 +7,9 @@ import { PharmacyLogo } from './PharmacyLogo'
 import { RelativeTime } from './RelativeTime'
 import { formatCOP } from '@/app/utils/format'
 import { trackOutboundClick } from '@/app/utils/analytics'
+import { groupResults } from '@/app/utils/groupResults'
+import { findBestSaving, type BestSaving } from '@/app/utils/savings'
+import { formatQuantity } from '@/app/utils/units'
 
 export interface SnapshotInitial {
   /** YYYY-MM-DD del último registro diario disponible */
@@ -51,6 +54,9 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
   const [fetchedAt, setFetchedAt] = useState<string | null>(null)
   const [state, setState] = useState<State>(hasSnapshot ? 'snapshot' : 'loading')
   const [liveFailed, setLiveFailed] = useState(false)
+  // Solo con datos en vivo: el snapshot guarda el mas barato por farmacia, que
+  // pueden ser productos distintos, asi que no sirve para calcular ahorro.
+  const [saving, setSaving] = useState<BestSaving | null>(null)
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -66,6 +72,7 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
         }
         const list = [...best.values()].sort((a, b) => a.price - b.price)
         if (list.length) {
+          setSaving(findBestSaving(groupResults(results).comparisons))
           setRows(list)
           setFetchedAt(data.fetchedAt ?? null)
           setState('ok')
@@ -118,6 +125,30 @@ export function LivePriceCompare({ query, ingredient, initial }: Props) {
             <div key={i} className="flex items-center gap-3 glass-row rounded-xl h-12 animate-pulse" />
           ))}
           <p className="sr-only">Consultando precios...</p>
+        </div>
+      )}
+
+      {/* Ahorro concreto, SOLO sobre el mismo producto exacto en 2+ farmacias
+          (misma regla y mismo diseno que /buscar). */}
+      {state === 'ok' && saving && (
+        <div className="flex items-start gap-3 mb-3 p-4 rounded-2xl bg-secondary/10 border border-secondary/20">
+          <div className="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5 text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8v1m0 10v1m0-12V4m0 16v-1" />
+            </svg>
+          </div>
+          <div className="self-center min-w-0">
+            <p className="text-[13px] sm:text-[14px] text-[#1a1b1f] leading-snug">
+              Ahorras hasta <span className="font-bold text-secondary">{formatCOP(saving.savings)}</span>{' '}
+              comprando en <span className="font-semibold">{saving.cheapest.pharmacy}</span>{' '}
+              en vez de <span className="font-semibold">{saving.dearest.pharmacy}</span>.
+            </p>
+            <p className="text-[11px] text-[#717786] mt-0.5">
+              Mismo producto: {saving.group.activeIngredient}
+              {saving.group.concentration ? ` ${saving.group.concentration}` : ''}
+              {saving.group.quantity > 1 ? ` · ${formatQuantity(saving.group.quantity, saving.group.presentation)}` : ''}
+            </p>
+          </div>
         </div>
       )}
 

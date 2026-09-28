@@ -20,6 +20,7 @@ import { PriceAlert } from '@/app/components/PriceAlert'
 import { ShareComparison } from '@/app/components/ShareComparison'
 import { RelativeTime } from '@/app/components/RelativeTime'
 import { groupResults } from '@/app/utils/groupResults'
+import { findBestSaving } from '@/app/utils/savings'
 import { useLang } from '@/app/i18n/LanguageProvider'
 
 type TypeFilter = 'all' | MedicationType
@@ -223,20 +224,8 @@ export default function BuscarClient() {
     return itemPrice(a) - itemPrice(b)
   })
 
-  // Ahorro real y comparable: SOLO entre el mismo producto exacto (mismos principio
-  // activo, concentracion, presentación y cantidad) vendido en 2+ farmacias. Así
-  // nunca comparamos productos distintos entre si. Tomamos el grupo con mayor ahorro
-  // y descartamos diferencias absurdas (> 3x), que casi siempre son errores de dato.
-  const bestSaving = comparisons
-    .filter((g) => g.availableCount >= 2 && g.savings > 1000)
-    .map((g) => {
-      const avail = g.results.filter((r) => r.availability !== 'unavailable')
-      const cheapest = avail.reduce((m, r) => (r.price < m.price ? r : m))
-      const dearest = avail.reduce((m, r) => (r.price > m.price ? r : m))
-      return { group: g, cheapest, dearest, savings: dearest.price - cheapest.price }
-    })
-    .filter((s) => s.cheapest.pharmacy !== s.dearest.pharmacy && s.dearest.price <= s.cheapest.price * 3)
-    .sort((a, b) => b.savings - a.savings)[0] ?? null
+  // Ahorro real: solo sobre el mismo producto exacto (regla en utils/savings).
+  const bestSaving = findBestSaving(comparisons)
 
   // Switching basis also sets a matching default sort for the flat list.
   function changeBasis(b: 'total' | 'unit') {
