@@ -82,7 +82,8 @@ CREATE TABLE IF NOT EXISTS tracked_medications (
   query            TEXT PRIMARY KEY,           -- normalizado: minusculas, sin acentos
   label            TEXT NOT NULL,              -- texto legible (consulta original)
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  last_snapshot_at TIMESTAMPTZ
+  last_snapshot_at TIMESTAMPTZ,               -- ultimo snapshot CON precios
+  last_attempt_at  TIMESTAMPTZ                -- ultimo intento (exito o no); ordena la cola del cron
 );
 
 -- Un precio real por farmacia, por medicamento rastreado, por dia.
